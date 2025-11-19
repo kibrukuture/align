@@ -36,10 +36,10 @@ bun add @schnl/align
 ## Quick Start
 
 ```typescript
-import { AlignClient } from '@schnl/align';
+import { Align } from '@schnl/align';
 
 // Initialize the client
-const align = new AlignClient({
+const align = new Align({
   apiKey: 'your_api_key_here',
   environment: 'sandbox', // or 'production'
 });
@@ -109,7 +109,7 @@ interface AlignConfig {
 ### Example
 
 ```typescript
-const align = new AlignClient({
+const align = new Align({
   apiKey: process.env.ALIGNLAB_API_KEY!,
   environment: 'production',
   timeout: 60000, // 60 seconds
@@ -1043,7 +1043,7 @@ import type {
 ### Custom HTTP Client Configuration
 
 ```typescript
-const align = new AlignClient({
+const align = new Align({
   apiKey: process.env.ALIGNLAB_API_KEY!,
   environment: 'production',
   timeout: 60000, // 60 seconds
@@ -1056,9 +1056,9 @@ const align = new AlignClient({
 ```typescript
 // pages/api/create-customer.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { AlignClient } from '@schnl/align';
+import { Align } from '@schnl/align';
 
-const align = new AlignClient({
+const align = new Align({
   apiKey: process.env.ALIGNLAB_API_KEY!,
   environment: 'production',
 });
@@ -1085,10 +1085,10 @@ export default async function handler(
 
 ```typescript
 import express from 'express';
-import { AlignClient } from '@schnl/align';
+import { Align } from '@schnl/align';
 
 const app = express();
-const align = new AlignClient({
+const align = new Align({
   apiKey: process.env.ALIGNLAB_API_KEY!,
 });
 
@@ -1112,8 +1112,8 @@ app.listen(3000);
 
 - **Documentation**: [https://docs.alignlabs.dev](https://docs.alignlabs.dev)
 - **API Reference**: [https://api.alignlabs.dev/docs](https://api.alignlabs.dev/docs)
-- **Email**: support@alignlabs.dev
-- **GitHub Issues**: [https://github.com/alignlabs/sdk-typescript/issues](https://github.com/alignlabs/sdk-typescript/issues)
+- **GitHub**: [https://github.com/kibrukuture/align](https://github.com/kibrukuture/align)
+- **Issues**: [https://github.com/kibrukuture/align/issues](https://github.com/kibrukuture/align/issues)
 
 ---
 
@@ -1125,10 +1125,10 @@ MIT © AlignLab
 
 ## Contributing
 
-Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+Contributions are welcome! Please open an issue or submit a pull request at [https://github.com/kibrukuture/align](https://github.com/kibrukuture/align).
 
 ---
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md) for a list of changes.
+See [CHANGELOG.md](https://github.com/kibrukuture/align/blob/main/CHANGELOG.md) for a list of changes.

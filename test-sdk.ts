@@ -1,9 +1,9 @@
-import { AlignClient } from './src';
+import { Align } from './src';
 
 async function main() {
   console.log('Initializing Align SDK...');
   
-  const client = new AlignClient({
+  const client = new Align({
     apiKey: 'test_api_key',
     environment: 'sandbox',
   });
