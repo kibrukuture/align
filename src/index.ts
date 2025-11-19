@@ -33,7 +33,7 @@
 export { Align } from '@/client';
 
 // Core types and configuration
-export type { AlignConfig, AlignEnvironment } from '@/core/config';
+export type { AlignConfig, AlignEnvironment, KycStatus, WebhookStatus, CustomerType } from '@/types/common';
 export { AlignError, AlignValidationError } from '@/core/errors';
 
 // Customer types

@@ -1,7 +1,9 @@
+import type { WebhookStatus } from '@/types/common';
+
 export interface Webhook {
   id: string;
   url: string;
-  status: string;
+  status: WebhookStatus;
   created_at: string;
 }
 

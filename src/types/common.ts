@@ -10,3 +10,18 @@ export interface AlignResponse<T> {
   status: number;
   error?: string;
 }
+
+/**
+ * KYC verification status
+ */
+export type KycStatus = 'pending' | 'approved' | 'rejected' | 'not_started';
+
+/**
+ * Webhook status
+ */
+export type WebhookStatus = 'active' | 'inactive';
+
+/**
+ * Customer type
+ */
+export type CustomerType = 'individual' | 'business';

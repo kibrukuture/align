@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [1.0.2] - 2025-11-19
+
+### Changed
+- **BREAKING (Type Safety)**: Replaced loose `string` types with strict union types
+  - `KycSessionResponse.status` now uses `KycStatus` type
+  - `Webhook.status` now uses `WebhookStatus` type
+  - `Customer.type` and `CreateCustomerRequest.type` now use `CustomerType` type
+- Created shared type definitions in `common.ts` (single source of truth)
+- Exported `KycStatus`, `WebhookStatus`, and `CustomerType` from main package
+
+### Fixed
+- Eliminated duplicate type definitions across resources
+- Improved TypeScript autocomplete and type safety
+
 ## [1.0.1] - 2025-11-19
 
 ### Changed

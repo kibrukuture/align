@@ -1,19 +1,21 @@
+import type { KycStatus, CustomerType } from '@/types/common';
+
 export interface Customer {
   id: string;
   email: string;
   first_name: string;
   last_name: string;
-  type: 'individual' | 'business';
+  type: CustomerType;
   created_at: string;
   updated_at: string;
-  kyc_status?: 'pending' | 'approved' | 'rejected' | 'not_started';
+  kyc_status?: KycStatus;
 }
 
 export interface CreateCustomerRequest {
   email: string;
   first_name: string;
   last_name: string;
-  type: 'individual' | 'business';
+  type: CustomerType;
 }
 
 export interface UpdateCustomerRequest {
@@ -31,5 +33,5 @@ export interface CustomerListResponse {
 export interface KycSessionResponse {
   session_id: string;
   url: string;
-  status: string;
+  status: KycStatus;
 }
