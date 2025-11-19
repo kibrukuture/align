@@ -1043,6 +1043,8 @@ import type {
 ### Custom HTTP Client Configuration
 
 ```typescript
+import { Align } from '@schnl/align';
+
 const align = new Align({
   apiKey: process.env.ALIGNLAB_API_KEY!,
   environment: 'production',
@@ -1051,32 +1053,109 @@ const align = new Align({
 });
 ```
 
-### Using with Next.js API Routes
+### Using with Next.js App Router
 
 ```typescript
-// pages/api/create-customer.ts
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { Align } from '@schnl/align';
+// app/api/customers/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { Align, type CreateCustomerRequest, AlignValidationError } from '@schnl/align';
 
 const align = new Align({
   apiKey: process.env.ALIGNLAB_API_KEY!,
   environment: 'production',
 });
 
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json() as CreateCustomerRequest;
+    
+    // Validate required fields
+    if (!body.email || !body.first_name || !body.last_name || !body.type) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    const customer = await align.customers.create(body);
+    
+    return NextResponse.json(customer, { status: 201 });
+  } catch (error) {
+    if (error instanceof AlignValidationError) {
+      return NextResponse.json(
+        { error: 'Validation failed', details: error.errors },
+        { status: 400 }
+      );
+    }
+    
+    console.error('Error creating customer:', error);
+    return NextResponse.json(
+      { error: 'Failed to create customer' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+
+    const customers = await align.customers.list(page, limit);
+    
+    return NextResponse.json(customers);
+  } catch (error) {
+    console.error('Error listing customers:', error);
+    return NextResponse.json(
+      { error: 'Failed to list customers' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+### Using with Next.js Pages Router
+
+```typescript
+// pages/api/customers/create.ts
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { Align, type CreateCustomerRequest, type Customer, AlignValidationError } from '@schnl/align';
+
+const align = new Align({
+  apiKey: process.env.ALIGNLAB_API_KEY!,
+  environment: 'production',
+});
+
+type ErrorResponse = {
+  error: string;
+  details?: Record<string, string[]>;
+};
+
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse<Customer | ErrorResponse>
 ) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const customer = await align.customers.create(req.body);
-    res.status(200).json(customer);
+    const body = req.body as CreateCustomerRequest;
+    
+    const customer = await align.customers.create(body);
+    
+    return res.status(201).json(customer);
   } catch (error) {
+    if (error instanceof AlignValidationError) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: error.errors,
+      });
+    }
+    
     console.error('Error creating customer:', error);
-    res.status(500).json({ error: 'Failed to create customer' });
+    return res.status(500).json({ error: 'Failed to create customer' });
   }
 }
 ```
@@ -1084,26 +1163,223 @@ export default async function handler(
 ### Using with Express.js
 
 ```typescript
-import express from 'express';
-import { Align } from '@schnl/align';
+import express, { Request, Response } from 'express';
+import { Align, type CreateCustomerRequest, AlignValidationError, AlignError } from '@schnl/align';
 
 const app = express();
 const align = new Align({
   apiKey: process.env.ALIGNLAB_API_KEY!,
+  environment: 'production',
 });
 
 app.use(express.json());
 
-app.post('/api/customers', async (req, res) => {
+// Create customer
+app.post('/api/customers', async (req: Request, res: Response) => {
   try {
-    const customer = await align.customers.create(req.body);
-    res.json(customer);
+    const customer = await align.customers.create(req.body as CreateCustomerRequest);
+    res.status(201).json(customer);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to create customer' });
+    if (error instanceof AlignValidationError) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: error.errors,
+      });
+    }
+    if (error instanceof AlignError) {
+      return res.status(error.status).json({
+        error: error.message,
+        code: error.code,
+      });
+    }
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-app.listen(3000);
+// Get customer
+app.get('/api/customers/:id', async (req: Request, res: Response) => {
+  try {
+    const customer = await align.customers.get(req.params.id);
+    res.json(customer);
+  } catch (error) {
+    if (error instanceof AlignError && error.status === 404) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Create offramp transfer
+app.post('/api/transfers/offramp', async (req: Request, res: Response) => {
+  try {
+    const { quote, transfer_purpose, destination_account_id } = req.body;
+    
+    // First create a quote
+    const quoteResponse = await align.transfers.createOfframpQuote(quote);
+    
+    // Then execute the transfer
+    const transfer = await align.transfers.createOfframpTransfer({
+      transfer_purpose,
+      destination_external_account_id: destination_account_id,
+    });
+    
+    res.status(201).json({ quote: quoteResponse, transfer });
+  } catch (error) {
+    if (error instanceof AlignValidationError) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: error.errors,
+      });
+    }
+    res.status(500).json({ error: 'Failed to create transfer' });
+  }
+});
+
+app.listen(3000, () => {
+  console.log('Server running on port 3000');
+});
+```
+
+### Using with Fastify
+
+```typescript
+import Fastify from 'fastify';
+import { Align, type CreateCustomerRequest, AlignValidationError } from '@schnl/align';
+
+const fastify = Fastify({ logger: true });
+
+const align = new Align({
+  apiKey: process.env.ALIGNLAB_API_KEY!,
+  environment: 'production',
+});
+
+fastify.post<{ Body: CreateCustomerRequest }>('/api/customers', async (request, reply) => {
+  try {
+    const customer = await align.customers.create(request.body);
+    return reply.status(201).send(customer);
+  } catch (error) {
+    if (error instanceof AlignValidationError) {
+      return reply.status(400).send({
+        error: 'Validation failed',
+        details: error.errors,
+      });
+    }
+    return reply.status(500).send({ error: 'Failed to create customer' });
+  }
+});
+
+fastify.listen({ port: 3000 }, (err) => {
+  if (err) throw err;
+});
+```
+
+### Using with Hono
+
+```typescript
+import { Hono } from 'hono';
+import { Align, type CreateCustomerRequest, AlignValidationError } from '@schnl/align';
+
+const app = new Hono();
+
+const align = new Align({
+  apiKey: process.env.ALIGNLAB_API_KEY!,
+  environment: 'production',
+});
+
+app.post('/api/customers', async (c) => {
+  try {
+    const body = await c.req.json<CreateCustomerRequest>();
+    const customer = await align.customers.create(body);
+    
+    return c.json(customer, 201);
+  } catch (error) {
+    if (error instanceof AlignValidationError) {
+      return c.json({
+        error: 'Validation failed',
+        details: error.errors,
+      }, 400);
+    }
+    return c.json({ error: 'Failed to create customer' }, 500);
+  }
+});
+
+export default app;
+```
+
+### Using with React (Client-Side via API Route)
+
+```typescript
+// hooks/useAlign.ts
+import { useState } from 'react';
+import type { Customer, CreateCustomerRequest } from '@schnl/align';
+
+export function useCreateCustomer() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const createCustomer = async (data: CreateCustomerRequest): Promise<Customer | null> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/customers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create customer');
+      }
+
+      const customer = await response.json() as Customer;
+      return customer;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { createCustomer, loading, error };
+}
+
+// Component usage
+import { useCreateCustomer } from '@/hooks/useAlign';
+
+export function CreateCustomerForm() {
+  const { createCustomer, loading, error } = useCreateCustomer();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
+    const customer = await createCustomer({
+      email: formData.get('email') as string,
+      first_name: formData.get('first_name') as string,
+      last_name: formData.get('last_name') as string,
+      type: 'individual',
+    });
+
+    if (customer) {
+      console.log('Customer created:', customer.id);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input name="email" type="email" required />
+      <input name="first_name" required />
+      <input name="last_name" required />
+      <button type="submit" disabled={loading}>
+        {loading ? 'Creating...' : 'Create Customer'}
+      </button>
+      {error && <p className="error">{error}</p>}
+    </form>
+  );
+}
 ```
 
 ---
