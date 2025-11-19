@@ -1,5 +1,5 @@
 /**
- * @schnl/align - Official TypeScript SDK for AlignLab API
+ * @schnl/align - TypeScript SDK for AlignLab API
  * 
  * Build powerful payment infrastructure with support for:
  * - Fiat-to-crypto (onramp) and crypto-to-fiat (offramp) transfers
