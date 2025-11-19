@@ -1119,7 +1119,7 @@ app.listen(3000);
 
 ## License
 
-MIT © AlignLab
+MIT
 
 ---
 
