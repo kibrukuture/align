@@ -1,6 +1,6 @@
 # AlignLab TypeScript SDK
 
-TypeScript/JavaScript SDK for the [AlignLab](https://alignlabs.dev) API. Build powerful payment infrastructure with support for fiat-to-crypto (onramp), crypto-to-fiat (offramp), cross-chain transfers, virtual accounts, and more.
+[None Official] TypeScript/JavaScript SDK for the [AlignLab](https://docs.alignlabs.dev) API. Build powerful payment infrastructure with support for fiat-to-crypto (onramp), crypto-to-fiat (offramp), cross-chain transfers, virtual accounts, and more.
 
 [![npm version](https://img.shields.io/npm/v/@schnl/align.svg)](https://www.npmjs.com/package/@schnl/align)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
