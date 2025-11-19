@@ -125,22 +125,26 @@ Manage customer accounts for your platform.
 ### Types
 
 ```typescript
+// Shared types
+type CustomerType = 'individual' | 'business';
+type KycStatus = 'pending' | 'approved' | 'rejected' | 'not_started';
+
 interface Customer {
   id: string;
   email: string;
   first_name: string;
   last_name: string;
-  type: 'individual' | 'business';
+  type: CustomerType;
   created_at: string;
   updated_at: string;
-  kyc_status?: 'pending' | 'approved' | 'rejected' | 'not_started';
+  kyc_status?: KycStatus;
 }
 
 interface CreateCustomerRequest {
   email: string;
   first_name: string;
   last_name: string;
-  type: 'individual' | 'business';
+  type: CustomerType;
 }
 
 interface UpdateCustomerRequest {
@@ -152,7 +156,7 @@ interface UpdateCustomerRequest {
 interface KycSessionResponse {
   session_id: string;
   url: string;
-  status: string;
+  status: KycStatus;
 }
 ```
 
@@ -737,11 +741,14 @@ Manage webhook endpoints and verify webhook signatures.
 ### Types
 
 ```typescript
+// Shared type
+type WebhookStatus = 'active' | 'inactive';
+
 interface Webhook {
   id: string;
   url: string;
   events: string[];
-  status: 'active' | 'inactive';
+  status: WebhookStatus;
   created_at: string;
 }
 
@@ -982,6 +989,11 @@ import type {
   // Core
   AlignConfig,
   AlignEnvironment,
+  
+  // Shared Types (NEW in v1.0.2)
+  KycStatus,
+  WebhookStatus,
+  CustomerType,
   
   // Customers
   Customer,
