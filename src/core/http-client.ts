@@ -1,4 +1,6 @@
-import ky, { HTTPError, type KyInstance, type Options } from "ky";
+import axios, { AxiosError } from "axios";
+import axiosRetry from "axios-retry";
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import type { AlignConfig } from "@/core/config";
 import { ALIGN_API_URLS, DEFAULT_CONFIG } from "@/core/config";
 import { AlignError, type AlignApiErrorResponse } from "@/core/errors";
@@ -6,7 +8,7 @@ import { createLogger, type LogLevel } from "@/core/logger";
 import type pino from "pino";
 
 export class HttpClient {
-  private client: KyInstance;
+  private client: AxiosInstance;
   private baseUrl: string;
   private logger: pino.Logger;
 
@@ -23,66 +25,85 @@ export class HttpClient {
       level: (config.logLevel || "error") as LogLevel,
     });
 
-    // Create ky instance - ky handles headers automatically
-    this.client = ky.create({
-      prefixUrl: this.baseUrl,
+    // Create axios instance
+    this.client = axios.create({
+      baseURL: this.baseUrl,
       timeout: config.timeout || DEFAULT_CONFIG.timeout!,
       headers: {
         Authorization: `Bearer ${config.apiKey}`,
       },
-      retry: {
-        limit: 2,
-        methods: ["get", "put", "head", "delete", "options", "trace"],
-        statusCodes: [408, 413, 429, 500, 502, 503, 504],
+    });
+
+    // Request interceptor for logging
+    this.client.interceptors.request.use(
+      (config) => {
+        this.logger.debug(
+          { url: config.url, method: config.method },
+          "Making request"
+        );
+        return config;
       },
-      hooks: {
-        beforeRequest: [
-          (request) => {
-            this.logger.debug(
-              { url: request.url, method: request.method },
-              "Making request"
-            );
+      (error) => {
+        return Promise.reject(error);
+      }
+    );
+
+    // Response interceptor for logging
+    this.client.interceptors.response.use(
+      (response) => {
+        this.logger.debug(
+          {
+            url: response.config.url,
+            method: response.config.method,
+            status: response.status,
           },
-        ],
-        afterResponse: [
-          (request, options, response) => {
-            this.logger.debug(
-              {
-                url: request.url,
-                method: request.method,
-                status: response.status,
-              },
-              "Request completed"
-            );
-            return response;
-          },
-        ],
+          "Request completed"
+        );
+        return response;
+      },
+      async (error) => {
+        return Promise.reject(error);
+      }
+    );
+
+    // Retry plugin
+    axiosRetry(this.client, {
+      retries: 2,
+      retryDelay: axiosRetry.exponentialDelay,
+      retryCondition: (error) => {
+        return (
+          axiosRetry.isNetworkOrIdempotentRequestError(error) ||
+          (error.response?.status !== undefined &&
+            [408, 413, 429, 500, 502, 503, 504].includes(error.response.status))
+        );
       },
     });
   }
 
   private async handleError(error: unknown): Promise<never> {
-    if (error instanceof HTTPError) {
-      const response = error.response;
-      let errorMessage = `Align API Error: ${response.status} ${response.statusText}`;
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<AlignApiErrorResponse>;
+      const response = axiosError.response;
+      let errorMessage = `Align API Error: ${response?.status || 0} ${
+        response?.statusText || "Unknown"
+      }`;
       let errorCode: string | undefined;
 
-      try {
-        const errorBody = (await response
-          .clone()
-          .json()) as AlignApiErrorResponse;
-        errorMessage = errorBody.message || errorMessage;
-        errorCode = errorBody.code;
-      } catch {
-        // Ignore if response is not JSON
+      if (response?.data) {
+        errorMessage = response.data.message || errorMessage;
+        errorCode = response.data.code;
       }
 
       this.logger.error(
-        { status: response.status, code: errorCode, message: errorMessage },
+        {
+          status: response?.status || 0,
+          code: errorCode,
+          message: errorMessage,
+        },
         "API request failed"
       );
 
-      throw new AlignError(errorMessage, response.status, errorCode);
+      throw new AlignError(errorMessage, response?.status || 0, errorCode);
     }
 
     if (error instanceof AlignError) {
@@ -104,29 +125,19 @@ export class HttpClient {
   public async get<T>(
     path: string,
     query?: Record<string, string | number | boolean>,
-    options?: Options
+    options?: AxiosRequestConfig
   ): Promise<T> {
     try {
-      const searchParams: Record<string, string> = {};
-      if (query) {
-        Object.entries(query).forEach(([key, value]) => {
-          if (value !== undefined && value !== null) {
-            searchParams[key] = String(value);
-          }
-        });
-      }
-
-      const response = await this.client.get(path, {
+      const response = await this.client.get<T>(path, {
         ...options,
-        searchParams:
-          Object.keys(searchParams).length > 0 ? searchParams : undefined,
+        params: query,
       });
 
       if (response.status === 204) {
         return {} as T;
       }
 
-      return response.json();
+      return response.data;
     } catch (error) {
       return this.handleError(error);
     }
@@ -135,26 +146,16 @@ export class HttpClient {
   public async post<T>(
     path: string,
     body?: unknown,
-    options?: Options
+    options?: AxiosRequestConfig
   ): Promise<T> {
     try {
-      const kyOptions: Options = { ...options };
-
-      if (body !== undefined) {
-        if (body instanceof FormData) {
-          kyOptions.body = body;
-        } else {
-          kyOptions.json = body;
-        }
-      }
-
-      const response = await this.client.post(path, kyOptions);
+      const response = await this.client.post<T>(path, body, options);
 
       if (response.status === 204) {
         return {} as T;
       }
 
-      return response.json();
+      return response.data;
     } catch (error) {
       return this.handleError(error);
     }
@@ -163,26 +164,16 @@ export class HttpClient {
   public async put<T>(
     path: string,
     body?: unknown,
-    options?: Options
+    options?: AxiosRequestConfig
   ): Promise<T> {
     try {
-      const kyOptions: Options = { ...options };
-
-      if (body !== undefined) {
-        if (body instanceof FormData) {
-          kyOptions.body = body;
-        } else {
-          kyOptions.json = body;
-        }
-      }
-
-      const response = await this.client.put(path, kyOptions);
+      const response = await this.client.put<T>(path, body, options);
 
       if (response.status === 204) {
         return {} as T;
       }
 
-      return response.json();
+      return response.data;
     } catch (error) {
       return this.handleError(error);
     }
@@ -191,40 +182,33 @@ export class HttpClient {
   public async patch<T>(
     path: string,
     body?: unknown,
-    options?: Options
+    options?: AxiosRequestConfig
   ): Promise<T> {
     try {
-      const kyOptions: Options = { ...options };
-
-      if (body !== undefined) {
-        if (body instanceof FormData) {
-          kyOptions.body = body;
-        } else {
-          kyOptions.json = body;
-        }
-      }
-
-      const response = await this.client.patch(path, kyOptions);
+      const response = await this.client.patch<T>(path, body, options);
 
       if (response.status === 204) {
         return {} as T;
       }
 
-      return response.json();
+      return response.data;
     } catch (error) {
       return this.handleError(error);
     }
   }
 
-  public async delete<T>(path: string, options?: Options): Promise<T> {
+  public async delete<T>(
+    path: string,
+    options?: AxiosRequestConfig
+  ): Promise<T> {
     try {
-      const response = await this.client.delete(path, options);
+      const response = await this.client.delete<T>(path, options);
 
       if (response.status === 204) {
         return {} as T;
       }
 
-      return response.json();
+      return response.data;
     } catch (error) {
       return this.handleError(error);
     }

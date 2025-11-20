@@ -5,7 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.7.0] - 2025-01-XX
+## [3.7.1] - 2025-11-20
+
+### Changed
+
+- **HTTP Client Migration**:
+  - Migrated from `ky` to `axios` HTTP client library
+  - Resolved `prefixUrl` limitation with absolute endpoint paths (`/v0/...`)
+  - Improved Node.js compatibility (axios works natively in both browser and Node.js)
+  - Better error handling with `AxiosError` types
+  - Automatic JSON serialization/deserialization
+  - Automatic Content-Type header handling for JSON and FormData
+
+### Added
+
+- **Retry Logic**:
+  - Integrated `axios-retry` plugin for automatic retry mechanism
+  - 2 retries with exponential backoff for transient errors
+  - Retries on network errors and status codes: 408, 413, 429, 500, 502, 503, 504
+
+### Improved
+
+- **Error Handling**:
+  - Centralized error handling in `handleError()` helper function
+  - Better error messages with API error code extraction
+  - Proper TypeScript types for error responses (`AlignApiErrorResponse`)
+  - Removed code duplication across HTTP methods
+
+### Technical
+
+- **Dependencies**:
+  - Replaced `ky` with `axios` (^1.13.2) for HTTP requests
+  - Added `axios-retry` (^4.5.0) for retry logic
+  - Added `pino` (^10.1.0) for logging
+  - Added `pino-pretty` (^13.1.2) as dev dependency for development logging
+
+## [3.7.0] - 2025-11-20
 
 ### Changed
 

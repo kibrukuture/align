@@ -14,7 +14,7 @@
 - 🔒 **Secure**: HMAC-SHA256 webhook signature verification
 - 📦 **Lightweight**: Minimal dependencies
 - 🌍 **Environment Support**: Sandbox and production environments
-- 🔄 **Automatic Retry**: Built-in retry mechanism for transient errors
+- 🔄 **Automatic Retry**: Built-in retry mechanism with exponential backoff for transient errors
 - 📝 **Logging**: Optional request/response logging with pino (disabled by default)
 
 ## Installation

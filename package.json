@@ -1,6 +1,6 @@
 {
   "name": "@schnl/align",
-  "version": "3.7.1",
+  "version": "3.7.2",
   "description": "SDK for the AlignLab API - Build powerful payment infrastructure with fiat-to-crypto, crypto-to-fiat, and cross-chain transfers",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -22,7 +22,7 @@
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "bun run typecheck && bun run build",
-    "publish": "bun run typecheck && bun run build && git push && npm publish"
+    "pub": "bun run typecheck && bun run build && git push && npm publish"
   },
   "keywords": [
     "alignlab",
@@ -53,7 +53,8 @@
   },
   "homepage": "https://github.com/kibrukuture/align#readme",
   "dependencies": {
-    "ky": "^1.14.0",
+    "axios": "^1.13.2",
+    "axios-retry": "^4.5.0",
     "pino": "^10.1.0",
     "zod": "^4.1.12"
   },
