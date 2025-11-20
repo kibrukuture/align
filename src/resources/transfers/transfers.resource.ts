@@ -4,10 +4,24 @@ import type {
   CreateOfframpQuoteRequest, 
   CreateOnrampQuoteRequest, 
   QuoteResponse,
-  CreateTransferFromQuoteRequest,
-  Transfer
+  CreateOfframpTransferRequest,
+  CreateOnrampTransferRequest,
+  Transfer,
+  CompleteOfframpTransferRequest,
+  SimulateOfframpTransferRequest,
+  SimulateOnrampTransferRequest,
+  SimulateTransferResponse,
+  TransferListResponse
 } from '@/resources/transfers/transfers.types';
-import { CreateOfframpQuoteSchema, CreateOnrampQuoteSchema } from '@/resources/transfers/transfers.validator';
+import { 
+  CreateOfframpQuoteSchema, 
+  CreateOnrampQuoteSchema, 
+  CreateOfframpTransferSchema,
+  CreateOnrampTransferSchema,
+  CompleteOfframpTransferSchema,
+  SimulateOfframpTransferSchema,
+  SimulateOnrampTransferSchema
+} from '@/resources/transfers/transfers.validator';
 import { TRANSFER_ENDPOINTS } from '@/constants';
 
 export class TransfersResource {
@@ -19,6 +33,7 @@ export class TransfersResource {
    * Get a quote for converting cryptocurrency to fiat currency. You can specify either
    * the source amount (crypto) or destination amount (fiat) you want.
    * 
+   * @param customerId - The unique customer identifier (UUID)
    * @param data - Offramp quote parameters
    * @param data.source_amount - Amount of crypto to send (optional, specify this OR destination_amount)
    * @param data.destination_amount - Amount of fiat to receive (optional, specify this OR source_amount)
@@ -33,7 +48,7 @@ export class TransfersResource {
    * @example
    * ```typescript
    * // Quote with source amount (you know how much crypto to send)
-   * const quote = await align.transfers.createOfframpQuote({
+   * const quote = await align.transfers.createOfframpQuote('123e4567-e89b-12d3-a456-426614174000', {
    *   source_amount: '100.00',
    *   source_token: 'usdc',
    *   source_network: 'polygon',
@@ -45,13 +60,13 @@ export class TransfersResource {
    * console.log(`Fee: ${quote.fee_amount}`);
    * ```
    */
-  public async createOfframpQuote(data: CreateOfframpQuoteRequest): Promise<QuoteResponse> {
+  public async createOfframpQuote(customerId: string, data: CreateOfframpQuoteRequest): Promise<QuoteResponse> {
     const validation = CreateOfframpQuoteSchema.safeParse(data);
     if (!validation.success) {
       throw new AlignValidationError('Invalid offramp quote data', validation.error.flatten().fieldErrors as Record<string, string[]>);
     }
 
-    return this.client.post<QuoteResponse>(TRANSFER_ENDPOINTS.OFFRAMP_QUOTE, data);
+    return this.client.post<QuoteResponse>(TRANSFER_ENDPOINTS.OFFRAMP_QUOTE(customerId), data);
   }
 
   /**
@@ -60,6 +75,7 @@ export class TransfersResource {
    * Get a quote for converting fiat currency to cryptocurrency. You can specify either
    * the source amount (fiat) or destination amount (crypto) you want.
    * 
+   * @param customerId - The unique customer identifier (UUID)
    * @param data - Onramp quote parameters
    * @param data.source_amount - Amount of fiat to send (optional, specify this OR destination_amount)
    * @param data.destination_amount - Amount of crypto to receive (optional, specify this OR source_amount)
@@ -73,7 +89,7 @@ export class TransfersResource {
    * 
    * @example
    * ```typescript
-   * const quote = await align.transfers.createOnrampQuote({
+   * const quote = await align.transfers.createOnrampQuote('123e4567-e89b-12d3-a456-426614174000', {
    *   source_amount: '100.00',
    *   source_currency: 'usd',
    *   source_payment_rails: 'ach',
@@ -84,156 +100,254 @@ export class TransfersResource {
    * console.log(`Receive ${quote.destination_amount} USDC`);
    * ```
    */
-  public async createOnrampQuote(data: CreateOnrampQuoteRequest): Promise<QuoteResponse> {
+  public async createOnrampQuote(customerId: string, data: CreateOnrampQuoteRequest): Promise<QuoteResponse> {
     const validation = CreateOnrampQuoteSchema.safeParse(data);
     if (!validation.success) {
       throw new AlignValidationError('Invalid onramp quote data', validation.error.flatten().fieldErrors as Record<string, string[]>);
     }
 
-    return this.client.post<QuoteResponse>(TRANSFER_ENDPOINTS.ONRAMP_QUOTE, data);
+    return this.client.post<QuoteResponse>(TRANSFER_ENDPOINTS.ONRAMP_QUOTE(customerId), data);
   }
 
   /**
-   * Execute an offramp transfer from a quote
+   * Create an offramp transfer from a quote
    * 
-   * After creating a quote, use this method to execute the actual transfer.
+   * After creating a quote, use this method to initiate the transfer.
    * 
+   * @param customerId - The unique customer identifier (UUID)
+   * @param quoteId - The unique quote identifier (UUID)
    * @param data - Transfer execution parameters
    * @param data.transfer_purpose - Description of the transfer purpose
    * @param data.destination_external_account_id - ID of the external bank account to send to (optional)
-   * @param data.destination_bank_account_details - Bank account details if not using external account (optional)
+   * @param data.destination_bank_account - Bank account details if not using external account (optional)
    * @returns Promise resolving to the created transfer object
+   * @throws {AlignValidationError} If the transfer data is invalid
    * 
    * @example
    * ```typescript
-   * const transfer = await align.transfers.createOfframpTransfer({
-   *   transfer_purpose: 'Payment for services',
-   *   destination_external_account_id: 'ext_acc_123',
-   * });
+   * const transfer = await align.transfers.createOfframpTransfer(
+   *   '123e4567-e89b-12d3-a456-426614174000',
+   *   'quote_123',
+   *   {
+   *     transfer_purpose: 'commercial_investment',
+   *     destination_external_account_id: 'ext_acc_123',
+   *   }
+   * );
    * console.log(transfer.id); // "transfer_abc123"
-   * console.log(transfer.status); // "pending"
+   * console.log(transfer.status); // "processing"
    * ```
    */
-  public async createOfframpTransfer(data: CreateTransferFromQuoteRequest): Promise<Transfer> {
-    return this.client.post<Transfer>(TRANSFER_ENDPOINTS.OFFRAMP_CREATE, data);
+  public async createOfframpTransfer(customerId: string, quoteId: string, data: CreateOfframpTransferRequest): Promise<Transfer> {
+    const validation = CreateOfframpTransferSchema.safeParse(data);
+    if (!validation.success) {
+      throw new AlignValidationError('Invalid transfer data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+    }
+
+    return this.client.post<Transfer>(TRANSFER_ENDPOINTS.OFFRAMP_CREATE(customerId, quoteId), data);
   }
 
   /**
-   * Execute an onramp transfer from a quote
+   * Complete an offramp transfer
    * 
-   * After creating a quote, use this method to execute the actual transfer.
+   * Finalize the offramp transfer by providing the deposit transaction hash.
    * 
-   * @param data - Transfer execution parameters
-   * @param data.transfer_purpose - Description of the transfer purpose
-   * @returns Promise resolving to the created transfer object
+   * @param customerId - The unique customer identifier (UUID)
+   * @param transferId - The unique transfer identifier (UUID)
+   * @param data - Completion data
+   * @param data.deposit_transaction_hash - The transaction hash of the deposit
+   * @returns Promise resolving to the updated transfer object
+   * @throws {AlignValidationError} If the completion data is invalid
    * 
    * @example
    * ```typescript
-   * const transfer = await align.transfers.createOnrampTransfer({
-   *   transfer_purpose: 'Crypto purchase',
-   * });
+   * const transfer = await align.transfers.completeOfframpTransfer(
+   *   '123e4567-e89b-12d3-a456-426614174000',
+   *   'transfer_abc123',
+   *   {
+   *     deposit_transaction_hash: '0x123...',
+   *   }
+   * );
+   * console.log(transfer.status); // "processing"
+   * ```
+   */
+  public async completeOfframpTransfer(customerId: string, transferId: string, data: CompleteOfframpTransferRequest): Promise<Transfer> {
+    const validation = CompleteOfframpTransferSchema.safeParse(data);
+    if (!validation.success) {
+      throw new AlignValidationError('Invalid completion data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+    }
+
+    return this.client.post<Transfer>(TRANSFER_ENDPOINTS.OFFRAMP_COMPLETE(customerId, transferId), data);
+  }
+
+  /**
+   * Create an onramp transfer from a quote
+   * 
+   * After creating a quote, use this method to execute the actual transfer.
+   * 
+   * @param customerId - The unique customer identifier (UUID)
+   * @param quoteId - The unique quote identifier (UUID)
+   * @param data - Transfer execution parameters
+   * @param data.destination_address - The blockchain address where funds will be sent
+   * @returns Promise resolving to the created transfer object
+   * @throws {AlignValidationError} If the transfer data is invalid
+   * 
+   * @example
+   * ```typescript
+   * const transfer = await align.transfers.createOnrampTransfer(
+   *   '123e4567-e89b-12d3-a456-426614174000',
+   *   'quote_123',
+   *   {
+   *     destination_address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+   *   }
+   * );
    * console.log(transfer.id); // "transfer_xyz789"
    * ```
    */
-  public async createOnrampTransfer(data: CreateTransferFromQuoteRequest): Promise<Transfer> {
-    return this.client.post<Transfer>(TRANSFER_ENDPOINTS.ONRAMP_CREATE, data);
+  public async createOnrampTransfer(customerId: string, quoteId: string, data: CreateOnrampTransferRequest): Promise<Transfer> {
+    const validation = CreateOnrampTransferSchema.safeParse(data);
+    if (!validation.success) {
+      throw new AlignValidationError('Invalid onramp transfer data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+    }
+
+    return this.client.post<Transfer>(TRANSFER_ENDPOINTS.ONRAMP_CREATE(customerId, quoteId), data);
   }
 
   /**
    * Retrieve an offramp transfer by its unique identifier
    * 
-   * @param id - The unique transfer identifier
+   * @param customerId - The unique customer identifier (UUID)
+   * @param transferId - The unique transfer identifier (UUID)
    * @returns Promise resolving to the transfer object
    * 
    * @example
    * ```typescript
-   * const transfer = await align.transfers.getOfframpTransfer('transfer_abc123');
+   * const transfer = await align.transfers.getOfframpTransfer(
+   *   '123e4567-e89b-12d3-a456-426614174000',
+   *   'transfer_abc123'
+   * );
    * console.log(transfer.status); // "completed"
    * console.log(transfer.amount); // "95.00"
    * ```
    */
-  public async getOfframpTransfer(id: string): Promise<Transfer> {
-    return this.client.get<Transfer>(TRANSFER_ENDPOINTS.OFFRAMP_GET(id));
+  public async getOfframpTransfer(customerId: string, transferId: string): Promise<Transfer> {
+    return this.client.get<Transfer>(TRANSFER_ENDPOINTS.OFFRAMP_GET(customerId, transferId));
   }
 
   /**
    * Retrieve an onramp transfer by its unique identifier
    * 
-   * @param id - The unique transfer identifier
+   * @param customerId - The unique customer identifier (UUID)
+   * @param transferId - The unique transfer identifier (UUID)
    * @returns Promise resolving to the transfer object
    * 
    * @example
    * ```typescript
-   * const transfer = await align.transfers.getOnrampTransfer('transfer_xyz789');
+   * const transfer = await align.transfers.getOnrampTransfer(
+   *   '123e4567-e89b-12d3-a456-426614174000',
+   *   'transfer_xyz789'
+   * );
    * console.log(transfer.status); // "completed"
    * ```
    */
-  public async getOnrampTransfer(id: string): Promise<Transfer> {
-    return this.client.get<Transfer>(TRANSFER_ENDPOINTS.ONRAMP_GET(id));
+  public async getOnrampTransfer(customerId: string, transferId: string): Promise<Transfer> {
+    return this.client.get<Transfer>(TRANSFER_ENDPOINTS.ONRAMP_GET(customerId, transferId));
   }
 
   /**
-   * List all offramp transfers
+   * List all offramp transfers for a customer
    * 
-   * @returns Promise resolving to an array of offramp transfers
+   * @param customerId - The unique customer identifier (UUID)
+   * @returns Promise resolving to a list of offramp transfers
    * 
    * @example
    * ```typescript
-   * const transfers = await align.transfers.listOfframpTransfers();
-   * transfers.forEach(transfer => {
+   * const transfers = await align.transfers.listOfframpTransfers('123e4567-e89b-12d3-a456-426614174000');
+   * transfers.items.forEach(transfer => {
    *   console.log(`${transfer.id}: ${transfer.status} - $${transfer.amount}`);
    * });
    * ```
    */
-  public async listOfframpTransfers(): Promise<Transfer[]> {
-    return this.client.get<Transfer[]>(TRANSFER_ENDPOINTS.OFFRAMP_LIST);
+  public async listOfframpTransfers(customerId: string): Promise<TransferListResponse> {
+    return this.client.get<TransferListResponse>(TRANSFER_ENDPOINTS.OFFRAMP_LIST(customerId));
   }
 
   /**
-   * List all onramp transfers
+   * List all onramp transfers for a customer
    * 
-   * @returns Promise resolving to an array of onramp transfers
+   * @param customerId - The unique customer identifier (UUID)
+   * @returns Promise resolving to a list of onramp transfers
    * 
    * @example
    * ```typescript
-   * const transfers = await align.transfers.listOnrampTransfers();
-   * transfers.forEach(transfer => {
+   * const transfers = await align.transfers.listOnrampTransfers('123e4567-e89b-12d3-a456-426614174000');
+   * transfers.items.forEach(transfer => {
    *   console.log(`${transfer.id}: ${transfer.status}`);
    * });
    * ```
    */
-  public async listOnrampTransfers(): Promise<Transfer[]> {
-    return this.client.get<Transfer[]>(TRANSFER_ENDPOINTS.ONRAMP_LIST);
+  public async listOnrampTransfers(customerId: string): Promise<TransferListResponse> {
+    return this.client.get<TransferListResponse>(TRANSFER_ENDPOINTS.ONRAMP_LIST(customerId));
   }
 
   /**
-   * Simulate a transfer status change (Sandbox environment only)
+   * Simulate an offramp transfer action (Sandbox environment only)
    * 
    * This method is only available in the sandbox environment and allows you to
-   * simulate transfer completion or failure for testing purposes.
+   * simulate transfer actions like completion.
    * 
-   * @param transferId - The unique transfer identifier
-   * @param status - The status to simulate: 'completed' or 'failed'
-   * @returns Promise resolving to the updated transfer object
+   * @param customerId - The unique customer identifier (UUID)
+   * @param data - Simulation parameters
+   * @param data.action - The action to simulate (e.g., 'complete_transfer')
+   * @param data.transfer_id - The ID of the transfer to simulate action on
+   * @returns Promise resolving to a message describing the result
    * 
    * @example
    * ```typescript
    * // Simulate transfer completion
-   * const completedTransfer = await align.transfers.simulate(
-   *   'transfer_abc123',
-   *   'completed'
-   * );
-   * console.log(completedTransfer.status); // "completed"
-   * 
-   * // Simulate transfer failure
-   * const failedTransfer = await align.transfers.simulate(
-   *   'transfer_xyz789',
-   *   'failed'
-   * );
-   * console.log(failedTransfer.status); // "failed"
+   * const result = await align.transfers.simulateOfframpTransfer('123e4567-e89b-12d3-a456-426614174000', {
+   *   action: 'complete_transfer',
+   *   transfer_id: 'transfer_abc123'
+   * });
+   * console.log(result.message);
    * ```
    */
-  public async simulate(transferId: string, status: 'completed' | 'failed'): Promise<Transfer> {
-    return this.client.post<Transfer>(TRANSFER_ENDPOINTS.SIMULATE(transferId), { status });
+  public async simulateOfframpTransfer(customerId: string, data: SimulateOfframpTransferRequest): Promise<SimulateTransferResponse> {
+    const validation = SimulateOfframpTransferSchema.safeParse(data);
+    if (!validation.success) {
+      throw new AlignValidationError('Invalid simulation data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+    }
+
+    return this.client.post<SimulateTransferResponse>(TRANSFER_ENDPOINTS.SIMULATE(customerId), data);
+  }
+
+  /**
+   * Simulate an onramp transfer action (Sandbox environment only)
+   * 
+   * This method is only available in the sandbox environment and allows you to
+   * simulate transfer actions like completion.
+   * 
+   * @param customerId - The unique customer identifier (UUID)
+   * @param data - Simulation parameters
+   * @param data.action - The action to simulate (e.g., 'complete_transfer')
+   * @param data.transfer_id - The ID of the transfer to simulate action on
+   * @returns Promise resolving to a message describing the result
+   * 
+   * @example
+   * ```typescript
+   * // Simulate transfer completion
+   * const result = await align.transfers.simulateOnrampTransfer('123e4567-e89b-12d3-a456-426614174000', {
+   *   action: 'complete_transfer',
+   *   transfer_id: 'transfer_xyz789'
+   * });
+   * console.log(result.message);
+   * ```
+   */
+  public async simulateOnrampTransfer(customerId: string, data: SimulateOnrampTransferRequest): Promise<SimulateTransferResponse> {
+    const validation = SimulateOnrampTransferSchema.safeParse(data);
+    if (!validation.success) {
+      throw new AlignValidationError('Invalid simulation data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+    }
+
+    return this.client.post<SimulateTransferResponse>(TRANSFER_ENDPOINTS.ONRAMP_SIMULATE(customerId), data);
   }
 }

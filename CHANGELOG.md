@@ -6,6 +6,49 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [3.1.0] - 2024-03-21
+
+### ⚠️ Breaking Changes (Offramp Transfers)
+
+The Offramp Transfers API has been completely rewritten to align with the official AlignLab API documentation. The previous implementation was incorrect.
+
+- **Endpoints**: All offramp endpoints now follow the `/v0/customers/{customer_id}/offramp-transfer/...` pattern.
+- **Methods**:
+  - `createOfframpQuote`: Now requires `customerId` as the first argument.
+  - `createOfframpTransfer`: Now requires `customerId` and `quoteId` as arguments.
+  - `getOnrampTransfer`: Now requires `customerId`.
+  - `simulate`: Renamed to `simulateOfframpTransfer` for consistency.
+
+### Added
+- **Transfers API**:
+  - `completeOfframpTransfer`: Added to support the transfer completion flow (required after deposit).
+  - `simulateOfframpTransfer`: Renamed from `simulate`.
+  - `simulateOnrampTransfer`: New method for simulating onramp transfer actions in sandbox.
+  - `CreateOnrampTransferRequest`: New strict type for onramp transfer creation.
+  - `SimulateOnrampTransferRequest`: New type for onramp simulation. actions in Sandbox.
+- **Types**:
+  - `CreateTransferFromQuoteRequest`: `destination_bank_account` now strictly accepts `IbanAccountDetails | UsAccountDetails`.
+  - Added `CompleteOfframpTransferRequest`, `SimulateTransferRequest`, `TransferListResponse`.
+
+### Migration Guide
+
+#### Offramp Transfers
+
+```typescript
+// BEFORE (Incorrect)
+const quote = await align.transfers.createOfframpQuote({...});
+const transfer = await align.transfers.createOfframpTransfer({...});
+
+// AFTER (Correct)
+const quote = await align.transfers.createOfframpQuote(customerId, {...});
+const transfer = await align.transfers.createOfframpTransfer(customerId, quote.quote_id, {...});
+
+// NEW: Complete the transfer
+await align.transfers.completeOfframpTransfer(customerId, transfer.id, {
+  deposit_transaction_hash: '0x...'
+});
+```
+
 ## [3.0.1] - 2025-11-20
 
 ### Changed

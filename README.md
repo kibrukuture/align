@@ -354,18 +354,69 @@ const quote2 = await align.transfers.createOfframpQuote({
 console.log(`Send ${quote2.source_amount} USDC to receive $95 USD`);
 ```
 
-#### Create Offramp Transfer
+### Offramp Transfers (Crypto to Fiat)
 
-```typescript
-// Execute the transfer from the quote
-const transfer = await align.transfers.createOfframpTransfer({
-  transfer_purpose: 'Payment for services',
-  destination_external_account_id: 'ext_acc_123',
-});
+1. **Create a Quote**
+   ```typescript
+   const quote = await align.transfers.createOfframpQuote(customer.customer_id, {
+     source_amount: '100.00',
+     source_token: 'usdc',
+     source_network: 'polygon',
+     destination_currency: 'usd',
+     destination_payment_rails: 'ach',
+   });
+   ```
 
-console.log(transfer.id); // "transfer_abc123"
-console.log(transfer.status); // "pending"
-```
+2. **Create Transfer from Quote**
+   ```typescript
+   const transfer = await align.transfers.createOfframpTransfer(
+     customer.customer_id,
+     quote.quote_id,
+     {
+       transfer_purpose: 'commercial_investment',
+       // Option A: Use existing external account
+       destination_external_account_id: 'ext_acc_123',
+       
+       // Option B: Provide bank details directly
+       /*
+       destination_bank_account: {
+         bank_name: 'Chase Bank',
+         account_holder_type: 'individual',
+         account_holder_first_name: 'John',
+         account_holder_last_name: 'Doe',
+         account_holder_address: {
+           country: 'US',
+           city: 'San Francisco',
+           street_line_1: '123 Main St',
+           postal_code: '94105'
+         },
+         account_type: 'us',
+         us: {
+           account_number: '1234567890',
+           routing_number: '021000021'
+         }
+       }
+       */
+     }
+   );
+   ```
+
+3. **Complete Transfer (After Deposit)**
+   ```typescript
+   const completedTransfer = await align.transfers.completeOfframpTransfer(
+     customer.customer_id,
+     transfer.id,
+     {
+       deposit_transaction_hash: '0x1234567890abcdef...',
+     }
+   );
+   ```
+
+4. **List Transfers**
+   ```typescript
+   const transfers = await align.transfers.listOfframpTransfers(customer.customer_id);
+   console.log(transfers.items);
+   ```
 
 #### Get Offramp Transfer
 
@@ -407,34 +458,46 @@ interface CreateOnrampQuoteRequest {
 #### Create Onramp Quote
 
 ```typescript
-const quote = await align.transfers.createOnrampQuote({
+const quote = await align.transfers.createOnrampQuote('123e4567-e89b-12d3-a456-426614174000', {
   source_amount: '100.00',
   source_currency: 'usd',
   source_payment_rails: 'ach',
   destination_token: 'usdc',
   destination_network: 'polygon',
 });
-
-console.log(`Send $${quote.source_amount} USD`);
-console.log(`Receive ${quote.destination_amount} USDC`);
 ```
 
 #### Create Onramp Transfer
 
 ```typescript
-const transfer = await align.transfers.createOnrampTransfer({
-  transfer_purpose: 'Crypto purchase',
-});
+const transfer = await align.transfers.createOnrampTransfer(
+  '123e4567-e89b-12d3-a456-426614174000',
+  quote.quote_id,
+  {
+    destination_address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+  }
+);
+```
 
-console.log(transfer.id); // "transfer_xyz789"
+#### Simulate Offramp Transfer (Sandbox)
+
+```typescript
+const result = await align.transfers.simulateOfframpTransfer(
+  '123e4567-e89b-12d3-a456-426614174000',
+  {
+    action: 'complete_transfer',
+    transfer_id: 'transfer_abc123'
+  }
+);
 ```
 
 #### Get Onramp Transfer
 
 ```typescript
-const transfer = await align.transfers.getOnrampTransfer('transfer_xyz789');
-
-console.log(transfer.status); // "completed"
+const transfer = await align.transfers.getOnrampTransfer(
+  '123e4567-e89b-12d3-a456-426614174000',
+  'transfer_xyz789'
+);
 ```
 
 #### List Onramp Transfers
