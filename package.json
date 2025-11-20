@@ -21,7 +21,7 @@
     "build": "tsup src/index.ts --format cjs,esm --dts --minify --clean",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "bun run typecheck && bun run build", 
+    "prepublishOnly": "bun run typecheck && bun run build",
     "publish": "bun run typecheck && bun run build && npm publish"
   },
   "keywords": [
@@ -53,6 +53,8 @@
   },
   "homepage": "https://github.com/kibrukuture/align#readme",
   "dependencies": {
+    "ky": "^1.14.0",
+    "pino": "^10.1.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {
