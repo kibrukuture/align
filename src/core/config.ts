@@ -42,6 +42,6 @@ export const DEFAULT_CONFIG: Partial<AlignConfig> = {
 };
 
 export const ALIGN_API_URLS: Record<AlignEnvironment, string> = {
-  sandbox: "https://api-sandbox.alignlabs.dev/v0",
-  production: "https://api.alignlabs.dev/v0",
+  sandbox: "https://api-sandbox.alignlabs.dev",
+  production: "https://api.alignlabs.dev",
 };
