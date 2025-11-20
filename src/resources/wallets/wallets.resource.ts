@@ -2,6 +2,9 @@ import { HttpClient } from '@/core/http-client';
 import type { VerifyWalletRequest, WalletVerification } from '@/resources/wallets/wallets.types';
 import { WALLET_ENDPOINTS } from '@/constants';
 
+import { AlignValidationError } from '@/core/errors';
+import { VerifyWalletSchema } from '@/resources/wallets/wallets.validator';
+
 export class WalletsResource {
   constructor(private client: HttpClient) {}
 
@@ -14,6 +17,7 @@ export class WalletsResource {
    * @param customerId - The unique customer identifier
    * @param walletAddress - The cryptocurrency wallet address to verify
    * @returns Promise resolving to the wallet verification object with verification link
+   * @throws {AlignValidationError} If the wallet address is invalid
    * 
    * @example
    * ```typescript
@@ -29,6 +33,12 @@ export class WalletsResource {
    */
   public async verifyOwnership(customerId: string, walletAddress: string): Promise<WalletVerification> {
     const data: VerifyWalletRequest = { wallet_address: walletAddress };
+    
+    const validation = VerifyWalletSchema.safeParse(data);
+    if (!validation.success) {
+      throw new AlignValidationError('Invalid wallet data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+    }
+
     return this.client.post<WalletVerification>(WALLET_ENDPOINTS.VERIFY_OWNERSHIP(customerId), data);
   }
 }
