@@ -3,9 +3,9 @@
  */
 export const WEBHOOK_ENDPOINTS = {
   /** Endpoint to create a webhook */
-  CREATE: '/webhooks',
+  CREATE: '/v0/webhooks',
   /** Endpoint to list webhooks */
-  LIST: '/webhooks',
+  LIST: '/v0/webhooks',
   /** Endpoint to delete a webhook by ID */
-  DELETE: (id: string) => `/webhooks/${id}`,
+  DELETE: (id: string) => `/v0/webhooks/${id}`,
 } as const;
