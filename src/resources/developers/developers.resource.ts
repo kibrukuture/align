@@ -1,5 +1,8 @@
 import { HttpClient } from '@/core/http-client';
-import type { DeveloperFee } from '@/resources/developers/developers.types';
+import type { 
+  DeveloperFeesResponse,
+  UpdateDeveloperFeesRequest 
+} from '@/resources/developers/developers.types';
 import { DEVELOPER_ENDPOINTS } from '@/constants';
 
 export class DevelopersResource {
@@ -9,44 +12,49 @@ export class DevelopersResource {
    * Retrieve current developer fee settings
    * 
    * Developer fees allow you to earn a percentage on each transaction processed
-   * through your integration.
+   * through your integration. Fees are configured per service type (onramp, offramp,
+   * cross-chain transfers).
    * 
-   * @returns Promise resolving to an array of developer fee configurations
+   * @returns Promise resolving to developer fee configurations
    * 
    * @example
    * ```typescript
-   * const fees = await align.developers.getFees();
-   * fees.forEach(fee => {
-   *   console.log(`Fee: ${fee.percent}% to wallet ${fee.wallet_address}`);
+   * const response = await align.developers.getFees();
+   * response.developer_receivable_fees.forEach(fee => {
+   *   console.log(`${fee.service_type}: ${fee.value}% (${fee.accrual_basis})`);
    * });
    * ```
    */
-  public async getFees(): Promise<DeveloperFee[]> {
-    return this.client.get<DeveloperFee[]>(DEVELOPER_ENDPOINTS.GET_FEES);
+  public async getFees(): Promise<DeveloperFeesResponse> {
+    return this.client.get<DeveloperFeesResponse>(DEVELOPER_ENDPOINTS.GET_FEES);
   }
 
   /**
    * Update developer fee settings
    * 
-   * Configure the percentage fee you want to earn on transactions and the
-   * wallet address where fees should be sent.
+   * Configure the percentage fee you want to earn on transactions for each
+   * service type. Fees are calculated as a percentage of the transaction amount.
    * 
-   * @param fees - Array of developer fee configurations
+   * @param request - Developer fee configuration by service type
+   * @param request.developer_receivable_fees - Fees by service type
+   * @param request.developer_receivable_fees.onramp - Fee percentage for onramp transactions
+   * @param request.developer_receivable_fees.offramp - Fee percentage for offramp transactions
+   * @param request.developer_receivable_fees.cross_chain_transfer - Fee percentage for cross-chain transfers
    * @returns Promise resolving to the updated developer fee settings
    * 
    * @example
    * ```typescript
-   * const updatedFees = await align.developers.updateFees([
-   *   {
-   *     id: 'fee_123',
-   *     percent: '0.5',
-   *     wallet_address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+   * const response = await align.developers.updateFees({
+   *   developer_receivable_fees: {
+   *     onramp: 1,
+   *     offramp: 1,
+   *     cross_chain_transfer: 1,
    *   },
-   * ]);
+   * });
    * console.log('Developer fees updated successfully');
    * ```
    */
-  public async updateFees(fees: DeveloperFee[]): Promise<DeveloperFee[]> {
-    return this.client.post<DeveloperFee[]>(DEVELOPER_ENDPOINTS.UPDATE_FEES, { fees });
+  public async updateFees(request: UpdateDeveloperFeesRequest): Promise<DeveloperFeesResponse> {
+    return this.client.put<DeveloperFeesResponse>(DEVELOPER_ENDPOINTS.UPDATE_FEES, request);
   }
 }

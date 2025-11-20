@@ -4,6 +4,50 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [3.4.0] - 2025-11-20
+
+### Breaking Changes
+- **Developer Fees API**:
+  - Endpoint path changed from `/developers/fees` to `/v0/developer/fees`
+  - `getFees()`: Response structure changed from `DeveloperFee[]` to `DeveloperFeesResponse`
+  - `updateFees()`: HTTP method changed from POST to PUT, request structure completely changed
+  - Removed `DeveloperFee` type (replaced with `DeveloperReceivableFee`)
+
+### Added
+- **Developer Fees API**:
+  - `ServiceType`: Type for service types ('onramp' | 'offramp' | 'cross_chain_transfer')
+  - `AccrualBasis`: Type for fee calculation method ('percentage')
+  - `DeveloperReceivableFee`: Individual fee configuration with service_type, accrual_basis, value
+  - `DeveloperFeesResponse`: Response wrapper with developer_receivable_fees array
+  - `UpdateDeveloperFeesRequest`: Request structure with fees by service type
+
+### Migration Guide
+#### Developer Fees
+```typescript
+// Old (v3.3.0)
+const fees = await align.developers.getFees();
+fees.forEach(fee => {
+  console.log(`${fee.percent}% → ${fee.wallet_address}`);
+});
+
+await align.developers.updateFees([
+  { id: 'fee_1', percent: '0.5', wallet_address: '0x...' }
+]);
+
+// New (v3.4.0)
+const response = await align.developers.getFees();
+response.developer_receivable_fees.forEach(fee => {
+  console.log(`${fee.service_type}: ${fee.value}%`);
+});
+
+await align.developers.updateFees({
+  developer_receivable_fees: {
+    onramp: 1,
+    offramp: 1,
+    cross_chain_transfer: 1,
+  },
+});
+```
 
 ## [3.3.0] - 2025-11-20
 

@@ -125,7 +125,13 @@ export type {
 } from '@/resources/webhooks/webhooks.types';
 
 // Developer types
-export type { DeveloperFee } from '@/resources/developers/developers.types';
+export type { 
+  ServiceType,
+  AccrualBasis,
+  DeveloperReceivableFee,
+  DeveloperFeesResponse,
+  UpdateDeveloperFeesRequest,
+} from '@/resources/developers/developers.types';
 export * from '@/resources/files/files.resource';
 export * from '@/resources/developers/developers.resource';
 export * from '@/resources/cross-chain/cross-chain.types';

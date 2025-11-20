@@ -980,30 +980,26 @@ interface DeveloperFee {
 ### Get Developer Fees
 
 ```typescript
-const fees = await align.developers.getFees();
+const response = await align.developers.getFees();
 
-fees.forEach(fee => {
-  console.log(`${fee.percent}% → ${fee.wallet_address}`);
+response.developer_receivable_fees.forEach(fee => {
+  console.log(`${fee.service_type}: ${fee.value}% (${fee.accrual_basis})`);
 });
 ```
 
 ### Update Developer Fees
 
 ```typescript
-const updatedFees = await align.developers.updateFees([
-  {
-    id: 'fee_1',
-    percent: '0.5',
-    wallet_address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+const response = await align.developers.updateFees({
+  developer_receivable_fees: {
+    onramp: 1,
+    offramp: 1,
+    cross_chain_transfer: 1,
   },
-  {
-    id: 'fee_2',
-    percent: '0.3',
-    wallet_address: '0x8ba1f109551bD432803012645Ac136ddd64DBA72',
-  },
-]);
+});
 
-console.log('Fees updated');
+console.log('Fees updated successfully');
+```
 ```
 
 ---
