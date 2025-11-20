@@ -3,9 +3,9 @@
  */
 export const CUSTOMER_ENDPOINTS = {
   /** Endpoint to create a new customer */
-  CREATE: '/v0/customers',
+  CREATE: "/v0/customers",
   /** Endpoint to list customers */
-  LIST: '/v0/customers',
+  LIST: "/v0/customers",
   /** Endpoint to get a customer by ID */
   GET: (id: string) => `/v0/customers/${id}`,
   /** Endpoint to update a customer */
