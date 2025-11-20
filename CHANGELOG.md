@@ -6,7 +6,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [3.1.0] - 2024-03-21
+## [3.2.0] - 2025-11-20
+
+### Breaking Changes
+- **Onramp Transfers API**:
+  - `createOnrampQuote`: Now requires `customerId` as the first argument.
+  - `createOnrampTransfer`: Now requires `customerId` and `quoteId` as arguments. Request body now requires `destination_address` instead of `transfer_purpose`.
+  - `listOnrampTransfers`: Now requires `customerId`.
+  - `getOnrampTransfer`: Now requires `customerId`.
+  - `simulate`: Renamed to `simulateOfframpTransfer` for consistency.
+
+### Added
+- **Transfers API**:
+  - `completeOfframpTransfer`: Added to support the transfer completion flow (required after deposit).
+  - `simulateOfframpTransfer`: Renamed from `simulate`.
+  - `simulateOnrampTransfer`: New method for simulating onramp transfer actions in sandbox.
+  - `CreateOnrampTransferRequest`: New strict type for onramp transfer creation.
+  - `SimulateOnrampTransferRequest`: New type for onramp simulation.
+
+### Migration Guide
+#### Onramp Transfers
+```typescript
+// Old
+const quote = await align.transfers.createOnrampQuote({...});
+const transfer = await align.transfers.createOnrampTransfer({...});
+
+// New
+const quote = await align.transfers.createOnrampQuote(customerId, {...});
+const transfer = await align.transfers.createOnrampTransfer(customerId, quote.quote_id, {
+  destination_address: '0x...'
+});
+```
+
+## [3.1.0] - 2025-11-20
 
 ### ⚠️ Breaking Changes (Offramp Transfers)
 
