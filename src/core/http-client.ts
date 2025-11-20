@@ -101,6 +101,18 @@ export class HttpClient {
     });
   }
 
+  public async put<T>(path: string, body?: unknown, options?: RequestInit): Promise<T> {
+    return this.request<T>(path, {
+      ...options,
+      method: 'PUT',
+      body: JSON.stringify(body),
+      headers: {
+        ...options?.headers,
+        'Content-Type': 'application/json',
+      }
+    });
+  }
+
   public async patch<T>(path: string, body?: unknown, options?: RequestInit): Promise<T> {
     return this.request<T>(path, {
       ...options,

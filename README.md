@@ -36,7 +36,7 @@ bun add @schnl/align
 ## Quick Start
 
 ```typescript
-import { Align } from '@schnl/align';
+import Align from '@schnl/align';
 
 // Initialize the client
 const align = new Align({
@@ -52,7 +52,7 @@ const customer = await align.customers.create({
   type: 'individual',
 });
 
-console.log('Customer created:', customer.id);
+console.log('Customer created:', customer.customer_id);
 ```
 
 ---
@@ -170,13 +170,13 @@ const customer = await align.customers.create({
   type: 'individual',
 });
 
-console.log(customer.id); // "cus_abc123"
+console.log(customer.customer_id); // "123e4567-e89b-12d3-a456-426614174000"
 ```
 
 ### Get Customer
 
 ```typescript
-const customer = await align.customers.get('cus_abc123');
+const customer = await align.customers.get('123e4567-e89b-12d3-a456-426614174000');
 
 console.log(customer.email); // "alice@example.com"
 console.log(customer.kyc_status); // "approved"
@@ -1070,7 +1070,7 @@ import type {
 ### Custom HTTP Client Configuration
 
 ```typescript
-import { Align } from '@schnl/align';
+import Align from '@schnl/align';
 
 const align = new Align({
   apiKey: process.env.ALIGNLAB_API_KEY!,

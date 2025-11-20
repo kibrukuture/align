@@ -19,7 +19,7 @@ import { AlignError, AlignValidationError } from '@/core/errors';
  * 
  * @example
  * ```typescript
- * import { Align } from '@schnl/align';
+ * import Align from '@schnl/align';
  * 
  * const align = new Align({
  *   apiKey: process.env.ALIGNLAB_API_KEY!,

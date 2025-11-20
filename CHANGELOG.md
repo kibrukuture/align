@@ -6,6 +6,176 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [3.0.0] - 2025-11-20
+
+### Changed
+- **BREAKING**: Customers API completely rewritten to match official AlignLab API documentation
+  - `CustomerType`: Changed from `'business'` to `'corporate'`
+  - Field names: `id` → `customer_id`
+  - Added `company_name` field (required for corporate customers)
+  - Added `address` object (available for approved KYC)
+  - Added detailed `kycs` object with status breakdown and sub-status
+  - `CreateCustomerRequest`: Made `first_name`/`last_name` optional (required only for individual)
+  - `UpdateCustomerRequest`: Now accepts `documents` array instead of customer fields
+  - Update method: Changed from PATCH to PUT
+  - `CustomerListResponse`: Changed from `{ data, has_more, total_count }` to `{ items }`
+  - List method: Removed pagination, added optional `email` filter parameter
+  - `KycSessionResponse`: Changed from `{ session_id, url, status }` to `{ kycs: { kyc_flow_link } }`
+
+- **BREAKING**: External Accounts API completely rewritten to match official AlignLab API documentation
+  - Endpoint structure: Now requires `customer_id` in path: `/v0/customers/{customer_id}/external-accounts`
+  - `create()` method: Now requires `customer_id` as first parameter
+  - Added `list(customer_id)` method to retrieve all external accounts for a customer
+  - `ExternalAccount` interface: Now complete with all response fields
+  - Renamed `Address` to `ExternalAccountAddress`
+  - Added proper IBAN/US account type discrimination with union types
+
+### Added
+- New customer types exported:
+  - `CustomerAddress` - Address information for approved KYC customers
+  - `CustomerKycs` - Detailed KYC status information
+  - `KycStatusBreakdown` - KYC status by currency and payment rails
+  - `KycSubStatus` - KYC verification sub-statuses
+  - `CustomerDocument` - Document upload structure
+- Added `put()` method to HttpClient for PUT requests
+
+### Migration Guide
+
+#### 1. Update CustomerType
+```typescript
+// Before
+type: 'business'
+
+// After
+type: 'corporate'
+```
+
+#### 2. Update Field Names
+```typescript
+// Before
+customer.id
+customer.kyc_status
+
+// After
+customer.customer_id
+customer.kycs?.sub_status
+```
+
+#### 3. Update Create Customer
+```typescript
+// Before - all fields required
+await align.customers.create({
+  email: 'contact@acme.com',
+  first_name: '',  // Had to provide empty strings
+  last_name: '',
+  type: 'business',
+});
+
+// After - conditional fields
+await align.customers.create({
+  email: 'contact@acme.com',
+  type: 'corporate',
+  company_name: 'Acme Corporation',  // Required for corporate
+});
+```
+
+#### 4. Update Customer Updates
+```typescript
+// Before
+await align.customers.update(customerId, {
+  email: 'new@email.com',
+  first_name: 'John',
+});
+
+// After - now uses documents
+await align.customers.update(customerId, {
+  documents: [
+    {
+      file_id: 'file_uuid',
+      purpose: 'id_document',
+      description: 'Driver license',
+    },
+  ],
+});
+```
+
+#### 5. Update List Customers
+```typescript
+// Before
+const customers = await align.customers.list(1, 20);
+console.log(customers.data);
+
+// After
+const customers = await align.customers.list();
+console.log(customers.items);
+
+// Or filter by email
+const filtered = await align.customers.list('alice@example.com');
+```
+
+#### 6. Update KYC Session
+```typescript
+// Before
+const session = await align.customers.createKycSession(customerId);
+window.location.href = session.url;
+
+// After
+const session = await align.customers.createKycSession(customerId);
+window.location.href = session.kycs.kyc_flow_link;
+```
+
+#### 7. Update External Account Creation
+```typescript
+// Before
+await align.externalAccounts.create({
+  bank_name: 'Chase Bank',
+  account_holder_type: 'individual',
+  // ...
+});
+
+// After - now requires customer_id
+await align.externalAccounts.create(customerId, {
+  bank_name: 'Chase Bank',
+  account_holder_type: 'individual',
+  // ...
+});
+```
+
+#### 8. List External Accounts
+```typescript
+// Before - method didn't exist
+// Had to use get(id) for single account
+
+// After - new list method
+const accounts = await align.externalAccounts.list(customerId);
+console.log(accounts.items);
+```
+
+## [2.0.0] - 2025-11-20
+
+### Changed
+- **BREAKING**: `Align` is now the default export for cleaner import syntax
+  - **Before**: `import { Align } from '@schnl/align';`
+  - **After**: `import Align from '@schnl/align';`
+  - Named export still available for backwards compatibility: `import { Align } from '@schnl/align';`
+
+### Migration Guide
+
+Update your imports from:
+```typescript
+import { Align } from '@schnl/align';
+```
+
+To:
+```typescript
+import Align from '@schnl/align';
+```
+
+You can still import types alongside the default export:
+```typescript
+import Align, { KycStatus, WebhookEvent } from '@schnl/align';
+```
+
 ## [1.2.0] - 2025-11-20
 
 ### Added

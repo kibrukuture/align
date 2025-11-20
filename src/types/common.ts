@@ -24,4 +24,5 @@ export type WebhookStatus = 'active' | 'inactive';
 /**
  * Customer type
  */
-export type CustomerType = 'individual' | 'business';
+export type CustomerType = 'individual' | 'corporate';
+

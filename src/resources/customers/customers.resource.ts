@@ -17,22 +17,31 @@ export class CustomersResource {
    * Create a new customer account
    * 
    * @param data - Customer information
-   * @param data.email - Customer's email address
-   * @param data.first_name - Customer's first name
-   * @param data.last_name - Customer's last name
-   * @param data.type - Customer type: 'individual' or 'business'
+   * @param data.email - Customer's email address (required)
+   * @param data.type - Customer type: 'individual' or 'corporate' (required)
+   * @param data.first_name - Customer's first name (required for individual)
+   * @param data.last_name - Customer's last name (required for individual)
+   * @param data.company_name - Company name (required for corporate)
    * @returns Promise resolving to the created customer object
    * @throws {AlignValidationError} If the customer data is invalid
    * 
    * @example
    * ```typescript
+   * // Individual customer
    * const customer = await align.customers.create({
    *   email: 'alice@example.com',
+   *   type: 'individual',
    *   first_name: 'Alice',
    *   last_name: 'Smith',
-   *   type: 'individual',
    * });
-   * console.log(customer.id); // "cus_abc123"
+   * console.log(customer.customer_id); // "123e4567-e89b-12d3-a456-426614174000"
+   * 
+   * // Corporate customer
+   * const company = await align.customers.create({
+   *   email: 'contact@acme.com',
+   *   type: 'corporate',
+   *   company_name: 'Acme Corporation',
+   * });
    * ```
    */
   public async create(data: CreateCustomerRequest): Promise<Customer> {
@@ -47,85 +56,94 @@ export class CustomersResource {
   /**
    * Retrieve a customer by their unique identifier
    * 
-   * @param id - The unique customer identifier
+   * @param customerId - The unique customer identifier (UUID)
    * @returns Promise resolving to the customer object
    * 
    * @example
    * ```typescript
-   * const customer = await align.customers.get('cus_abc123');
+   * const customer = await align.customers.get('123e4567-e89b-12d3-a456-426614174000');
    * console.log(customer.email); // "alice@example.com"
-   * console.log(customer.kyc_status); // "approved"
+   * console.log(customer.kycs?.sub_status); // "kyc_form_submission_accepted"
    * ```
    */
-  public async get(id: string): Promise<Customer> {
-    return this.client.get<Customer>(CUSTOMER_ENDPOINTS.GET(id));
+  public async get(customerId: string): Promise<Customer> {
+    return this.client.get<Customer>(CUSTOMER_ENDPOINTS.GET(customerId));
   }
 
   /**
-   * Update an existing customer's information
+   * Update an existing customer's information with documents
    * 
-   * @param id - The unique customer identifier
-   * @param data - Updated customer information
-   * @param data.email - Updated email address (optional)
-   * @param data.first_name - Updated first name (optional)
-   * @param data.last_name - Updated last name (optional)
-   * @returns Promise resolving to the updated customer object
+   * @param customerId - The unique customer identifier (UUID)
+   * @param data - Update data with documents array
+   * @param data.documents - Array of document objects to upload
+   * @returns Promise resolving to an empty object on success
    * @throws {AlignValidationError} If the update data is invalid
    * 
    * @example
    * ```typescript
-   * const updatedCustomer = await align.customers.update('cus_abc123', {
-   *   email: 'alice.smith@example.com',
-   *   first_name: 'Alice Marie',
+   * const result = await align.customers.update('123e4567-e89b-12d3-a456-426614174000', {
+   *   documents: [
+   *     {
+   *       file_id: '123e4567-e89b-12d3-a456-426614174001',
+   *       purpose: 'id_document',
+   *       description: 'Driver license',
+   *     },
+   *     {
+   *       file_id: '123e4567-e89b-12d3-a456-426614174002',
+   *       purpose: 'proof_of_address',
+   *     },
+   *   ],
    * });
-   * console.log(updatedCustomer.email); // "alice.smith@example.com"
    * ```
    */
-  public async update(id: string, data: UpdateCustomerRequest): Promise<Customer> {
+  public async update(customerId: string, data: UpdateCustomerRequest): Promise<Record<string, never>> {
     const validation = UpdateCustomerSchema.safeParse(data);
     if (!validation.success) {
       throw new AlignValidationError('Invalid update data', validation.error.flatten().fieldErrors as Record<string, string[]>);
     }
 
-    return this.client.patch<Customer>(CUSTOMER_ENDPOINTS.UPDATE(id), data);
+    return this.client.put<Record<string, never>>(CUSTOMER_ENDPOINTS.UPDATE(customerId), data);
   }
 
   /**
-   * List all customers with pagination
+   * List all customers with optional email filter
    * 
-   * @param page - Page number (1-indexed)
-   * @param limit - Number of customers per page
-   * @returns Promise resolving to a paginated list of customers
+   * @param email - Optional email filter to search for specific customer
+   * @returns Promise resolving to a list of customers
    * 
    * @example
    * ```typescript
-   * const customers = await align.customers.list(1, 20);
-   * console.log(customers.data.length); // 20
-   * console.log(customers.has_more); // true
-   * console.log(customers.total_count); // 156
+   * // List all customers
+   * const allCustomers = await align.customers.list();
+   * console.log(allCustomers.items.length);
+   * 
+   * // Filter by email
+   * const filtered = await align.customers.list('alice@example.com');
+   * console.log(filtered.items[0].customer_id);
    * ```
    */
-  public async list(page = 1, limit = 10): Promise<CustomerListResponse> {
-    return this.client.get<CustomerListResponse>(CUSTOMER_ENDPOINTS.LIST, { page, limit });
+  public async list(email?: string): Promise<CustomerListResponse> {
+    const params = email ? { email } : undefined;
+    return this.client.get<CustomerListResponse>(CUSTOMER_ENDPOINTS.LIST, params);
   }
 
   /**
    * Create a KYC (Know Your Customer) verification session
    * 
-   * Generates a unique KYC session URL that the customer can use to complete
+   * Generates a unique KYC flow link that the customer can use to complete
    * their identity verification process.
    * 
-   * @param customerId - The unique customer identifier
-   * @returns Promise resolving to the KYC session details including the verification URL
+   * @param customerId - The unique customer identifier (UUID)
+   * @returns Promise resolving to the KYC session with flow link
    * 
    * @example
    * ```typescript
-   * const kycSession = await align.customers.createKycSession('cus_abc123');
-   * console.log(kycSession.url); // "https://kyc.alignlabs.dev/session/..."
-   * console.log(kycSession.session_id); // "kyc_session_xyz"
-   * console.log(kycSession.status); // "pending"
+   * const kycSession = await align.customers.createKycSession('123e4567-e89b-12d3-a456-426614174000');
+   * console.log(kycSession.kycs.kyc_flow_link);
+   * // "https://kyc.alignlabs.dev/flow/..."
    * 
-   * // Redirect user to kycSession.url to complete KYC
+   * // Redirect user to complete KYC
+   * window.location.href = kycSession.kycs.kyc_flow_link;
    * ```
    */
   public async createKycSession(customerId: string): Promise<KycSessionResponse> {

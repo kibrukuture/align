@@ -1,4 +1,4 @@
-import { Align } from './src';
+import Align from './src';
 
 async function main() {
   console.log('Initializing Align SDK...');

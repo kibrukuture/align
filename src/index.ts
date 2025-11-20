@@ -11,7 +11,7 @@
  * 
  * @example
  * ```typescript
- * import { Align } from '@schnl/align';
+ * import Align from '@schnl/align';
  * 
  * const align = new Align({
  *   apiKey: 'your_api_key',
@@ -30,7 +30,9 @@
  */
 
 // Main client export
-export { Align } from '@/client';
+import { Align } from '@/client';
+export { Align };
+export default Align;
 
 // Core types and configuration
 export type { AlignConfig, AlignEnvironment, KycStatus, WebhookStatus, CustomerType } from '@/types/common';
@@ -43,6 +45,11 @@ export type {
   UpdateCustomerRequest,
   CustomerListResponse,
   KycSessionResponse,
+  CustomerAddress,
+  CustomerKycs,
+  KycStatusBreakdown,
+  KycSubStatus,
+  CustomerDocument,
 } from '@/resources/customers/customers.types';
 
 // Virtual Account types
@@ -77,9 +84,14 @@ export type {
 export type {
   ExternalAccount,
   CreateExternalAccountRequest,
-  Address,
+  ExternalAccountAddress,
+  ExternalAccountListResponse,
   IbanDetails,
   UsDetails,
+  IbanAccountRequest,
+  UsAccountRequest,
+  IbanAccountResponse,
+  UsAccountResponse,
 } from '@/resources/external-accounts/external-accounts.types';
 
 // Wallet types
