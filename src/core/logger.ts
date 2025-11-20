@@ -25,21 +25,9 @@ export function createLogger(config: {
     });
   }
 
-  // Create logger with appropriate level
+  // Create logger with JSON format (always)
   return pino({
     level,
     enabled: true,
-    // Pretty print in development, JSON in production
-    transport:
-      process.env.NODE_ENV === "development"
-        ? {
-            target: "pino-pretty",
-            options: {
-              colorize: true,
-              translateTime: "HH:MM:ss.l",
-              ignore: "pid,hostname",
-            },
-          }
-        : undefined,
   });
 }
