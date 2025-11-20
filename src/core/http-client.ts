@@ -30,7 +30,8 @@ export class HttpClient {
       baseURL: this.baseUrl,
       timeout: config.timeout || DEFAULT_CONFIG.timeout!,
       headers: {
-        Authorization: `Bearer ${config.apiKey}`,
+        Authorization: config.apiKey, // align does not use Bearer token.
+        // Accept: "*/*",
       },
     });
 
