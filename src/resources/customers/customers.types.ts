@@ -45,11 +45,11 @@ export interface Customer {
   customer_id: string;
   email: string;
   type: CustomerType;
-  company_name?: string | null;
-  first_name?: string | null;
-  last_name?: string | null;
-  address?: CustomerAddress | null;
-  kycs?: CustomerKycs | null;
+  company_name?: string;
+  first_name?: string;
+  last_name?: string;
+  address?: CustomerAddress;
+  kycs?: CustomerKycs;
 }
 
 /**
