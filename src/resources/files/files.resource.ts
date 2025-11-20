@@ -1,5 +1,7 @@
 import { HttpClient } from '@/core/http-client';
+import { AlignValidationError } from '@/core/errors';
 import type { UploadFileResponse } from '@/resources/files/files.types';
+import { UploadFileSchema } from '@/resources/files/files.validator';
 import { FILE_ENDPOINTS } from '@/constants';
 
 export class FilesResource {
@@ -13,6 +15,7 @@ export class FilesResource {
    * 
    * @param file - The file to upload (File or Blob object)
    * @returns Promise resolving to the uploaded file details
+   * @throws {AlignValidationError} If the input is not a valid File or Blob object
    * 
    * @remarks
    * - Requires FormData support (available in browser and Node.js environments)
@@ -32,12 +35,18 @@ export class FilesResource {
    * ```
    */
   public async upload(file: File | Blob): Promise<UploadFileResponse> {
+    // Validate that the input is actually a File or Blob
+    const validation = UploadFileSchema.safeParse(file);
+    if (!validation.success) {
+      throw new AlignValidationError(
+        'Invalid file input',
+        { file: ['Input must be a File or Blob object'] }
+      );
+    }
+
     const formData = new FormData();
     formData.append('file', file);
 
-    // We need to let the browser/runtime set the Content-Type header for FormData
-    // so we pass a custom request function or handle it in HttpClient
-    // For now, assuming HttpClient handles FormData correctly if body is FormData
     return this.client.post<UploadFileResponse>(FILE_ENDPOINTS.UPLOAD, formData);
   }
 }

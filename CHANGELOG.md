@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Files API**:
   - Moved `UploadFileResponse` type to separate `files.types.ts` file for consistency
+  - Added `UploadFileSchema` validator to ensure input is a valid File or Blob object
   - Updated JSDoc examples to reflect new response fields
 
 ### Migration Guide
