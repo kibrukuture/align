@@ -1,4 +1,4 @@
-import type { KycStatus, CustomerType } from '@/types/common';
+import type { KycStatus, CustomerType } from "@/types/common";
 
 /**
  * Customer address information (only available for approved KYC)
@@ -15,18 +15,18 @@ export interface CustomerAddress {
  * KYC status breakdown by currency and payment rails
  */
 export interface KycStatusBreakdown {
-  currency: 'usd' | 'eur' | 'aed';
-  payment_rails: 'ach' | 'wire' | 'sepa' | 'uaefts';
+  currency: "usd" | "eur" | "aed";
+  payment_rails: "ach" | "wire" | "sepa" | "uaefts";
   status: KycStatus;
 }
 
 /**
  * KYC sub-status during verification process
  */
-export type KycSubStatus = 
-  | 'kyc_form_submission_started'
-  | 'kyc_form_submission_accepted'
-  | 'kyc_form_resubmission_required';
+export type KycSubStatus =
+  | "kyc_form_submission_started"
+  | "kyc_form_submission_accepted"
+  | "kyc_form_resubmission_required";
 
 /**
  * Detailed KYC information
@@ -35,6 +35,7 @@ export interface CustomerKycs {
   status_breakdown: KycStatusBreakdown[];
   sub_status: KycSubStatus;
   kyc_flow_link: string;
+  status: KycStatus;
 }
 
 /**
@@ -56,15 +57,15 @@ export interface Customer {
  */
 export interface CustomerDocument {
   file_id: string;
-  purpose: 
-    | 'id_document'
-    | 'proof_of_address'
-    | 'proof_of_source_of_funds'
-    | 'business_formation'
-    | 'directors_registry'
-    | 'shareholder_registry'
-    | 'proof_of_nature_of_business'
-    | 'other';
+  purpose:
+    | "id_document"
+    | "proof_of_address"
+    | "proof_of_source_of_funds"
+    | "business_formation"
+    | "directors_registry"
+    | "shareholder_registry"
+    | "proof_of_nature_of_business"
+    | "other";
   description?: string;
 }
 
