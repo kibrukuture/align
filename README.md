@@ -1,6 +1,6 @@
 # AlignLab TypeScript SDK
 
-[None Official] TypeScript/JavaScript SDK for the [AlignLab](https://docs.alignlabs.dev) API. Build powerful payment infrastructure with support for fiat-to-crypto (onramp), crypto-to-fiat (offramp), cross-chain transfers, virtual accounts, and more.
+**Unofficial** TypeScript/JavaScript SDK for the [AlignLab](https://docs.alignlabs.dev) API. Build powerful payment infrastructure with support for fiat-to-crypto (onramp), crypto-to-fiat (offramp), cross-chain transfers, virtual accounts, and more.
 
 [![npm version](https://img.shields.io/npm/v/@schnl/align.svg)](https://www.npmjs.com/package/@schnl/align)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
@@ -220,11 +220,14 @@ console.log(updatedCustomer.email); // "alice.smith@example.com"
 ### List Customers
 
 ```typescript
+// List all customers (use with caution - no pagination support)
 const customers = await align.customers.list();
 
-console.log(customers.data.length); // 10
-console.log(customers.has_more); // true
-console.log(customers.total_count); // 156
+console.log(customers.items.length); // Number of customers returned
+
+// Filter by email (recommended for finding specific customer)
+const filtered = await align.customers.list("alice@example.com");
+console.log(filtered.items[0]?.customer_id);
 ```
 
 ### Create KYC Session
