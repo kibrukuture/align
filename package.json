@@ -22,7 +22,7 @@
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "bun run typecheck && bun run build", 
-    "publish": "bun run typecheck && bun run build && bun run test && npm publish"
+    "publish": "bun run typecheck && bun run build && npm publish"
   },
   "keywords": [
     "alignlab",

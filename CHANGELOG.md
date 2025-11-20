@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Resolved all `validation.error.flatten()` deprecation warnings by migrating to `z.treeifyError()`
   - Updated all Zod imports to `zod/v4` for explicit versioning
   - Implemented `formatZodError` utility for consistent error formatting across all resources
+- Added client-side validation for Developer Fees API
 
 ## [3.6.3] - 2025-11-20
 

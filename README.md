@@ -126,37 +126,45 @@ Manage customer accounts for your platform.
 
 ```typescript
 // Shared types
-type CustomerType = 'individual' | 'business';
+type CustomerType = 'individual' | 'corporate';
 type KycStatus = 'pending' | 'approved' | 'rejected' | 'not_started';
 
 interface Customer {
-  id: string;
+  customer_id: string;
   email: string;
-  first_name: string;
-  last_name: string;
+  first_name?: string;
+  last_name?: string;
+  company_name?: string;
   type: CustomerType;
-  created_at: string;
-  updated_at: string;
-  kyc_status?: KycStatus;
+  kycs?: {
+    status_breakdown: Array<{
+      currency: string;
+      payment_rails: string;
+      status: KycStatus;
+    }>;
+    kyc_flow_link: string;
+  };
 }
 
 interface CreateCustomerRequest {
   email: string;
-  first_name: string;
-  last_name: string;
   type: CustomerType;
+  first_name?: string;
+  last_name?: string;
+  company_name?: string;
 }
 
 interface UpdateCustomerRequest {
-  email?: string;
-  first_name?: string;
-  last_name?: string;
+  documents: Array<{
+    file_id: string;
+    purpose: string;
+  }>;
 }
 
 interface KycSessionResponse {
-  session_id: string;
-  url: string;
-  status: KycStatus;
+  kycs: {
+    kyc_flow_link: string;
+  };
 }
 ```
 
@@ -179,7 +187,7 @@ console.log(customer.customer_id); // "123e4567-e89b-12d3-a456-426614174000"
 const customer = await align.customers.get('123e4567-e89b-12d3-a456-426614174000');
 
 console.log(customer.email); // "alice@example.com"
-console.log(customer.kyc_status); // "approved"
+console.log(customer.kycs?.status_breakdown[0].status); // "approved"
 ```
 
 ### Update Customer
@@ -225,47 +233,54 @@ Create virtual bank accounts for customers to receive payments.
 ```typescript
 interface VirtualAccount {
   id: string;
-  customer_id: string;
-  account_number: string;
-  routing_number: string;
-  account_type: 'checking' | 'savings';
-  currency: 'usd' | 'eur' | 'aed';
-  status: 'active' | 'inactive';
-  created_at: string;
+  status: 'active';
+  destination_token: 'usdc' | 'usdt' | 'aed';
+  destination_network: 'polygon' | 'ethereum' | 'solana' | 'base' | 'tron' | 'arbitrum';
+  destination_address: string;
+  deposit_instructions: {
+    bank_name: string;
+    bank_address: string;
+    account_holder_name: string;
+    // ... other bank details (IBAN or US)
+  };
 }
 
 interface CreateVirtualAccountRequest {
-  currency: 'usd' | 'eur' | 'aed';
-  account_type?: 'checking' | 'savings';
+  source_currency: 'usd' | 'eur' | 'aed';
+  destination_token: 'usdc' | 'usdt';
+  destination_network: 'polygon' | 'ethereum' | 'solana' | 'base' | 'tron' | 'arbitrum';
+  destination_address: string;
 }
 ```
 
 ### Create Virtual Account
 
 ```typescript
-const virtualAccount = await align.virtualAccounts.create({
-  currency: 'usd',
-  account_type: 'checking',
+const virtualAccount = await align.virtualAccounts.create(customerId, {
+  source_currency: 'eur',
+  destination_token: 'usdc',
+  destination_network: 'polygon',
+  destination_address: '0x742d35...',
 });
 
-console.log(virtualAccount.account_number); // "1234567890"
-console.log(virtualAccount.routing_number); // "021000021"
+console.log(virtualAccount.id);
+console.log(virtualAccount.deposit_instructions.bank_name);
 ```
 
 ### List Virtual Accounts
 
 ```typescript
-const accounts = await align.virtualAccounts.list();
+const accounts = await align.virtualAccounts.list(customerId);
 
-accounts.forEach(account => {
-  console.log(`${account.currency.toUpperCase()}: ${account.account_number}`);
+accounts.items.forEach(account => {
+  console.log(`${account.destination_token.toUpperCase()}: ${account.deposit_instructions.bank_name}`);
 });
 ```
 
 ### Get Virtual Account
 
 ```typescript
-const account = await align.virtualAccounts.get('va_abc123');
+const account = await align.virtualAccounts.get(customerId, 'va_abc123');
 
 console.log(account.status); // "active"
 ```
@@ -792,19 +807,18 @@ interface VerifyWalletRequest {
 }
 
 interface WalletVerification {
-  verification_link: string;
-  status: 'pending' | 'verified';
+  verification_flow_link: string;
 }
 ```
 
 ### Verify Wallet Ownership
 
 ```typescript
-const verification = await align.wallets.verifyOwnership({
+const verification = await align.wallets.verifyOwnership(customerId, {
   wallet_address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
 });
 
-console.log(verification.verification_link);
+console.log(verification.verification_flow_link);
 // "https://verify.alignlabs.dev/wallet/..."
 
 console.log(verification.status); // "pending"
@@ -954,11 +968,11 @@ const formData = new FormData();
 formData.append('file', new Blob([fileBuffer]), 'passport.pdf');
 formData.append('purpose', 'kyc_document');
 
-const file = await align.files.upload(formData);
+const file = await align.files.upload(fileInput.files[0]);
 
 console.log(file.id); // "file_abc123"
-console.log(file.filename); // "passport.pdf"
-console.log(file.url); // "https://files.alignlabs.dev/..."
+console.log(file.name); // "passport.pdf"
+console.log(file.type); // "application/pdf"
 ```
 
 ---
@@ -970,10 +984,12 @@ Manage developer fees for your platform.
 ### Types
 
 ```typescript
-interface DeveloperFee {
-  id: string;
-  percent: string;
-  wallet_address: string;
+interface DeveloperFeesResponse {
+  developer_receivable_fees: Array<{
+    service_type: 'onramp' | 'offramp' | 'cross_chain_transfer';
+    accrual_basis: 'percentage';
+    value: number;
+  }>;
 }
 ```
 

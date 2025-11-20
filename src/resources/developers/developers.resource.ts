@@ -1,8 +1,11 @@
 import { HttpClient } from '@/core/http-client';
+import { AlignValidationError } from '@/core/errors';
+import { formatZodError } from '@/core/validation';
 import type { 
   DeveloperFeesResponse,
   UpdateDeveloperFeesRequest 
 } from '@/resources/developers/developers.types';
+import { UpdateDeveloperFeesSchema } from '@/resources/developers/developers.validator';
 import { DEVELOPER_ENDPOINTS } from '@/constants';
 
 export class DevelopersResource {
@@ -55,6 +58,11 @@ export class DevelopersResource {
    * ```
    */
   public async updateFees(request: UpdateDeveloperFeesRequest): Promise<DeveloperFeesResponse> {
+    const validation = UpdateDeveloperFeesSchema.safeParse(request);
+    if (!validation.success) {
+      throw new AlignValidationError('Invalid developer fees data', formatZodError(validation.error));
+    }
+
     return this.client.put<DeveloperFeesResponse>(DEVELOPER_ENDPOINTS.UPDATE_FEES, request);
   }
 }
