@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.1.0] - 2025-11-20
+
+### Changed
+- **BREAKING**: Fixed `WebhookEvent` structure to match official AlignLab API
+  - Replaced `id`, `type`, `data` fields with `event_type`, `entity_id`, `entity_type`
+  - Added `WebhookEventType` union type for event types
+  - Added `WebhookEntityType` union type for entity types
+- **BREAKING**: `webhooks.list()` now returns `WebhookListResponse` with `{ items: Webhook[] }` structure
+- Updated webhook signature verification documentation to use correct `x-hmac-signature` header
+- Removed `events` field from `Webhook` interface (not in official API)
+
+### Added
+- `WebhookEventType` type export
+- `WebhookEntityType` type export
+- `WebhookListResponse` type export
+
 ## [1.0.3] - 2025-11-19
 
 ### Changed

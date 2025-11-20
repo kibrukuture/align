@@ -1,7 +1,7 @@
 import * as crypto from 'node:crypto';
 import { HttpClient } from '@/core/http-client';
 import { AlignValidationError } from '@/core/errors';
-import type { Webhook, CreateWebhookRequest } from '@/resources/webhooks/webhooks.types';
+import type { Webhook, CreateWebhookRequest, WebhookListResponse } from '@/resources/webhooks/webhooks.types';
 import { CreateWebhookSchema } from '@/resources/webhooks/webhooks.validator';
 import { WEBHOOK_ENDPOINTS } from '@/constants';
 
@@ -23,8 +23,8 @@ export class WebhooksResource {
   /**
    * List all webhooks
    */
-  public async list(): Promise<Webhook[]> {
-    return this.client.get<Webhook[]>(WEBHOOK_ENDPOINTS.LIST);
+  public async list(): Promise<WebhookListResponse> {
+    return this.client.get<WebhookListResponse>(WEBHOOK_ENDPOINTS.LIST);
   }
 
   /**

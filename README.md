@@ -744,10 +744,19 @@ Manage webhook endpoints and verify webhook signatures.
 // Shared type
 type WebhookStatus = 'active' | 'inactive';
 
+type WebhookEventType =
+  | 'customer.kycs.updated'
+  | 'onramp_transfer.status.updated'
+  | 'offramp_transfer.status.updated';
+
+type WebhookEntityType =
+  | 'customer'
+  | 'onramp_transfer'
+  | 'offramp_transfer';
+
 interface Webhook {
   id: string;
   url: string;
-  events: string[];
   status: WebhookStatus;
   created_at: string;
 }
@@ -756,10 +765,15 @@ interface CreateWebhookRequest {
   url: string;
 }
 
+interface WebhookListResponse {
+  items: Webhook[];
+}
+
+// This is the payload you receive when a webhook is triggered
 interface WebhookEvent {
-  id: string;
-  type: string;
-  data: Record<string, unknown>;
+  event_type: WebhookEventType;
+  entity_id: string;
+  entity_type: WebhookEntityType;
   created_at: string;
 }
 ```
@@ -778,9 +792,9 @@ console.log(webhook.status); // "active"
 ### List Webhooks
 
 ```typescript
-const webhooks = await align.webhooks.list();
+const response = await align.webhooks.list();
 
-webhooks.forEach(webhook => {
+response.items.forEach(webhook => {
   console.log(`${webhook.id}: ${webhook.url}`);
 });
 ```
@@ -797,21 +811,25 @@ console.log('Webhook deleted');
 
 Verify that webhook requests are genuinely from AlignLab using HMAC-SHA256 signature verification.
 
+> [!IMPORTANT]
+> The webhook signature is sent in the `x-hmac-signature` header.
+
 ```typescript
 import express from 'express';
+import type { WebhookEvent } from '@schnl/align';
 
 const app = express();
 
 app.post('/webhooks/alignlab', express.raw({ type: 'application/json' }), (req, res) => {
-  const signature = req.headers['x-alignlab-signature'] as string;
+  const signature = req.headers['x-hmac-signature'] as string;
   const payload = req.body.toString('utf8');
-  const webhookSecret = process.env.ALIGNLAB_WEBHOOK_SECRET!;
+  const apiKey = process.env.ALIGNLAB_API_KEY!; // Use your API key as the secret
 
   // Verify the signature
   const isValid = align.webhooks.verifySignature(
     payload,
     signature,
-    webhookSecret
+    apiKey
   );
 
   if (!isValid) {
@@ -819,29 +837,23 @@ app.post('/webhooks/alignlab', express.raw({ type: 'application/json' }), (req, 
     return res.status(401).send('Invalid signature');
   }
 
-  // Process the webhook
-  const event = JSON.parse(payload);
-  console.log('Webhook event:', event.type);
+  // Process the webhook event
+  const event: WebhookEvent = JSON.parse(payload);
+  console.log('Webhook event:', event.event_type);
 
-  switch (event.type) {
-    case 'transfer.completed':
-      console.log('Transfer completed:', event.data.id);
+  switch (event.event_type) {
+    case 'customer.kycs.updated':
+      console.log('Customer KYC updated:', event.entity_id);
       break;
-    case 'transfer.failed':
-      console.log('Transfer failed:', event.data.id);
+    case 'onramp_transfer.status.updated':
+      console.log('Onramp transfer status updated:', event.entity_id);
       break;
-    case 'customer.kyc.approved':
-      console.log('KYC approved for customer:', event.data.customer_id);
+    case 'offramp_transfer.status.updated':
+      console.log('Offramp transfer status updated:', event.entity_id);
       break;
-    default:
-      console.log('Unhandled event type:', event.type);
   }
 
   res.status(200).send('OK');
-});
-
-app.listen(3000, () => {
-  console.log('Webhook server running on port 3000');
 });
 ```
 
@@ -1038,6 +1050,9 @@ import type {
   Webhook,
   CreateWebhookRequest,
   WebhookEvent,
+  WebhookEventType,
+  WebhookEntityType,
+  WebhookListResponse,
   
   // Developers
   DeveloperFee,

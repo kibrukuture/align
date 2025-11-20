@@ -93,6 +93,9 @@ export type {
   Webhook,
   CreateWebhookRequest,
   WebhookEvent,
+  WebhookEventType,
+  WebhookEntityType,
+  WebhookListResponse,
 } from '@/resources/webhooks/webhooks.types';
 
 // Developer types
