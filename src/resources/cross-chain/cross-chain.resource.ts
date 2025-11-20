@@ -1,5 +1,6 @@
 import { HttpClient } from '@/core/http-client';
 import { AlignValidationError } from '@/core/errors';
+import { formatZodError } from '@/core/validation';
 import type { 
   CreateCrossChainTransferRequest, 
   CrossChainTransfer,
@@ -51,7 +52,7 @@ export class CrossChainResource {
   public async createTransfer(customerId: string, data: CreateCrossChainTransferRequest): Promise<CrossChainTransfer> {
     const validation = CreateCrossChainTransferSchema.safeParse(data);
     if (!validation.success) {
-      throw new AlignValidationError('Invalid cross-chain transfer data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+      throw new AlignValidationError('Invalid cross-chain transfer data', formatZodError(validation.error));
     }
 
     return this.client.post<CrossChainTransfer>(CROSS_CHAIN_ENDPOINTS.CREATE(customerId), data);
@@ -84,7 +85,7 @@ export class CrossChainResource {
   public async completeTransfer(customerId: string, transferId: string, data: CompleteCrossChainTransferRequest): Promise<CrossChainTransfer> {
     const validation = CompleteCrossChainTransferSchema.safeParse(data);
     if (!validation.success) {
-      throw new AlignValidationError('Invalid completion data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+      throw new AlignValidationError('Invalid completion data', formatZodError(validation.error));
     }
 
     return this.client.post<CrossChainTransfer>(CROSS_CHAIN_ENDPOINTS.COMPLETE(customerId, transferId), data);
@@ -136,7 +137,7 @@ export class CrossChainResource {
   public async createPermanentRouteAddress(customerId: string, data: CreatePermanentRouteRequest): Promise<PermanentRouteAddress> {
     const validation = CreatePermanentRouteSchema.safeParse(data);
     if (!validation.success) {
-      throw new AlignValidationError('Invalid permanent route data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+      throw new AlignValidationError('Invalid permanent route data', formatZodError(validation.error));
     }
 
     return this.client.post<PermanentRouteAddress>(CROSS_CHAIN_ENDPOINTS.CREATE_ROUTE(customerId), data);

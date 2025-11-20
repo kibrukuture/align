@@ -3,6 +3,7 @@ import type { VerifyWalletRequest, WalletVerification } from '@/resources/wallet
 import { WALLET_ENDPOINTS } from '@/constants';
 
 import { AlignValidationError } from '@/core/errors';
+import { formatZodError } from '@/core/validation';
 import { VerifyWalletSchema } from '@/resources/wallets/wallets.validator';
 
 export class WalletsResource {
@@ -36,7 +37,7 @@ export class WalletsResource {
     
     const validation = VerifyWalletSchema.safeParse(data);
     if (!validation.success) {
-      throw new AlignValidationError('Invalid wallet data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+      throw new AlignValidationError('Invalid wallet data', formatZodError(validation.error));
     }
 
     return this.client.post<WalletVerification>(WALLET_ENDPOINTS.VERIFY_OWNERSHIP(customerId), data);

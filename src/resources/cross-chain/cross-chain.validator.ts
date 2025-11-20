@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 export const CreateCrossChainTransferSchema = z.object({
   amount: z.string().regex(/^[0-9]+(\.[0-9]+)?$/),

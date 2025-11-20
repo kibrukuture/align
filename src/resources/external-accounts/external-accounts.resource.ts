@@ -1,5 +1,6 @@
 import { HttpClient } from '@/core/http-client';
 import { AlignValidationError } from '@/core/errors';
+import { formatZodError } from '@/core/validation';
 import type { CreateExternalAccountRequest, ExternalAccount, ExternalAccountListResponse } from '@/resources/external-accounts/external-accounts.types';
 import { CreateExternalAccountSchema } from '@/resources/external-accounts/external-accounts.validator';
 import { EXTERNAL_ACCOUNT_ENDPOINTS } from '@/constants';
@@ -70,7 +71,7 @@ export class ExternalAccountsResource {
   public async create(customerId: string, data: CreateExternalAccountRequest): Promise<ExternalAccount> {
     const validation = CreateExternalAccountSchema.safeParse(data);
     if (!validation.success) {
-      throw new AlignValidationError('Invalid external account data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+      throw new AlignValidationError('Invalid external account data', formatZodError(validation.error));
     }
 
     return this.client.post<ExternalAccount>(EXTERNAL_ACCOUNT_ENDPOINTS.CREATE(customerId), data);

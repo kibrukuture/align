@@ -1,5 +1,6 @@
 import { HttpClient } from '@/core/http-client';
 import { AlignValidationError } from '@/core/errors';
+import { formatZodError } from '@/core/validation';
 import type { 
   CreateCustomerRequest, 
   Customer, 
@@ -47,7 +48,7 @@ export class CustomersResource {
   public async create(data: CreateCustomerRequest): Promise<Customer> {
     const validation = CreateCustomerSchema.safeParse(data);
     if (!validation.success) {
-      throw new AlignValidationError('Invalid customer data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+      throw new AlignValidationError('Invalid customer data', formatZodError(validation.error));
     }
 
     return this.client.post<Customer>(CUSTOMER_ENDPOINTS.CREATE, data);
@@ -99,7 +100,7 @@ export class CustomersResource {
   public async update(customerId: string, data: UpdateCustomerRequest): Promise<Record<string, never>> {
     const validation = UpdateCustomerSchema.safeParse(data);
     if (!validation.success) {
-      throw new AlignValidationError('Invalid update data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+      throw new AlignValidationError('Invalid update data', formatZodError(validation.error));
     }
 
     return this.client.put<Record<string, never>>(CUSTOMER_ENDPOINTS.UPDATE(customerId), data);

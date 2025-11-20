@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 const CustomerDocumentSchema = z.object({
   file_id: z.uuid(),

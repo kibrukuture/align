@@ -1,5 +1,6 @@
 import { HttpClient } from '@/core/http-client';
 import { AlignValidationError } from '@/core/errors';
+import { formatZodError } from '@/core/validation';
 import type { 
   CreateOfframpQuoteRequest, 
   CreateOnrampQuoteRequest, 
@@ -63,7 +64,7 @@ export class TransfersResource {
   public async createOfframpQuote(customerId: string, data: CreateOfframpQuoteRequest): Promise<QuoteResponse> {
     const validation = CreateOfframpQuoteSchema.safeParse(data);
     if (!validation.success) {
-      throw new AlignValidationError('Invalid offramp quote data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+      throw new AlignValidationError('Invalid offramp quote data', formatZodError(validation.error));
     }
 
     return this.client.post<QuoteResponse>(TRANSFER_ENDPOINTS.OFFRAMP_QUOTE(customerId), data);
@@ -103,7 +104,7 @@ export class TransfersResource {
   public async createOnrampQuote(customerId: string, data: CreateOnrampQuoteRequest): Promise<QuoteResponse> {
     const validation = CreateOnrampQuoteSchema.safeParse(data);
     if (!validation.success) {
-      throw new AlignValidationError('Invalid onramp quote data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+      throw new AlignValidationError('Invalid onramp quote data', formatZodError(validation.error));
     }
 
     return this.client.post<QuoteResponse>(TRANSFER_ENDPOINTS.ONRAMP_QUOTE(customerId), data);
@@ -140,7 +141,7 @@ export class TransfersResource {
   public async createOfframpTransfer(customerId: string, quoteId: string, data: CreateOfframpTransferRequest): Promise<Transfer> {
     const validation = CreateOfframpTransferSchema.safeParse(data);
     if (!validation.success) {
-      throw new AlignValidationError('Invalid transfer data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+      throw new AlignValidationError('Invalid transfer data', formatZodError(validation.error));
     }
 
     return this.client.post<Transfer>(TRANSFER_ENDPOINTS.OFFRAMP_CREATE(customerId, quoteId), data);
@@ -173,7 +174,7 @@ export class TransfersResource {
   public async completeOfframpTransfer(customerId: string, transferId: string, data: CompleteOfframpTransferRequest): Promise<Transfer> {
     const validation = CompleteOfframpTransferSchema.safeParse(data);
     if (!validation.success) {
-      throw new AlignValidationError('Invalid completion data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+      throw new AlignValidationError('Invalid completion data', formatZodError(validation.error));
     }
 
     return this.client.post<Transfer>(TRANSFER_ENDPOINTS.OFFRAMP_COMPLETE(customerId, transferId), data);
@@ -206,7 +207,7 @@ export class TransfersResource {
   public async createOnrampTransfer(customerId: string, quoteId: string, data: CreateOnrampTransferRequest): Promise<Transfer> {
     const validation = CreateOnrampTransferSchema.safeParse(data);
     if (!validation.success) {
-      throw new AlignValidationError('Invalid onramp transfer data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+      throw new AlignValidationError('Invalid onramp transfer data', formatZodError(validation.error));
     }
 
     return this.client.post<Transfer>(TRANSFER_ENDPOINTS.ONRAMP_CREATE(customerId, quoteId), data);
@@ -314,7 +315,7 @@ export class TransfersResource {
   public async simulateOfframpTransfer(customerId: string, data: SimulateOfframpTransferRequest): Promise<SimulateTransferResponse> {
     const validation = SimulateOfframpTransferSchema.safeParse(data);
     if (!validation.success) {
-      throw new AlignValidationError('Invalid simulation data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+      throw new AlignValidationError('Invalid simulation data', formatZodError(validation.error));
     }
 
     return this.client.post<SimulateTransferResponse>(TRANSFER_ENDPOINTS.SIMULATE(customerId), data);
@@ -345,7 +346,7 @@ export class TransfersResource {
   public async simulateOnrampTransfer(customerId: string, data: SimulateOnrampTransferRequest): Promise<SimulateTransferResponse> {
     const validation = SimulateOnrampTransferSchema.safeParse(data);
     if (!validation.success) {
-      throw new AlignValidationError('Invalid simulation data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+      throw new AlignValidationError('Invalid simulation data', formatZodError(validation.error));
     }
 
     return this.client.post<SimulateTransferResponse>(TRANSFER_ENDPOINTS.ONRAMP_SIMULATE(customerId), data);

@@ -1,5 +1,6 @@
 import { HttpClient } from '@/core/http-client';
 import { AlignValidationError } from '@/core/errors';
+import { formatZodError } from '@/core/validation';
 import type { 
   CreateVirtualAccountRequest, 
   VirtualAccount,
@@ -12,19 +13,11 @@ export class VirtualAccountsResource {
   constructor(private client: HttpClient) {}
 
   /**
-   * Create a new virtual bank account for receiving fiat payments
+   * Create a new virtual account
    * 
-   * Virtual accounts allow customers to receive fiat currency payments that are automatically
-   * converted to stablecoins (USDC/USDT) and sent to the specified blockchain address.
-   * 
-   * @param customerId - The unique identifier of the customer
-   * @param data - Virtual account configuration
-   * @param data.source_currency - Fiat currency: 'usd', 'eur', or 'aed'
-   * @param data.source_rails - Optional, 'swift' for USD SWIFT payments
-   * @param data.destination_token - Stablecoin: 'usdc' or 'usdt'
-   * @param data.destination_network - Blockchain network
-   * @param data.destination_address - Blockchain address where funds will be sent
-   * @returns Promise resolving to the created virtual account with deposit instructions
+   * @param customerId - The unique customer identifier
+   * @param data - Virtual account creation data
+   * @returns Promise resolving to the created virtual account
    * @throws {AlignValidationError} If the virtual account data is invalid
    * 
    * @example
@@ -45,7 +38,7 @@ export class VirtualAccountsResource {
   public async create(customerId: string, data: CreateVirtualAccountRequest): Promise<VirtualAccount> {
     const validation = CreateVirtualAccountSchema.safeParse(data);
     if (!validation.success) {
-      throw new AlignValidationError('Invalid virtual account data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+      throw new AlignValidationError('Invalid virtual account data', formatZodError(validation.error));
     }
 
     return this.client.post<VirtualAccount>(VIRTUAL_ACCOUNT_ENDPOINTS.CREATE(customerId), data);

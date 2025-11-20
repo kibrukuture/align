@@ -1,33 +1,38 @@
 import * as crypto from 'node:crypto';
 import { HttpClient } from '@/core/http-client';
 import { AlignValidationError } from '@/core/errors';
-import type { Webhook, CreateWebhookRequest, WebhookListResponse } from '@/resources/webhooks/webhooks.types';
+import { formatZodError } from '@/core/validation';
+import type { 
+  CreateWebhookRequest, 
+  Webhook, 
+  WebhookListResponse 
+} from '@/resources/webhooks/webhooks.types';
 import { CreateWebhookSchema } from '@/resources/webhooks/webhooks.validator';
 import { WEBHOOK_ENDPOINTS } from '@/constants';
+import { createHmac } from 'crypto';
 
 export class WebhooksResource {
   constructor(private client: HttpClient) {}
 
   /**
-   * Create a new webhook endpoint
+   * Create a new webhook subscription
    * 
-   * @param data - Webhook configuration
-   * @param data.url - The URL where webhook events will be sent (max 1024 characters)
-   * @returns Promise resolving to the created webhook object
+   * @param data - Webhook creation data
+   * @returns Promise resolving to the created webhook
    * @throws {AlignValidationError} If the webhook data is invalid
    * 
    * @example
    * ```typescript
    * const webhook = await align.webhooks.create({
-   *   url: 'https://your-domain.com/webhooks/alignlab',
+   *   url: 'https://api.example.com/webhooks',
+   *   events: ['payment.received', 'kyc.updated'],
    * });
-   * console.log(webhook.id); // "wh_abc123"
    * ```
    */
   public async create(data: CreateWebhookRequest): Promise<Webhook> {
     const validation = CreateWebhookSchema.safeParse(data);
     if (!validation.success) {
-      throw new AlignValidationError('Invalid webhook data', validation.error.flatten().fieldErrors as Record<string, string[]>);
+      throw new AlignValidationError('Invalid webhook data', formatZodError(validation.error));
     }
 
     return this.client.post<Webhook>(WEBHOOK_ENDPOINTS.CREATE, data);

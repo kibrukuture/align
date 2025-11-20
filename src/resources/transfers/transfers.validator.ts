@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 export const CreateOfframpQuoteSchema = z.object({
   source_amount: z.string().regex(/^[0-9]+(\.[0-9]+)?$/).optional(),
@@ -88,7 +88,7 @@ export const CompleteOfframpTransferSchema = z.object({
 
 export const SimulateOfframpTransferSchema = z.object({
   action: z.literal('complete_transfer'),
-  transfer_id: z.string().uuid(),
+  transfer_id: z.uuid(),
 });
 
 export const SimulateOnrampTransferSchema = z.object({
