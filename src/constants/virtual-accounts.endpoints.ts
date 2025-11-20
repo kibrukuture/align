@@ -3,9 +3,9 @@
  */
 export const VIRTUAL_ACCOUNT_ENDPOINTS = {
   /** Endpoint to create a virtual account */
-  CREATE: '/virtual-accounts',
-  /** Endpoint to list virtual accounts */
-  LIST: '/virtual-accounts',
+  CREATE: (customerId: string) => `/v0/customers/${customerId}/virtual-account`,
   /** Endpoint to get a virtual account by ID */
-  GET: (id: string) => `/virtual-accounts/${id}`,
+  GET: (customerId: string, virtualAccountId: string) => `/v0/customers/${customerId}/virtual-account/${virtualAccountId}`,
+  /** Endpoint to list virtual accounts */
+  LIST: (customerId: string) => `/v0/customers/${customerId}/virtual-account`,
 } as const;

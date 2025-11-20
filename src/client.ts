@@ -1,5 +1,5 @@
 import { HttpClient } from '@/core/http-client';
-import { type AlignConfig, DEFAULT_CONFIG } from '@/core/config';
+import { type AlignConfig} from '@/core/config';
 import { CustomersResource } from '@/resources/customers/customers.resource';
 import { VirtualAccountsResource } from '@/resources/virtual-accounts/virtual-accounts.resource';
 import { TransfersResource } from '@/resources/transfers/transfers.resource';
@@ -9,7 +9,7 @@ import { WalletsResource } from '@/resources/wallets/wallets.resource';
 import { FilesResource } from '@/resources/files/files.resource';
 import { DevelopersResource } from '@/resources/developers/developers.resource';
 import { CrossChainResource } from '@/resources/cross-chain/cross-chain.resource';
-import { AlignError, AlignValidationError } from '@/core/errors';
+ 
 
 /**
  * Main SDK client for interacting with the AlignLab API.

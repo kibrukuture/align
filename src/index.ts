@@ -54,8 +54,19 @@ export type {
 
 // Virtual Account types
 export type {
+  SourceCurrency,
+  SourceRails,
+  DestinationToken,
+  DestinationNetwork,
+  VirtualAccountStatus,
+  PaymentRails,
+  DepositCurrency,
+  IBANAccountDetails,
+  USAccountDetails,
+  DepositInstructions,
   VirtualAccount,
   CreateVirtualAccountRequest,
+  VirtualAccountListResponse,
 } from '@/resources/virtual-accounts/virtual-accounts.types';
 
 // Transfer types

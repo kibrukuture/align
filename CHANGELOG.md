@@ -4,6 +4,67 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [3.6.0] - 2025-11-20
+
+### Breaking Changes
+- **Virtual Accounts API** (Complete Rewrite):
+  - All endpoints changed from `/virtual-accounts` to `/v0/customers/{customer_id}/virtual-account`
+  - `create()`: Now requires `customerId` as first parameter
+  - `get()`: Now requires both `customerId` and `virtualAccountId` parameters
+  - `list()`: Now requires `customerId` parameter and returns `{ items: VirtualAccount[] }`
+  - `VirtualAccount` response structure completely changed (see below)
+  - `CreateVirtualAccountRequest` structure completely changed (see below)
+
+### Added
+- **Virtual Accounts API**:
+  - `deposit_instructions` field in response (CRITICAL: contains bank account details)
+  - `IBANAccountDetails`: EUR deposit instructions with IBAN details
+  - `USAccountDetails`: USD deposit instructions with ACH/wire details
+  - `source_rails` field in request (optional, for USD SWIFT)
+  - Support for `'aed'` currency
+  - Support for `'tron'` and `'arbitrum'` networks
+  - New types: `SourceCurrency`, `SourceRails`, `DestinationToken`, `DestinationNetwork`, `VirtualAccountStatus`, `PaymentRails`, `DepositCurrency`, `DepositInstructions`, `VirtualAccountListResponse`
+
+### Migration Guide
+#### Virtual Accounts
+```typescript
+// Old (v3.5.0)
+const account = await align.virtualAccounts.create({
+  source_currency: 'eur',
+  destination_token: 'usdc',
+  destination_network: 'polygon',
+  destination_address: '0x...',
+});
+console.log(account.currency);  // Wrong field name
+console.log(account.network);   // Wrong field name
+
+// New (v3.6.0)
+const account = await align.virtualAccounts.create(customerId, {
+  source_currency: 'eur',
+  source_rails: 'swift',  // Optional, for USD SWIFT
+  destination_token: 'usdc',
+  destination_network: 'polygon',
+  destination_address: '0x...',
+});
+
+// Access deposit instructions (CRITICAL NEW FEATURE)
+if (account.deposit_instructions.currency === 'eur') {
+  const iban = account.deposit_instructions.iban.iban_number;
+  const bic = account.deposit_instructions.iban.bic;
+  console.log(`IBAN: ${iban}, BIC: ${bic}`);
+} else {
+  const accountNumber = account.deposit_instructions.us.account_number;
+  const routingNumber = account.deposit_instructions.us.routing_number;
+  console.log(`Account: ${accountNumber}, Routing: ${routingNumber}`);
+}
+
+// List accounts
+const response = await align.virtualAccounts.list(customerId);
+response.items.forEach(account => {
+  console.log(account.destination_token);
+});
+```
+
 ## [3.5.0] - 2025-11-20
 
 ### Breaking Changes
