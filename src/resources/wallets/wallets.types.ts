@@ -3,6 +3,5 @@ export interface VerifyWalletRequest {
 }
 
 export interface WalletVerification {
-  verification_link: string;
-  status: 'pending' | 'verified';
+  verification_flow_link: string;
 }

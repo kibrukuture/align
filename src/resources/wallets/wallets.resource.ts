@@ -21,12 +21,10 @@ export class WalletsResource {
    *   'cus_abc123',
    *   '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb'
    * );
-   * console.log(verification.verification_link);
+   * console.log(verification.verification_flow_link);
    * // "https://verify.alignlabs.dev/wallet/..."
-   * console.log(verification.status); // "pending"
    * 
    * // User clicks the link and signs a message with their wallet
-   * // Status will change to "verified"
    * ```
    */
   public async verifyOwnership(customerId: string, walletAddress: string): Promise<WalletVerification> {
