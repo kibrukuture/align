@@ -16,7 +16,7 @@ export interface CustomerAddress {
  */
 export interface KycStatusBreakdown {
   currency: 'usd' | 'eur' | 'aed';
-  payment_rails: 'ach' | 'wire' | 'sepa' | 'swift' | 'uaefts';
+  payment_rails: 'ach' | 'wire' | 'sepa' | 'uaefts';
   status: KycStatus;
 }
 
