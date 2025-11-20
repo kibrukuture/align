@@ -6,7 +6,28 @@ export class WalletsResource {
   constructor(private client: HttpClient) {}
 
   /**
-   * Verify wallet ownership
+   * Verify ownership of a cryptocurrency wallet address
+   * 
+   * Generates a verification link that the customer can use to prove they own
+   * the wallet by signing a message with their private key.
+   * 
+   * @param customerId - The unique customer identifier
+   * @param walletAddress - The cryptocurrency wallet address to verify
+   * @returns Promise resolving to the wallet verification object with verification link
+   * 
+   * @example
+   * ```typescript
+   * const verification = await align.wallets.verifyOwnership(
+   *   'cus_abc123',
+   *   '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb'
+   * );
+   * console.log(verification.verification_link);
+   * // "https://verify.alignlabs.dev/wallet/..."
+   * console.log(verification.status); // "pending"
+   * 
+   * // User clicks the link and signs a message with their wallet
+   * // Status will change to "verified"
+   * ```
    */
   public async verifyOwnership(customerId: string, walletAddress: string): Promise<WalletVerification> {
     const data: VerifyWalletRequest = { wallet_address: walletAddress };

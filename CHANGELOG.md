@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.2.0] - 2025-11-20
+
+### Added
+- **Comprehensive JSDoc documentation** for all SDK resource classes (32 methods total)
+  - Detailed parameter descriptions with types and constraints
+  - Real-world code examples for every method
+  - Return value documentation
+  - Error handling documentation with `@throws` tags
+  - Remarks for important implementation details
+- Enhanced IDE autocomplete and IntelliSense support
+- Improved developer experience with inline documentation
+
+### Resources Documented
+- `WebhooksResource` (4 methods)
+- `CustomersResource` (5 methods)
+- `VirtualAccountsResource` (3 methods)
+- `TransfersResource` (9 methods)
+- `CrossChainResource` (5 methods)
+- `ExternalAccountsResource` (2 methods)
+- `WalletsResource` (1 method)
+- `FilesResource` (1 method)
+- `DevelopersResource` (2 methods)
+
 ## [1.1.0] - 2025-11-20
 
 ### Changed
