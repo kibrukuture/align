@@ -5,6 +5,60 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2025-11-20
+
+### Breaking Changes
+- **Cross-Chain Transfers API**:
+  - Removed `createQuote` method (quote is now returned in `createTransfer` response)
+  - `createTransfer`: Now requires `customerId` as first argument and takes full transfer details directly (no `quote_id`)
+  - `getTransfer`: Now requires both `customerId` and `transferId`
+  - `createPermanentRoute`: Renamed to `createPermanentRouteAddress`, now requires `customerId` and different request structure
+  - `listPermanentRoutes`: Renamed to `listPermanentRouteAddresses`, now requires `customerId`
+
+### Added
+- **Cross-Chain Transfers API**:
+  - `completeTransfer`: New method to finalize transfers by providing deposit transaction hash
+  - `getPermanentRouteAddress`: New method to retrieve a specific permanent route by ID
+  - `CreateCrossChainTransferRequest`: Updated to include all transfer details directly
+  - `CompleteCrossChainTransferRequest`: New type for completing transfers
+  - `CreatePermanentRouteRequest`: New simplified request structure
+  - `PermanentRouteAddress`: New response type with `route_chain_addresses` for multiple networks
+  - `PermanentRouteListResponse`: New list response wrapper
+
+### Migration Guide
+#### Cross-Chain Transfers
+```typescript
+// Old (v3.2.0)
+const quote = await align.crossChain.createQuote({
+  source_token: 'usdc',
+  source_network: 'ethereum',
+  destination_token: 'usdc',
+  destination_network: 'polygon',
+  amount: '100.00',
+  is_source_amount: true,
+});
+const transfer = await align.crossChain.createTransfer({
+  quote_id: quote.quote_id,
+  destination_address: '0x742d35...',
+});
+
+// New (v3.3.0)
+const transfer = await align.crossChain.createTransfer(customerId, {
+  amount: '100.00',
+  source_network: 'ethereum',
+  source_token: 'usdc',
+  destination_network: 'polygon',
+  destination_token: 'usdc',
+  destination_address: '0x742d35...',
+});
+// Quote is now in transfer.quote
+console.log(transfer.quote.fee_amount);
+
+// Complete the transfer
+await align.crossChain.completeTransfer(customerId, transfer.id, {
+  deposit_transaction_hash: '0x123...',
+});
+```
 
 ## [3.2.0] - 2025-11-20
 

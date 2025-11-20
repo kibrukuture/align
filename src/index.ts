@@ -87,9 +87,11 @@ export type {
 export type {
   CrossChainQuote,
   CrossChainTransfer,
-  CreateCrossChainQuoteRequest,
   CreateCrossChainTransferRequest,
-  PermanentRoute,
+  CompleteCrossChainTransferRequest,
+  CreatePermanentRouteRequest,
+  PermanentRouteAddress,
+  PermanentRouteListResponse,
 } from '@/resources/cross-chain/cross-chain.types';
 
 // External Account types

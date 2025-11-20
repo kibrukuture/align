@@ -600,40 +600,58 @@ console.log(`Fee: ${quote.fee}`);
 console.log(`Expires at: ${quote.expires_at}`);
 ```
 
-### Create Cross-Chain Transfer
+### Cross-Chain Transfers
+
+Transfer cryptocurrency across different blockchain networks.
+
+#### Create a Cross-Chain Transfer
 
 ```typescript
-const transfer = await align.crossChain.createTransfer({
-  quote_id: quote.quote_id,
+const transfer = await align.crossChain.createTransfer(customerId, {
+  amount: '100.00',
+  source_network: 'ethereum',
+  source_token: 'usdc',
+  destination_network: 'polygon',
+  destination_token: 'usdc',
   destination_address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
 });
 
-console.log(transfer.id); // "cc_transfer_123"
-console.log(transfer.status); // "pending"
+console.log(`Transfer ID: ${transfer.id}`);
+console.log(`Status: ${transfer.status}`);
+console.log(`Fee: ${transfer.quote.fee_amount} ${transfer.quote.deposit_token}`);
 ```
 
-### Get Cross-Chain Transfer
+#### Complete a Cross-Chain Transfer
+
+After sending the funds to the deposit address provided in the transfer response, you must complete the transfer by providing the transaction hash.
 
 ```typescript
-const transfer = await align.crossChain.getTransfer('cc_transfer_123');
-
-console.log(transfer.status); // "completed"
-console.log(transfer.destination_amount); // "99.50"
+const completedTransfer = await align.crossChain.completeTransfer(customerId, transfer.id, {
+  deposit_transaction_hash: '0x88df016429689c079f3b2f6ad39fa052532c56795b733da78a91ebe6a713944b',
+});
 ```
 
-### Create Permanent Route
-
-Create a permanent deposit address for recurring cross-chain transfers.
+#### Get Transfer Details
 
 ```typescript
-const route = await align.crossChain.createPermanentRoute({
-  source_token: 'usdc',
-  source_network: 'ethereum',
+const transfer = await align.crossChain.getTransfer(customerId, 'transfer_uuid');
+```
+
+#### Permanent Routes
+
+Create a permanent deposit address for recurring transfers.
+
+```typescript
+// Create a permanent route
+const route = await align.crossChain.createPermanentRouteAddress(customerId, {
+  destination_network: 'polygon',
   destination_token: 'usdc',
-  destination_network: 'solana',
-  deposit_address: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
+  destination_address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
 });
 
+// List all routes
+const routes = await align.crossChain.listPermanentRouteAddresses(customerId);
+```
 console.log(`Deposit Address: ${route.deposit_address}`);
 console.log(`Route ID: ${route.id}`);
 
