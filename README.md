@@ -14,6 +14,8 @@
 - 🔒 **Secure**: HMAC-SHA256 webhook signature verification
 - 📦 **Lightweight**: Minimal dependencies
 - 🌍 **Environment Support**: Sandbox and production environments
+- 🔄 **Automatic Retry**: Built-in retry mechanism for transient errors
+- 📝 **Logging**: Optional request/response logging with pino (disabled by default)
 
 ## Installation
 
@@ -36,23 +38,23 @@ bun add @schnl/align
 ## Quick Start
 
 ```typescript
-import Align from '@schnl/align';
+import Align from "@schnl/align";
 
 // Initialize the client
 const align = new Align({
-  apiKey: 'your_api_key_here',
-  environment: 'sandbox', // or 'production'
+  apiKey: "your_api_key_here",
+  environment: "sandbox", // or 'production'
 });
 
 // Create a customer
 const customer = await align.customers.create({
-  email: 'user@example.com',
-  first_name: 'John',
-  last_name: 'Doe',
-  type: 'individual',
+  email: "user@example.com",
+  first_name: "John",
+  last_name: "Doe",
+  type: "individual",
 });
 
-console.log('Customer created:', customer.customer_id);
+console.log("Customer created:", customer.customer_id);
 ```
 
 ---
@@ -91,7 +93,7 @@ interface AlignConfig {
    * Environment to use
    * @default 'sandbox'
    */
-  environment?: 'sandbox' | 'production';
+  environment?: "sandbox" | "production";
 
   /**
    * Custom base URL (useful for proxying)
@@ -103,6 +105,18 @@ interface AlignConfig {
    * @default 30000
    */
   timeout?: number;
+
+  /**
+   * Enable logging for debugging
+   * @default false
+   */
+  debug?: boolean;
+
+  /**
+   * Log level threshold
+   * @default 'error'
+   */
+  logLevel?: "error" | "warn" | "info" | "debug";
 }
 ```
 
@@ -111,7 +125,7 @@ interface AlignConfig {
 ```typescript
 const align = new Align({
   apiKey: process.env.ALIGNLAB_API_KEY!,
-  environment: 'production',
+  environment: "production",
   timeout: 60000, // 60 seconds
 });
 ```
@@ -126,8 +140,8 @@ Manage customer accounts for your platform.
 
 ```typescript
 // Shared types
-type CustomerType = 'individual' | 'corporate';
-type KycStatus = 'pending' | 'approved' | 'rejected' | 'not_started';
+type CustomerType = "individual" | "corporate";
+type KycStatus = "pending" | "approved" | "rejected" | "not_started";
 
 interface Customer {
   customer_id: string;
@@ -172,10 +186,10 @@ interface KycSessionResponse {
 
 ```typescript
 const customer = await align.customers.create({
-  email: 'alice@example.com',
-  first_name: 'Alice',
-  last_name: 'Smith',
-  type: 'individual',
+  email: "alice@example.com",
+  first_name: "Alice",
+  last_name: "Smith",
+  type: "individual",
 });
 
 console.log(customer.customer_id); // "123e4567-e89b-12d3-a456-426614174000"
@@ -184,7 +198,9 @@ console.log(customer.customer_id); // "123e4567-e89b-12d3-a456-426614174000"
 ### Get Customer
 
 ```typescript
-const customer = await align.customers.get('123e4567-e89b-12d3-a456-426614174000');
+const customer = await align.customers.get(
+  "123e4567-e89b-12d3-a456-426614174000"
+);
 
 console.log(customer.email); // "alice@example.com"
 console.log(customer.kycs?.status_breakdown[0].status); // "approved"
@@ -193,9 +209,9 @@ console.log(customer.kycs?.status_breakdown[0].status); // "approved"
 ### Update Customer
 
 ```typescript
-const updatedCustomer = await align.customers.update('cus_abc123', {
-  email: 'alice.smith@example.com',
-  first_name: 'Alice Marie',
+const updatedCustomer = await align.customers.update("cus_abc123", {
+  email: "alice.smith@example.com",
+  first_name: "Alice Marie",
 });
 
 console.log(updatedCustomer.email); // "alice.smith@example.com"
@@ -214,7 +230,7 @@ console.log(customers.total_count); // 156
 ### Create KYC Session
 
 ```typescript
-const kycSession = await align.customers.createKycSession('cus_abc123');
+const kycSession = await align.customers.createKycSession("cus_abc123");
 
 console.log(kycSession.url); // "https://kyc.alignlabs.dev/session/..."
 console.log(kycSession.session_id); // "kyc_session_xyz"
@@ -233,9 +249,15 @@ Create virtual bank accounts for customers to receive payments.
 ```typescript
 interface VirtualAccount {
   id: string;
-  status: 'active';
-  destination_token: 'usdc' | 'usdt' | 'aed';
-  destination_network: 'polygon' | 'ethereum' | 'solana' | 'base' | 'tron' | 'arbitrum';
+  status: "active";
+  destination_token: "usdc" | "usdt" | "aed";
+  destination_network:
+    | "polygon"
+    | "ethereum"
+    | "solana"
+    | "base"
+    | "tron"
+    | "arbitrum";
   destination_address: string;
   deposit_instructions: {
     bank_name: string;
@@ -246,9 +268,15 @@ interface VirtualAccount {
 }
 
 interface CreateVirtualAccountRequest {
-  source_currency: 'usd' | 'eur' | 'aed';
-  destination_token: 'usdc' | 'usdt';
-  destination_network: 'polygon' | 'ethereum' | 'solana' | 'base' | 'tron' | 'arbitrum';
+  source_currency: "usd" | "eur" | "aed";
+  destination_token: "usdc" | "usdt";
+  destination_network:
+    | "polygon"
+    | "ethereum"
+    | "solana"
+    | "base"
+    | "tron"
+    | "arbitrum";
   destination_address: string;
 }
 ```
@@ -257,10 +285,10 @@ interface CreateVirtualAccountRequest {
 
 ```typescript
 const virtualAccount = await align.virtualAccounts.create(customerId, {
-  source_currency: 'eur',
-  destination_token: 'usdc',
-  destination_network: 'polygon',
-  destination_address: '0x742d35...',
+  source_currency: "eur",
+  destination_token: "usdc",
+  destination_network: "polygon",
+  destination_address: "0x742d35...",
 });
 
 console.log(virtualAccount.id);
@@ -272,15 +300,19 @@ console.log(virtualAccount.deposit_instructions.bank_name);
 ```typescript
 const accounts = await align.virtualAccounts.list(customerId);
 
-accounts.items.forEach(account => {
-  console.log(`${account.destination_token.toUpperCase()}: ${account.deposit_instructions.bank_name}`);
+accounts.items.forEach((account) => {
+  console.log(
+    `${account.destination_token.toUpperCase()}: ${
+      account.deposit_instructions.bank_name
+    }`
+  );
 });
 ```
 
 ### Get Virtual Account
 
 ```typescript
-const account = await align.virtualAccounts.get(customerId, 'va_abc123');
+const account = await align.virtualAccounts.get(customerId, "va_abc123");
 
 console.log(account.status); // "active"
 ```
@@ -296,10 +328,16 @@ Convert cryptocurrency to fiat currency.
 #### Types
 
 ```typescript
-type PaymentRail = 'ach' | 'wire' | 'sepa' | 'swift' | 'uaefts';
-type FiatCurrency = 'usd' | 'eur' | 'aed';
-type CryptoToken = 'usdc' | 'usdt' | 'eurc';
-type BlockchainNetwork = 'polygon' | 'ethereum' | 'solana' | 'base' | 'arbitrum' | 'tron';
+type PaymentRail = "ach" | "wire" | "sepa" | "swift" | "uaefts";
+type FiatCurrency = "usd" | "eur" | "aed";
+type CryptoToken = "usdc" | "usdt" | "eurc";
+type BlockchainNetwork =
+  | "polygon"
+  | "ethereum"
+  | "solana"
+  | "base"
+  | "arbitrum"
+  | "tron";
 
 interface CreateOfframpQuoteRequest {
   source_amount?: string;
@@ -333,7 +371,7 @@ interface Transfer {
   id: string;
   amount: string;
   currency: string;
-  status: 'pending' | 'completed' | 'failed';
+  status: "pending" | "completed" | "failed";
   created_at: string;
   updated_at: string;
 }
@@ -344,12 +382,12 @@ interface Transfer {
 ```typescript
 // Quote with source amount (you know how much crypto to send)
 const quote = await align.transfers.createOfframpQuote({
-  source_amount: '100.00',
-  source_token: 'usdc',
-  source_network: 'polygon',
-  destination_currency: 'usd',
-  destination_payment_rails: 'ach',
-  developer_fee_percent: '0.5', // Optional 0.5% fee
+  source_amount: "100.00",
+  source_token: "usdc",
+  source_network: "polygon",
+  destination_currency: "usd",
+  destination_payment_rails: "ach",
+  developer_fee_percent: "0.5", // Optional 0.5% fee
 });
 
 console.log(`Send ${quote.source_amount} USDC`);
@@ -359,11 +397,11 @@ console.log(`Fee: ${quote.fee_amount}`);
 
 // Quote with destination amount (you know how much fiat to receive)
 const quote2 = await align.transfers.createOfframpQuote({
-  destination_amount: '95.00',
-  source_token: 'usdc',
-  source_network: 'ethereum',
-  destination_currency: 'usd',
-  destination_payment_rails: 'wire',
+  destination_amount: "95.00",
+  source_token: "usdc",
+  source_network: "ethereum",
+  destination_currency: "usd",
+  destination_payment_rails: "wire",
 });
 
 console.log(`Send ${quote2.source_amount} USDC to receive $95 USD`);
@@ -372,26 +410,31 @@ console.log(`Send ${quote2.source_amount} USDC to receive $95 USD`);
 ### Offramp Transfers (Crypto to Fiat)
 
 1. **Create a Quote**
+
    ```typescript
-   const quote = await align.transfers.createOfframpQuote(customer.customer_id, {
-     source_amount: '100.00',
-     source_token: 'usdc',
-     source_network: 'polygon',
-     destination_currency: 'usd',
-     destination_payment_rails: 'ach',
-   });
+   const quote = await align.transfers.createOfframpQuote(
+     customer.customer_id,
+     {
+       source_amount: "100.00",
+       source_token: "usdc",
+       source_network: "polygon",
+       destination_currency: "usd",
+       destination_payment_rails: "ach",
+     }
+   );
    ```
 
 2. **Create Transfer from Quote**
+
    ```typescript
    const transfer = await align.transfers.createOfframpTransfer(
      customer.customer_id,
      quote.quote_id,
      {
-       transfer_purpose: 'commercial_investment',
+       transfer_purpose: "commercial_investment",
        // Option A: Use existing external account
-       destination_external_account_id: 'ext_acc_123',
-       
+       destination_external_account_id: "ext_acc_123",
+
        // Option B: Provide bank details directly
        /*
        destination_bank_account: {
@@ -417,26 +460,29 @@ console.log(`Send ${quote2.source_amount} USDC to receive $95 USD`);
    ```
 
 3. **Complete Transfer (After Deposit)**
+
    ```typescript
    const completedTransfer = await align.transfers.completeOfframpTransfer(
      customer.customer_id,
      transfer.id,
      {
-       deposit_transaction_hash: '0x1234567890abcdef...',
+       deposit_transaction_hash: "0x1234567890abcdef...",
      }
    );
    ```
 
 4. **List Transfers**
    ```typescript
-   const transfers = await align.transfers.listOfframpTransfers(customer.customer_id);
+   const transfers = await align.transfers.listOfframpTransfers(
+     customer.customer_id
+   );
    console.log(transfers.items);
    ```
 
 #### Get Offramp Transfer
 
 ```typescript
-const transfer = await align.transfers.getOfframpTransfer('transfer_abc123');
+const transfer = await align.transfers.getOfframpTransfer("transfer_abc123");
 
 console.log(transfer.status); // "completed"
 console.log(transfer.amount); // "95.00"
@@ -447,7 +493,7 @@ console.log(transfer.amount); // "95.00"
 ```typescript
 const transfers = await align.transfers.listOfframpTransfers();
 
-transfers.forEach(transfer => {
+transfers.forEach((transfer) => {
   console.log(`${transfer.id}: ${transfer.status} - $${transfer.amount}`);
 });
 ```
@@ -473,23 +519,26 @@ interface CreateOnrampQuoteRequest {
 #### Create Onramp Quote
 
 ```typescript
-const quote = await align.transfers.createOnrampQuote('123e4567-e89b-12d3-a456-426614174000', {
-  source_amount: '100.00',
-  source_currency: 'usd',
-  source_payment_rails: 'ach',
-  destination_token: 'usdc',
-  destination_network: 'polygon',
-});
+const quote = await align.transfers.createOnrampQuote(
+  "123e4567-e89b-12d3-a456-426614174000",
+  {
+    source_amount: "100.00",
+    source_currency: "usd",
+    source_payment_rails: "ach",
+    destination_token: "usdc",
+    destination_network: "polygon",
+  }
+);
 ```
 
 #### Create Onramp Transfer
 
 ```typescript
 const transfer = await align.transfers.createOnrampTransfer(
-  '123e4567-e89b-12d3-a456-426614174000',
+  "123e4567-e89b-12d3-a456-426614174000",
   quote.quote_id,
   {
-    destination_address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+    destination_address: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
   }
 );
 ```
@@ -498,10 +547,10 @@ const transfer = await align.transfers.createOnrampTransfer(
 
 ```typescript
 const result = await align.transfers.simulateOfframpTransfer(
-  '123e4567-e89b-12d3-a456-426614174000',
+  "123e4567-e89b-12d3-a456-426614174000",
   {
-    action: 'complete_transfer',
-    transfer_id: 'transfer_abc123'
+    action: "complete_transfer",
+    transfer_id: "transfer_abc123",
   }
 );
 ```
@@ -510,8 +559,8 @@ const result = await align.transfers.simulateOfframpTransfer(
 
 ```typescript
 const transfer = await align.transfers.getOnrampTransfer(
-  '123e4567-e89b-12d3-a456-426614174000',
-  'transfer_xyz789'
+  "123e4567-e89b-12d3-a456-426614174000",
+  "transfer_xyz789"
 );
 ```
 
@@ -520,7 +569,7 @@ const transfer = await align.transfers.getOnrampTransfer(
 ```typescript
 const transfers = await align.transfers.listOnrampTransfers();
 
-transfers.forEach(transfer => {
+transfers.forEach((transfer) => {
   console.log(`${transfer.id}: ${transfer.status}`);
 });
 ```
@@ -530,16 +579,16 @@ transfers.forEach(transfer => {
 ```typescript
 // Simulate transfer completion in sandbox
 const simulatedTransfer = await align.transfers.simulate(
-  'transfer_abc123',
-  'completed'
+  "transfer_abc123",
+  "completed"
 );
 
 console.log(simulatedTransfer.status); // "completed"
 
 // Simulate transfer failure
 const failedTransfer = await align.transfers.simulate(
-  'transfer_xyz789',
-  'failed'
+  "transfer_xyz789",
+  "failed"
 );
 
 console.log(failedTransfer.status); // "failed"
@@ -580,7 +629,7 @@ interface CreateCrossChainTransferRequest {
 interface CrossChainTransfer {
   id: string;
   quote_id: string;
-  status: 'pending' | 'completed' | 'failed';
+  status: "pending" | "completed" | "failed";
   source_amount: string;
   destination_amount: string;
   created_at: string;
@@ -600,11 +649,11 @@ interface PermanentRoute {
 
 ```typescript
 const quote = await align.crossChain.createQuote({
-  source_token: 'usdc',
-  source_network: 'ethereum',
-  destination_token: 'usdc',
-  destination_network: 'polygon',
-  amount: '100.00',
+  source_token: "usdc",
+  source_network: "ethereum",
+  destination_token: "usdc",
+  destination_network: "polygon",
+  amount: "100.00",
   is_source_amount: true,
 });
 
@@ -623,17 +672,19 @@ Transfer cryptocurrency across different blockchain networks.
 
 ```typescript
 const transfer = await align.crossChain.createTransfer(customerId, {
-  amount: '100.00',
-  source_network: 'ethereum',
-  source_token: 'usdc',
-  destination_network: 'polygon',
-  destination_token: 'usdc',
-  destination_address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+  amount: "100.00",
+  source_network: "ethereum",
+  source_token: "usdc",
+  destination_network: "polygon",
+  destination_token: "usdc",
+  destination_address: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
 });
 
 console.log(`Transfer ID: ${transfer.id}`);
 console.log(`Status: ${transfer.status}`);
-console.log(`Fee: ${transfer.quote.fee_amount} ${transfer.quote.deposit_token}`);
+console.log(
+  `Fee: ${transfer.quote.fee_amount} ${transfer.quote.deposit_token}`
+);
 ```
 
 #### Complete a Cross-Chain Transfer
@@ -641,15 +692,23 @@ console.log(`Fee: ${transfer.quote.fee_amount} ${transfer.quote.deposit_token}`)
 After sending the funds to the deposit address provided in the transfer response, you must complete the transfer by providing the transaction hash.
 
 ```typescript
-const completedTransfer = await align.crossChain.completeTransfer(customerId, transfer.id, {
-  deposit_transaction_hash: '0x88df016429689c079f3b2f6ad39fa052532c56795b733da78a91ebe6a713944b',
-});
+const completedTransfer = await align.crossChain.completeTransfer(
+  customerId,
+  transfer.id,
+  {
+    deposit_transaction_hash:
+      "0x88df016429689c079f3b2f6ad39fa052532c56795b733da78a91ebe6a713944b",
+  }
+);
 ```
 
 #### Get Transfer Details
 
 ```typescript
-const transfer = await align.crossChain.getTransfer(customerId, 'transfer_uuid');
+const transfer = await align.crossChain.getTransfer(
+  customerId,
+  "transfer_uuid"
+);
 ```
 
 #### Permanent Routes
@@ -659,20 +718,22 @@ Create a permanent deposit address for recurring transfers.
 ```typescript
 // Create a permanent route
 const route = await align.crossChain.createPermanentRouteAddress(customerId, {
-  destination_network: 'polygon',
-  destination_token: 'usdc',
-  destination_address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+  destination_network: "polygon",
+  destination_token: "usdc",
+  destination_address: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
 });
 
 // List all routes
 const routes = await align.crossChain.listPermanentRouteAddresses(customerId);
 ```
+
 console.log(`Deposit Address: ${route.deposit_address}`);
 console.log(`Route ID: ${route.id}`);
 
 // Any USDC sent to this address on Ethereum will automatically
 // be bridged to Solana and sent to the destination address
-```
+
+````
 
 ### List Permanent Routes
 
@@ -683,7 +744,7 @@ routes.forEach(route => {
   console.log(`${route.source_network} → ${route.destination_network}`);
   console.log(`Deposit: ${route.deposit_address}`);
 });
-```
+````
 
 ---
 
@@ -710,12 +771,12 @@ interface IbanDetails {
 interface UsDetails {
   account_number: string;
   routing_number: string;
-  account_type: 'checking' | 'savings';
+  account_type: "checking" | "savings";
 }
 
 interface CreateExternalAccountRequest {
   account_holder_name: string;
-  account_holder_type: 'individual' | 'business';
+  account_holder_type: "individual" | "business";
   currency: FiatCurrency;
   country: string;
   address: Address;
@@ -726,10 +787,10 @@ interface CreateExternalAccountRequest {
 interface ExternalAccount {
   id: string;
   account_holder_name: string;
-  account_holder_type: 'individual' | 'business';
+  account_holder_type: "individual" | "business";
   currency: FiatCurrency;
   country: string;
-  status: 'pending' | 'verified' | 'failed';
+  status: "pending" | "verified" | "failed";
   created_at: string;
 }
 ```
@@ -738,21 +799,21 @@ interface ExternalAccount {
 
 ```typescript
 const account = await align.externalAccounts.create({
-  account_holder_name: 'John Doe',
-  account_holder_type: 'individual',
-  currency: 'usd',
-  country: 'US',
+  account_holder_name: "John Doe",
+  account_holder_type: "individual",
+  currency: "usd",
+  country: "US",
   address: {
-    street: '123 Main St',
-    city: 'New York',
-    state: 'NY',
-    postal_code: '10001',
-    country: 'US',
+    street: "123 Main St",
+    city: "New York",
+    state: "NY",
+    postal_code: "10001",
+    country: "US",
   },
   us_details: {
-    account_number: '1234567890',
-    routing_number: '021000021',
-    account_type: 'checking',
+    account_number: "1234567890",
+    routing_number: "021000021",
+    account_type: "checking",
   },
 });
 
@@ -764,20 +825,20 @@ console.log(account.status); // "pending"
 
 ```typescript
 const account = await align.externalAccounts.create({
-  account_holder_name: 'Jane Smith',
-  account_holder_type: 'individual',
-  currency: 'eur',
-  country: 'DE',
+  account_holder_name: "Jane Smith",
+  account_holder_type: "individual",
+  currency: "eur",
+  country: "DE",
   address: {
-    street: 'Hauptstraße 1',
-    city: 'Berlin',
-    state: 'Berlin',
-    postal_code: '10115',
-    country: 'DE',
+    street: "Hauptstraße 1",
+    city: "Berlin",
+    state: "Berlin",
+    postal_code: "10115",
+    country: "DE",
   },
   iban_details: {
-    iban: 'DE89370400440532013000',
-    bic: 'COBADEFFXXX',
+    iban: "DE89370400440532013000",
+    bic: "COBADEFFXXX",
   },
 });
 
@@ -787,7 +848,7 @@ console.log(account.id); // "ext_acc_456"
 ### Get External Account
 
 ```typescript
-const account = await align.externalAccounts.get('ext_acc_123');
+const account = await align.externalAccounts.get("ext_acc_123");
 
 console.log(account.status); // "verified"
 console.log(account.currency); // "usd"
@@ -815,7 +876,7 @@ interface WalletVerification {
 
 ```typescript
 const verification = await align.wallets.verifyOwnership(customerId, {
-  wallet_address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+  wallet_address: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
 });
 
 console.log(verification.verification_flow_link);
@@ -837,17 +898,14 @@ Manage webhook endpoints and verify webhook signatures.
 
 ```typescript
 // Shared type
-type WebhookStatus = 'active' | 'inactive';
+type WebhookStatus = "active" | "inactive";
 
 type WebhookEventType =
-  | 'customer.kycs.updated'
-  | 'onramp_transfer.status.updated'
-  | 'offramp_transfer.status.updated';
+  | "customer.kycs.updated"
+  | "onramp_transfer.status.updated"
+  | "offramp_transfer.status.updated";
 
-type WebhookEntityType =
-  | 'customer'
-  | 'onramp_transfer'
-  | 'offramp_transfer';
+type WebhookEntityType = "customer" | "onramp_transfer" | "offramp_transfer";
 
 interface Webhook {
   id: string;
@@ -877,7 +935,7 @@ interface WebhookEvent {
 
 ```typescript
 const webhook = await align.webhooks.create({
-  url: 'https://your-domain.com/webhooks/alignlab',
+  url: "https://your-domain.com/webhooks/alignlab",
 });
 
 console.log(webhook.id); // "wh_abc123"
@@ -889,7 +947,7 @@ console.log(webhook.status); // "active"
 ```typescript
 const response = await align.webhooks.list();
 
-response.items.forEach(webhook => {
+response.items.forEach((webhook) => {
   console.log(`${webhook.id}: ${webhook.url}`);
 });
 ```
@@ -897,9 +955,9 @@ response.items.forEach(webhook => {
 ### Delete Webhook
 
 ```typescript
-await align.webhooks.delete('wh_abc123');
+await align.webhooks.delete("wh_abc123");
 
-console.log('Webhook deleted');
+console.log("Webhook deleted");
 ```
 
 ### Verify Webhook Signature
@@ -910,46 +968,46 @@ Verify that webhook requests are genuinely from AlignLab using HMAC-SHA256 signa
 > The webhook signature is sent in the `x-hmac-signature` header.
 
 ```typescript
-import express from 'express';
-import type { WebhookEvent } from '@schnl/align';
+import express from "express";
+import type { WebhookEvent } from "@schnl/align";
 
 const app = express();
 
-app.post('/webhooks/alignlab', express.raw({ type: 'application/json' }), (req, res) => {
-  const signature = req.headers['x-hmac-signature'] as string;
-  const payload = req.body.toString('utf8');
-  const apiKey = process.env.ALIGNLAB_API_KEY!; // Use your API key as the secret
+app.post(
+  "/webhooks/alignlab",
+  express.raw({ type: "application/json" }),
+  (req, res) => {
+    const signature = req.headers["x-hmac-signature"] as string;
+    const payload = req.body.toString("utf8");
+    const apiKey = process.env.ALIGNLAB_API_KEY!; // Use your API key as the secret
 
-  // Verify the signature
-  const isValid = align.webhooks.verifySignature(
-    payload,
-    signature,
-    apiKey
-  );
+    // Verify the signature
+    const isValid = align.webhooks.verifySignature(payload, signature, apiKey);
 
-  if (!isValid) {
-    console.error('Invalid webhook signature');
-    return res.status(401).send('Invalid signature');
+    if (!isValid) {
+      console.error("Invalid webhook signature");
+      return res.status(401).send("Invalid signature");
+    }
+
+    // Process the webhook event
+    const event: WebhookEvent = JSON.parse(payload);
+    console.log("Webhook event:", event.event_type);
+
+    switch (event.event_type) {
+      case "customer.kycs.updated":
+        console.log("Customer KYC updated:", event.entity_id);
+        break;
+      case "onramp_transfer.status.updated":
+        console.log("Onramp transfer status updated:", event.entity_id);
+        break;
+      case "offramp_transfer.status.updated":
+        console.log("Offramp transfer status updated:", event.entity_id);
+        break;
+    }
+
+    res.status(200).send("OK");
   }
-
-  // Process the webhook event
-  const event: WebhookEvent = JSON.parse(payload);
-  console.log('Webhook event:', event.event_type);
-
-  switch (event.event_type) {
-    case 'customer.kycs.updated':
-      console.log('Customer KYC updated:', event.entity_id);
-      break;
-    case 'onramp_transfer.status.updated':
-      console.log('Onramp transfer status updated:', event.entity_id);
-      break;
-    case 'offramp_transfer.status.updated':
-      console.log('Offramp transfer status updated:', event.entity_id);
-      break;
-  }
-
-  res.status(200).send('OK');
-});
+);
 ```
 
 ---
@@ -961,12 +1019,12 @@ Upload files for KYC verification and compliance.
 ### Upload File
 
 ```typescript
-import fs from 'fs';
+import fs from "fs";
 
-const fileBuffer = fs.readFileSync('./passport.pdf');
+const fileBuffer = fs.readFileSync("./passport.pdf");
 const formData = new FormData();
-formData.append('file', new Blob([fileBuffer]), 'passport.pdf');
-formData.append('purpose', 'kyc_document');
+formData.append("file", new Blob([fileBuffer]), "passport.pdf");
+formData.append("purpose", "kyc_document");
 
 const file = await align.files.upload(fileInput.files[0]);
 
@@ -986,8 +1044,8 @@ Manage developer fees for your platform.
 ```typescript
 interface DeveloperFeesResponse {
   developer_receivable_fees: Array<{
-    service_type: 'onramp' | 'offramp' | 'cross_chain_transfer';
-    accrual_basis: 'percentage';
+    service_type: "onramp" | "offramp" | "cross_chain_transfer";
+    accrual_basis: "percentage";
     value: number;
   }>;
 }
@@ -998,7 +1056,7 @@ interface DeveloperFeesResponse {
 ```typescript
 const response = await align.developers.getFees();
 
-response.developer_receivable_fees.forEach(fee => {
+response.developer_receivable_fees.forEach((fee) => {
   console.log(`${fee.service_type}: ${fee.value}% (${fee.accrual_basis})`);
 });
 ```
@@ -1014,9 +1072,10 @@ const response = await align.developers.updateFees({
   },
 });
 
-console.log('Fees updated successfully');
+console.log("Fees updated successfully");
 ```
-```
+
+````
 
 ---
 
@@ -1048,36 +1107,36 @@ try {
     console.error('Unexpected error:', error);
   }
 }
-```
+````
 
 ### Handling API Errors
 
 ```typescript
 try {
   const transfer = await align.transfers.createOfframpTransfer({
-    transfer_purpose: 'Payment',
-    destination_external_account_id: 'invalid_id',
+    transfer_purpose: "Payment",
+    destination_external_account_id: "invalid_id",
   });
 } catch (error) {
   if (error instanceof AlignError) {
     switch (error.statusCode) {
       case 400:
-        console.error('Bad request:', error.message);
+        console.error("Bad request:", error.message);
         break;
       case 401:
-        console.error('Unauthorized - check your API key');
+        console.error("Unauthorized - check your API key");
         break;
       case 404:
-        console.error('Resource not found');
+        console.error("Resource not found");
         break;
       case 429:
-        console.error('Rate limit exceeded');
+        console.error("Rate limit exceeded");
         break;
       case 500:
-        console.error('Server error');
+        console.error("Server error");
         break;
       default:
-        console.error('API error:', error.message);
+        console.error("API error:", error.message);
     }
   }
 }
@@ -1094,22 +1153,22 @@ import type {
   // Core
   AlignConfig,
   AlignEnvironment,
-  
+
   // Shared Types (NEW in v1.0.2)
   KycStatus,
   WebhookStatus,
   CustomerType,
-  
+
   // Customers
   Customer,
   CreateCustomerRequest,
   UpdateCustomerRequest,
   KycSessionResponse,
-  
+
   // Virtual Accounts
   VirtualAccount,
   CreateVirtualAccountRequest,
-  
+
   // Transfers
   Transfer,
   QuoteResponse,
@@ -1120,25 +1179,25 @@ import type {
   FiatCurrency,
   CryptoToken,
   BlockchainNetwork,
-  
+
   // Cross-Chain
   CrossChainQuote,
   CrossChainTransfer,
   CreateCrossChainQuoteRequest,
   CreateCrossChainTransferRequest,
   PermanentRoute,
-  
+
   // External Accounts
   ExternalAccount,
   CreateExternalAccountRequest,
   Address,
   IbanDetails,
   UsDetails,
-  
+
   // Wallets
   VerifyWalletRequest,
   WalletVerification,
-  
+
   // Webhooks
   Webhook,
   CreateWebhookRequest,
@@ -1146,14 +1205,14 @@ import type {
   WebhookEventType,
   WebhookEntityType,
   WebhookListResponse,
-  
+
   // Developers
   DeveloperFee,
-  
+
   // Errors
   AlignError,
   AlignValidationError,
-} from '@schnl/align';
+} from "@schnl/align";
 ```
 
 ---
@@ -1163,54 +1222,80 @@ import type {
 ### Custom HTTP Client Configuration
 
 ```typescript
-import Align from '@schnl/align';
+import Align from "@schnl/align";
 
 const align = new Align({
   apiKey: process.env.ALIGNLAB_API_KEY!,
-  environment: 'production',
+  environment: "production",
   timeout: 60000, // 60 seconds
-  baseUrl: 'https://your-proxy.com/alignlab', // Custom proxy
+  baseUrl: "https://your-proxy.com/alignlab", // Custom proxy
 });
 ```
+
+### Debug Logging
+
+Enable logging to debug requests and responses:
+
+```typescript
+import Align from "@schnl/align";
+
+const align = new Align({
+  apiKey: process.env.ALIGNLAB_API_KEY!,
+  environment: "production",
+  debug: true, // Enable logging
+  logLevel: "debug", // Set log level: 'error' | 'warn' | 'info' | 'debug'
+});
+
+// Logs will show:
+// - Request details (URL, method)
+// - Response details (status code)
+// - Error details (status, code, message)
+```
+
+**Note**: Logging is disabled by default for production. When `debug: false`, the logger has zero overhead.
 
 ### Using with Next.js App Router
 
 ```typescript
 // app/api/customers/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { Align, type CreateCustomerRequest, AlignValidationError } from '@schnl/align';
+import { NextRequest, NextResponse } from "next/server";
+import {
+  Align,
+  type CreateCustomerRequest,
+  AlignValidationError,
+} from "@schnl/align";
 
 const align = new Align({
   apiKey: process.env.ALIGNLAB_API_KEY!,
-  environment: 'production',
+  environment: "production",
 });
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json() as CreateCustomerRequest;
-    
+    const body = (await request.json()) as CreateCustomerRequest;
+
     // Validate required fields
     if (!body.email || !body.first_name || !body.last_name || !body.type) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
     const customer = await align.customers.create(body);
-    
+
     return NextResponse.json(customer, { status: 201 });
   } catch (error) {
     if (error instanceof AlignValidationError) {
       return NextResponse.json(
-        { error: 'Validation failed', details: error.errors },
+        { error: "Validation failed", details: error.errors },
         { status: 400 }
       );
     }
-    
-    console.error('Error creating customer:', error);
+
+    console.error("Error creating customer:", error);
     return NextResponse.json(
-      { error: 'Failed to create customer' },
+      { error: "Failed to create customer" },
       { status: 500 }
     );
   }
@@ -1219,16 +1304,16 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
 
     const customers = await align.customers.list(page, limit);
-    
+
     return NextResponse.json(customers);
   } catch (error) {
-    console.error('Error listing customers:', error);
+    console.error("Error listing customers:", error);
     return NextResponse.json(
-      { error: 'Failed to list customers' },
+      { error: "Failed to list customers" },
       { status: 500 }
     );
   }
@@ -1239,12 +1324,17 @@ export async function GET(request: NextRequest) {
 
 ```typescript
 // pages/api/customers/create.ts
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { Align, type CreateCustomerRequest, type Customer, AlignValidationError } from '@schnl/align';
+import type { NextApiRequest, NextApiResponse } from "next";
+import {
+  Align,
+  type CreateCustomerRequest,
+  type Customer,
+  AlignValidationError,
+} from "@schnl/align";
 
 const align = new Align({
   apiKey: process.env.ALIGNLAB_API_KEY!,
-  environment: 'production',
+  environment: "production",
 });
 
 type ErrorResponse = {
@@ -1256,26 +1346,26 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Customer | ErrorResponse>
 ) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
     const body = req.body as CreateCustomerRequest;
-    
+
     const customer = await align.customers.create(body);
-    
+
     return res.status(201).json(customer);
   } catch (error) {
     if (error instanceof AlignValidationError) {
       return res.status(400).json({
-        error: 'Validation failed',
+        error: "Validation failed",
         details: error.errors,
       });
     }
-    
-    console.error('Error creating customer:', error);
-    return res.status(500).json({ error: 'Failed to create customer' });
+
+    console.error("Error creating customer:", error);
+    return res.status(500).json({ error: "Failed to create customer" });
   }
 }
 ```
@@ -1283,26 +1373,33 @@ export default async function handler(
 ### Using with Express.js
 
 ```typescript
-import express, { Request, Response } from 'express';
-import { Align, type CreateCustomerRequest, AlignValidationError, AlignError } from '@schnl/align';
+import express, { Request, Response } from "express";
+import {
+  Align,
+  type CreateCustomerRequest,
+  AlignValidationError,
+  AlignError,
+} from "@schnl/align";
 
 const app = express();
 const align = new Align({
   apiKey: process.env.ALIGNLAB_API_KEY!,
-  environment: 'production',
+  environment: "production",
 });
 
 app.use(express.json());
 
 // Create customer
-app.post('/api/customers', async (req: Request, res: Response) => {
+app.post("/api/customers", async (req: Request, res: Response) => {
   try {
-    const customer = await align.customers.create(req.body as CreateCustomerRequest);
+    const customer = await align.customers.create(
+      req.body as CreateCustomerRequest
+    );
     res.status(201).json(customer);
   } catch (error) {
     if (error instanceof AlignValidationError) {
       return res.status(400).json({
-        error: 'Validation failed',
+        error: "Validation failed",
         details: error.errors,
       });
     }
@@ -1312,81 +1409,88 @@ app.post('/api/customers', async (req: Request, res: Response) => {
         code: error.code,
       });
     }
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
 // Get customer
-app.get('/api/customers/:id', async (req: Request, res: Response) => {
+app.get("/api/customers/:id", async (req: Request, res: Response) => {
   try {
     const customer = await align.customers.get(req.params.id);
     res.json(customer);
   } catch (error) {
     if (error instanceof AlignError && error.status === 404) {
-      return res.status(404).json({ error: 'Customer not found' });
+      return res.status(404).json({ error: "Customer not found" });
     }
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
 // Create offramp transfer
-app.post('/api/transfers/offramp', async (req: Request, res: Response) => {
+app.post("/api/transfers/offramp", async (req: Request, res: Response) => {
   try {
     const { quote, transfer_purpose, destination_account_id } = req.body;
-    
+
     // First create a quote
     const quoteResponse = await align.transfers.createOfframpQuote(quote);
-    
+
     // Then execute the transfer
     const transfer = await align.transfers.createOfframpTransfer({
       transfer_purpose,
       destination_external_account_id: destination_account_id,
     });
-    
+
     res.status(201).json({ quote: quoteResponse, transfer });
   } catch (error) {
     if (error instanceof AlignValidationError) {
       return res.status(400).json({
-        error: 'Validation failed',
+        error: "Validation failed",
         details: error.errors,
       });
     }
-    res.status(500).json({ error: 'Failed to create transfer' });
+    res.status(500).json({ error: "Failed to create transfer" });
   }
 });
 
 app.listen(3000, () => {
-  console.log('Server running on port 3000');
+  console.log("Server running on port 3000");
 });
 ```
 
 ### Using with Fastify
 
 ```typescript
-import Fastify from 'fastify';
-import { Align, type CreateCustomerRequest, AlignValidationError } from '@schnl/align';
+import Fastify from "fastify";
+import {
+  Align,
+  type CreateCustomerRequest,
+  AlignValidationError,
+} from "@schnl/align";
 
 const fastify = Fastify({ logger: true });
 
 const align = new Align({
   apiKey: process.env.ALIGNLAB_API_KEY!,
-  environment: 'production',
+  environment: "production",
 });
 
-fastify.post<{ Body: CreateCustomerRequest }>('/api/customers', async (request, reply) => {
-  try {
-    const customer = await align.customers.create(request.body);
-    return reply.status(201).send(customer);
-  } catch (error) {
-    if (error instanceof AlignValidationError) {
-      return reply.status(400).send({
-        error: 'Validation failed',
-        details: error.errors,
-      });
+fastify.post<{ Body: CreateCustomerRequest }>(
+  "/api/customers",
+  async (request, reply) => {
+    try {
+      const customer = await align.customers.create(request.body);
+      return reply.status(201).send(customer);
+    } catch (error) {
+      if (error instanceof AlignValidationError) {
+        return reply.status(400).send({
+          error: "Validation failed",
+          details: error.errors,
+        });
+      }
+      return reply.status(500).send({ error: "Failed to create customer" });
     }
-    return reply.status(500).send({ error: 'Failed to create customer' });
   }
-});
+);
 
 fastify.listen({ port: 3000 }, (err) => {
   if (err) throw err;
@@ -1396,30 +1500,37 @@ fastify.listen({ port: 3000 }, (err) => {
 ### Using with Hono
 
 ```typescript
-import { Hono } from 'hono';
-import { Align, type CreateCustomerRequest, AlignValidationError } from '@schnl/align';
+import { Hono } from "hono";
+import {
+  Align,
+  type CreateCustomerRequest,
+  AlignValidationError,
+} from "@schnl/align";
 
 const app = new Hono();
 
 const align = new Align({
   apiKey: process.env.ALIGNLAB_API_KEY!,
-  environment: 'production',
+  environment: "production",
 });
 
-app.post('/api/customers', async (c) => {
+app.post("/api/customers", async (c) => {
   try {
     const body = await c.req.json<CreateCustomerRequest>();
     const customer = await align.customers.create(body);
-    
+
     return c.json(customer, 201);
   } catch (error) {
     if (error instanceof AlignValidationError) {
-      return c.json({
-        error: 'Validation failed',
-        details: error.errors,
-      }, 400);
+      return c.json(
+        {
+          error: "Validation failed",
+          details: error.errors,
+        },
+        400
+      );
     }
-    return c.json({ error: 'Failed to create customer' }, 500);
+    return c.json({ error: "Failed to create customer" }, 500);
   }
 });
 

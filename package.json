@@ -1,6 +1,6 @@
 {
   "name": "@schnl/align",
-  "version": "3.6.7",
+  "version": "3.7.0",
   "description": "SDK for the AlignLab API - Build powerful payment infrastructure with fiat-to-crypto, crypto-to-fiat, and cross-chain transfers",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -59,6 +59,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "pino-pretty": "^13.1.2",
     "tsup": "^8.0.0",
     "typescript": "^5.3.0"
   },

@@ -4,9 +4,46 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [3.7.0] - 2025-01-XX
+
+### Changed
+
+- **HTTP Client Migration**:
+  - Migrated from native `fetch` to `ky` HTTP client library
+  - Improved reliability with automatic retry mechanism (2 retries for transient errors)
+  - Better error handling with proper HTTP error types
+  - Automatic JSON serialization/deserialization
+  - Automatic Content-Type header handling for JSON and FormData
+
+### Added
+
+- **Logging Support**:
+  - Integrated `pino` logger for request/response logging
+  - Configurable via `debug` and `logLevel` options in `AlignConfig`
+  - Pretty-printed logs in development, JSON logs in production
+  - Zero overhead when disabled (silent logger)
+  - Logs requests, responses, and errors automatically
+
+### Improved
+
+- **Error Handling**:
+  - Centralized error handling in `handleError()` helper function
+  - Better error messages with API error code extraction
+  - Proper TypeScript types for error responses (`AlignApiErrorResponse`)
+  - Removed code duplication across HTTP methods
+
+### Technical
+
+- **Dependencies**:
+  - Added `ky` (^1.14.0) for HTTP requests
+  - Added `pino` (^10.1.0) for logging
+  - Added `pino-pretty` (^13.1.2) as dev dependency for development logging
+
 ## [3.6.6] - 2025-11-20
 
 ### Changed
+
 - **Build Optimization**:
   - Enabled minification for production builds (`dist/index.js`, `dist/index.mjs`) to reduce bundle size
   - Preserved JSDoc comments in type definitions (`dist/index.d.ts`) for full IDE support
@@ -14,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.6.5] - 2025-11-20
 
 ### Fixed
+
 - **Documentation**:
   - Updated `README.md` to strictly match the codebase types and examples for all resources
   - Fixed discrepancies in `Customers`, `Virtual Accounts`, `Wallets`, `Files`, and `Developers` documentation examples
@@ -21,6 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.6.4] - 2025-11-20
 
 ### Fixed
+
 - **Zod Deprecations**:
   - Resolved all `validation.error.flatten()` deprecation warnings by migrating to `z.treeifyError()`
   - Updated all Zod imports to `zod/v4` for explicit versioning
@@ -30,6 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.6.3] - 2025-11-20
 
 ### Fixed
+
 - **Wallet Ownership API**:
   - Fixed endpoint path to include `/v0/` prefix
   - Fixed response field name from `verification_link` to `verification_flow_link`
@@ -38,6 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.6.2] - 2025-11-20
 
 ### Fixed
+
 - **Customers API**:
   - Fixed all endpoint paths to include `/v0/` prefix
   - Fixed KYC endpoint from `/kyc` to `/kycs` (plural)
@@ -46,6 +87,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.6.1] - 2025-11-20
 
 ### Fixed
+
 - **Webhooks API**:
   - Fixed all endpoint paths to include `/v0/` prefix
   - `POST /webhooks` → `POST /v0/webhooks`
@@ -55,6 +97,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.6.0] - 2025-11-20
 
 ### Breaking Changes
+
 - **Virtual Accounts API** (Complete Rewrite):
   - All endpoints changed from `/virtual-accounts` to `/v0/customers/{customer_id}/virtual-account`
   - `create()`: Now requires `customerId` as first parameter
@@ -64,6 +107,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `CreateVirtualAccountRequest` structure completely changed (see below)
 
 ### Added
+
 - **Virtual Accounts API**:
   - `deposit_instructions` field in response (CRITICAL: contains bank account details)
   - `IBANAccountDetails`: EUR deposit instructions with IBAN details
@@ -74,29 +118,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - New types: `SourceCurrency`, `SourceRails`, `DestinationToken`, `DestinationNetwork`, `VirtualAccountStatus`, `PaymentRails`, `DepositCurrency`, `DepositInstructions`, `VirtualAccountListResponse`
 
 ### Migration Guide
+
 #### Virtual Accounts
+
 ```typescript
 // Old (v3.5.0)
 const account = await align.virtualAccounts.create({
-  source_currency: 'eur',
-  destination_token: 'usdc',
-  destination_network: 'polygon',
-  destination_address: '0x...',
+  source_currency: "eur",
+  destination_token: "usdc",
+  destination_network: "polygon",
+  destination_address: "0x...",
 });
-console.log(account.currency);  // Wrong field name
-console.log(account.network);   // Wrong field name
+console.log(account.currency); // Wrong field name
+console.log(account.network); // Wrong field name
 
 // New (v3.6.0)
 const account = await align.virtualAccounts.create(customerId, {
-  source_currency: 'eur',
-  source_rails: 'swift',  // Optional, for USD SWIFT
-  destination_token: 'usdc',
-  destination_network: 'polygon',
-  destination_address: '0x...',
+  source_currency: "eur",
+  source_rails: "swift", // Optional, for USD SWIFT
+  destination_token: "usdc",
+  destination_network: "polygon",
+  destination_address: "0x...",
 });
 
 // Access deposit instructions (CRITICAL NEW FEATURE)
-if (account.deposit_instructions.currency === 'eur') {
+if (account.deposit_instructions.currency === "eur") {
   const iban = account.deposit_instructions.iban.iban_number;
   const bic = account.deposit_instructions.iban.bic;
   console.log(`IBAN: ${iban}, BIC: ${bic}`);
@@ -108,7 +154,7 @@ if (account.deposit_instructions.currency === 'eur') {
 
 // List accounts
 const response = await align.virtualAccounts.list(customerId);
-response.items.forEach(account => {
+response.items.forEach((account) => {
   console.log(account.destination_token);
 });
 ```
@@ -116,27 +162,31 @@ response.items.forEach(account => {
 ## [3.5.0] - 2025-11-20
 
 ### Breaking Changes
+
 - **Files API**:
   - Endpoint path changed from `/files` to `/v0/files`
   - `UploadFileResponse`: Response structure changed from `{ id, url, created_at }` to `{ id, name, type }`
 
 ### Changed
+
 - **Files API**:
   - Moved `UploadFileResponse` type to separate `files.types.ts` file for consistency
   - Added `UploadFileSchema` validator to ensure input is a valid File or Blob object
   - Updated JSDoc examples to reflect new response fields
 
 ### Migration Guide
+
 #### Files API
+
 ```typescript
 // Old (v3.4.0)
 const file = await align.files.upload(fileBlob);
-console.log(file.url);        // No longer available
+console.log(file.url); // No longer available
 console.log(file.created_at); // No longer available
 
 // New (v3.5.0)
 const file = await align.files.upload(fileBlob);
-console.log(file.id);   // "123e4567-e89b-12d3-a456-426614174000"
+console.log(file.id); // "123e4567-e89b-12d3-a456-426614174000"
 console.log(file.name); // "document.pdf"
 console.log(file.type); // "application/pdf"
 ```
@@ -144,6 +194,7 @@ console.log(file.type); // "application/pdf"
 ## [3.4.0] - 2025-11-20
 
 ### Breaking Changes
+
 - **Developer Fees API**:
   - Endpoint path changed from `/developers/fees` to `/v0/developer/fees`
   - `getFees()`: Response structure changed from `DeveloperFee[]` to `DeveloperFeesResponse`
@@ -151,6 +202,7 @@ console.log(file.type); // "application/pdf"
   - Removed `DeveloperFee` type (replaced with `DeveloperReceivableFee`)
 
 ### Added
+
 - **Developer Fees API**:
   - `ServiceType`: Type for service types ('onramp' | 'offramp' | 'cross_chain_transfer')
   - `AccrualBasis`: Type for fee calculation method ('percentage')
@@ -159,21 +211,23 @@ console.log(file.type); // "application/pdf"
   - `UpdateDeveloperFeesRequest`: Request structure with fees by service type
 
 ### Migration Guide
+
 #### Developer Fees
+
 ```typescript
 // Old (v3.3.0)
 const fees = await align.developers.getFees();
-fees.forEach(fee => {
+fees.forEach((fee) => {
   console.log(`${fee.percent}% → ${fee.wallet_address}`);
 });
 
 await align.developers.updateFees([
-  { id: 'fee_1', percent: '0.5', wallet_address: '0x...' }
+  { id: "fee_1", percent: "0.5", wallet_address: "0x..." },
 ]);
 
 // New (v3.4.0)
 const response = await align.developers.getFees();
-response.developer_receivable_fees.forEach(fee => {
+response.developer_receivable_fees.forEach((fee) => {
   console.log(`${fee.service_type}: ${fee.value}%`);
 });
 
@@ -189,6 +243,7 @@ await align.developers.updateFees({
 ## [3.3.0] - 2025-11-20
 
 ### Breaking Changes
+
 - **Cross-Chain Transfers API**:
   - Removed `createQuote` method (quote is now returned in `createTransfer` response)
   - `createTransfer`: Now requires `customerId` as first argument and takes full transfer details directly (no `quote_id`)
@@ -197,6 +252,7 @@ await align.developers.updateFees({
   - `listPermanentRoutes`: Renamed to `listPermanentRouteAddresses`, now requires `customerId`
 
 ### Added
+
 - **Cross-Chain Transfers API**:
   - `completeTransfer`: New method to finalize transfers by providing deposit transaction hash
   - `getPermanentRouteAddress`: New method to retrieve a specific permanent route by ID
@@ -207,43 +263,46 @@ await align.developers.updateFees({
   - `PermanentRouteListResponse`: New list response wrapper
 
 ### Migration Guide
+
 #### Cross-Chain Transfers
+
 ```typescript
 // Old (v3.2.0)
 const quote = await align.crossChain.createQuote({
-  source_token: 'usdc',
-  source_network: 'ethereum',
-  destination_token: 'usdc',
-  destination_network: 'polygon',
-  amount: '100.00',
+  source_token: "usdc",
+  source_network: "ethereum",
+  destination_token: "usdc",
+  destination_network: "polygon",
+  amount: "100.00",
   is_source_amount: true,
 });
 const transfer = await align.crossChain.createTransfer({
   quote_id: quote.quote_id,
-  destination_address: '0x742d35...',
+  destination_address: "0x742d35...",
 });
 
 // New (v3.3.0)
 const transfer = await align.crossChain.createTransfer(customerId, {
-  amount: '100.00',
-  source_network: 'ethereum',
-  source_token: 'usdc',
-  destination_network: 'polygon',
-  destination_token: 'usdc',
-  destination_address: '0x742d35...',
+  amount: "100.00",
+  source_network: "ethereum",
+  source_token: "usdc",
+  destination_network: "polygon",
+  destination_token: "usdc",
+  destination_address: "0x742d35...",
 });
 // Quote is now in transfer.quote
 console.log(transfer.quote.fee_amount);
 
 // Complete the transfer
 await align.crossChain.completeTransfer(customerId, transfer.id, {
-  deposit_transaction_hash: '0x123...',
+  deposit_transaction_hash: "0x123...",
 });
 ```
 
 ## [3.2.0] - 2025-11-20
 
 ### Breaking Changes
+
 - **Onramp Transfers API**:
   - `createOnrampQuote`: Now requires `customerId` as the first argument.
   - `createOnrampTransfer`: Now requires `customerId` and `quoteId` as arguments. Request body now requires `destination_address` instead of `transfer_purpose`.
@@ -252,6 +311,7 @@ await align.crossChain.completeTransfer(customerId, transfer.id, {
   - `simulate`: Renamed to `simulateOfframpTransfer` for consistency.
 
 ### Added
+
 - **Transfers API**:
   - `completeOfframpTransfer`: Added to support the transfer completion flow (required after deposit).
   - `simulateOfframpTransfer`: Renamed from `simulate`.
@@ -260,7 +320,9 @@ await align.crossChain.completeTransfer(customerId, transfer.id, {
   - `SimulateOnrampTransferRequest`: New type for onramp simulation.
 
 ### Migration Guide
+
 #### Onramp Transfers
+
 ```typescript
 // Old
 const quote = await align.transfers.createOnrampQuote({...});
@@ -287,6 +349,7 @@ The Offramp Transfers API has been completely rewritten to align with the offici
   - `simulate`: Renamed to `simulateOfframpTransfer` for consistency.
 
 ### Added
+
 - **Transfers API**:
   - `completeOfframpTransfer`: Added to support the transfer completion flow (required after deposit).
   - `simulateOfframpTransfer`: Renamed from `simulate`.
@@ -319,7 +382,9 @@ await align.transfers.completeOfframpTransfer(customerId, transfer.id, {
 ## [3.0.1] - 2025-11-20
 
 ### Changed
+
 - **BREAKING**: Customers API completely rewritten to match official AlignLab API documentation
+
   - `CustomerType`: Changed from `'business'` to `'corporate'`
   - Field names: `id` → `customer_id`
   - Added `company_name` field (required for corporate customers)
@@ -341,6 +406,7 @@ await align.transfers.completeOfframpTransfer(customerId, transfer.id, {
   - Added proper IBAN/US account type discrimination with union types
 
 ### Added
+
 - New customer types exported:
   - `CustomerAddress` - Address information for approved KYC customers
   - `CustomerKycs` - Detailed KYC status information
@@ -352,64 +418,69 @@ await align.transfers.completeOfframpTransfer(customerId, transfer.id, {
 ### Migration Guide
 
 #### 1. Update CustomerType
+
 ```typescript
 // Before
-type: 'business'
+type: "business";
 
 // After
-type: 'corporate'
+type: "corporate";
 ```
 
 #### 2. Update Field Names
+
 ```typescript
 // Before
-customer.id
-customer.kyc_status
+customer.id;
+customer.kyc_status;
 
 // After
-customer.customer_id
-customer.kycs?.sub_status
+customer.customer_id;
+customer.kycs?.sub_status;
 ```
 
 #### 3. Update Create Customer
+
 ```typescript
 // Before - all fields required
 await align.customers.create({
-  email: 'contact@acme.com',
-  first_name: '',  // Had to provide empty strings
-  last_name: '',
-  type: 'business',
+  email: "contact@acme.com",
+  first_name: "", // Had to provide empty strings
+  last_name: "",
+  type: "business",
 });
 
 // After - conditional fields
 await align.customers.create({
-  email: 'contact@acme.com',
-  type: 'corporate',
-  company_name: 'Acme Corporation',  // Required for corporate
+  email: "contact@acme.com",
+  type: "corporate",
+  company_name: "Acme Corporation", // Required for corporate
 });
 ```
 
 #### 4. Update Customer Updates
+
 ```typescript
 // Before
 await align.customers.update(customerId, {
-  email: 'new@email.com',
-  first_name: 'John',
+  email: "new@email.com",
+  first_name: "John",
 });
 
 // After - now uses documents
 await align.customers.update(customerId, {
   documents: [
     {
-      file_id: 'file_uuid',
-      purpose: 'id_document',
-      description: 'Driver license',
+      file_id: "file_uuid",
+      purpose: "id_document",
+      description: "Driver license",
     },
   ],
 });
 ```
 
 #### 5. Update List Customers
+
 ```typescript
 // Before
 const customers = await align.customers.list(1, 20);
@@ -420,10 +491,11 @@ const customers = await align.customers.list();
 console.log(customers.items);
 
 // Or filter by email
-const filtered = await align.customers.list('alice@example.com');
+const filtered = await align.customers.list("alice@example.com");
 ```
 
 #### 6. Update KYC Session
+
 ```typescript
 // Before
 const session = await align.customers.createKycSession(customerId);
@@ -435,23 +507,25 @@ window.location.href = session.kycs.kyc_flow_link;
 ```
 
 #### 7. Update External Account Creation
+
 ```typescript
 // Before
 await align.externalAccounts.create({
-  bank_name: 'Chase Bank',
-  account_holder_type: 'individual',
+  bank_name: "Chase Bank",
+  account_holder_type: "individual",
   // ...
 });
 
 // After - now requires customer_id
 await align.externalAccounts.create(customerId, {
-  bank_name: 'Chase Bank',
-  account_holder_type: 'individual',
+  bank_name: "Chase Bank",
+  account_holder_type: "individual",
   // ...
 });
 ```
 
 #### 8. List External Accounts
+
 ```typescript
 // Before - method didn't exist
 // Had to use get(id) for single account
@@ -464,6 +538,7 @@ console.log(accounts.items);
 ## [2.0.0] - 2025-11-20
 
 ### Changed
+
 - **BREAKING**: `Align` is now the default export for cleaner import syntax
   - **Before**: `import { Align } from '@schnl/align';`
   - **After**: `import Align from '@schnl/align';`
@@ -472,23 +547,27 @@ console.log(accounts.items);
 ### Migration Guide
 
 Update your imports from:
+
 ```typescript
-import { Align } from '@schnl/align';
+import { Align } from "@schnl/align";
 ```
 
 To:
+
 ```typescript
-import Align from '@schnl/align';
+import Align from "@schnl/align";
 ```
 
 You can still import types alongside the default export:
+
 ```typescript
-import Align, { KycStatus, WebhookEvent } from '@schnl/align';
+import Align, { KycStatus, WebhookEvent } from "@schnl/align";
 ```
 
 ## [1.2.0] - 2025-11-20
 
 ### Added
+
 - **Comprehensive JSDoc documentation** for all SDK resource classes (32 methods total)
   - Detailed parameter descriptions with types and constraints
   - Real-world code examples for every method
@@ -499,6 +578,7 @@ import Align, { KycStatus, WebhookEvent } from '@schnl/align';
 - Improved developer experience with inline documentation
 
 ### Resources Documented
+
 - `WebhooksResource` (4 methods)
 - `CustomersResource` (5 methods)
 - `VirtualAccountsResource` (3 methods)
@@ -512,6 +592,7 @@ import Align, { KycStatus, WebhookEvent } from '@schnl/align';
 ## [1.1.0] - 2025-11-20
 
 ### Changed
+
 - **BREAKING**: Fixed `WebhookEvent` structure to match official AlignLab API
   - Replaced `id`, `type`, `data` fields with `event_type`, `entity_id`, `entity_type`
   - Added `WebhookEventType` union type for event types
@@ -521,6 +602,7 @@ import Align, { KycStatus, WebhookEvent } from '@schnl/align';
 - Removed `events` field from `Webhook` interface (not in official API)
 
 ### Added
+
 - `WebhookEventType` type export
 - `WebhookEntityType` type export
 - `WebhookListResponse` type export
@@ -528,12 +610,14 @@ import Align, { KycStatus, WebhookEvent } from '@schnl/align';
 ## [1.0.3] - 2025-11-19
 
 ### Changed
+
 - Updated README.md to document new shared type exports (`KycStatus`, `WebhookStatus`, `CustomerType`)
 - Updated inline type definitions in README to use shared types for consistency
 
 ## [1.0.2] - 2025-11-19
 
 ### Changed
+
 - **BREAKING (Type Safety)**: Replaced loose `string` types with strict union types
   - `KycSessionResponse.status` now uses `KycStatus` type
   - `Webhook.status` now uses `WebhookStatus` type
@@ -542,18 +626,21 @@ import Align, { KycStatus, WebhookEvent } from '@schnl/align';
 - Exported `KycStatus`, `WebhookStatus`, and `CustomerType` from main package
 
 ### Fixed
+
 - Eliminated duplicate type definitions across resources
 - Improved TypeScript autocomplete and type safety
 
 ## [1.0.1] - 2025-11-19
 
 ### Changed
+
 - Clarified SDK as non-official in README description
 - Updated AlignLab documentation link to docs.alignlabs.dev
 
 ## [1.0.0] - 2025-11-19
 
 ### Added
+
 - Initial release of @schnl/align SDK
 - Customer management (create, get, update, list, KYC sessions)
 - Virtual account creation and management

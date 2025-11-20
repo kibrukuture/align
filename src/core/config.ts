@@ -1,4 +1,4 @@
-export type AlignEnvironment = 'sandbox' | 'production';
+export type AlignEnvironment = "sandbox" | "production";
 
 export interface AlignConfig {
   /**
@@ -22,14 +22,26 @@ export interface AlignConfig {
    * @default 30000
    */
   timeout?: number;
+
+  /**
+   * Enable logging
+   * @default false
+   */
+  debug?: boolean;
+
+  /**
+   * Log level
+   * @default 'error'
+   */
+  logLevel?: "error" | "warn" | "info" | "debug";
 }
 
 export const DEFAULT_CONFIG: Partial<AlignConfig> = {
-  environment: 'sandbox',
+  environment: "sandbox",
   timeout: 30000,
 };
 
 export const ALIGN_API_URLS: Record<AlignEnvironment, string> = {
-  sandbox: 'https://api-sandbox.alignlabs.dev/v0',
-  production: 'https://api.alignlabs.dev/v0',
+  sandbox: "https://api-sandbox.alignlabs.dev/v0",
+  production: "https://api.alignlabs.dev/v0",
 };
