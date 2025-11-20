@@ -132,6 +132,10 @@ export type {
   DeveloperFeesResponse,
   UpdateDeveloperFeesRequest,
 } from '@/resources/developers/developers.types';
+
+// Files types
+export type { UploadFileResponse } from '@/resources/files/files.types';
+
 export * from '@/resources/files/files.resource';
 export * from '@/resources/developers/developers.resource';
 export * from '@/resources/cross-chain/cross-chain.types';

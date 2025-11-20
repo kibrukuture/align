@@ -4,6 +4,33 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [3.5.0] - 2025-11-20
+
+### Breaking Changes
+- **Files API**:
+  - Endpoint path changed from `/files` to `/v0/files`
+  - `UploadFileResponse`: Response structure changed from `{ id, url, created_at }` to `{ id, name, type }`
+
+### Changed
+- **Files API**:
+  - Moved `UploadFileResponse` type to separate `files.types.ts` file for consistency
+  - Updated JSDoc examples to reflect new response fields
+
+### Migration Guide
+#### Files API
+```typescript
+// Old (v3.4.0)
+const file = await align.files.upload(fileBlob);
+console.log(file.url);        // No longer available
+console.log(file.created_at); // No longer available
+
+// New (v3.5.0)
+const file = await align.files.upload(fileBlob);
+console.log(file.id);   // "123e4567-e89b-12d3-a456-426614174000"
+console.log(file.name); // "document.pdf"
+console.log(file.type); // "application/pdf"
+```
+
 ## [3.4.0] - 2025-11-20
 
 ### Breaking Changes
