@@ -1,6 +1,6 @@
 /**
- * @schnl/align - TypeScript SDK for AlignLab API
- * 
+ * @tolbel/align - TypeScript SDK for AlignLab API
+ *
  * Build powerful payment infrastructure with support for:
  * - Fiat-to-crypto (onramp) and crypto-to-fiat (offramp) transfers
  * - Cross-chain cryptocurrency transfers
@@ -8,16 +8,16 @@
  * - External account linking
  * - Wallet ownership verification
  * - Webhook management
- * 
+ *
  * @example
  * ```typescript
- * import Align from '@schnl/align';
- * 
+ * import Align from '@tolbel/align';
+ *
  * const align = new Align({
  *   apiKey: 'your_api_key',
  *   environment: 'sandbox',
  * });
- * 
+ *
  * const customer = await align.customers.create({
  *   email: 'user@example.com',
  *   first_name: 'John',
@@ -25,18 +25,24 @@
  *   type: 'individual',
  * });
  * ```
- * 
+ *
  * @packageDocumentation
  */
 
 // Main client export
-import { Align } from '@/client';
+import { Align } from "@/client";
 export { Align };
 export default Align;
 
 // Core types and configuration
-export type { AlignConfig, AlignEnvironment, KycStatus, WebhookStatus, CustomerType } from '@/types/common';
-export { AlignError, AlignValidationError } from '@/core/errors';
+export type {
+  AlignConfig,
+  AlignEnvironment,
+  KycStatus,
+  WebhookStatus,
+  CustomerType,
+} from "@/types/common";
+export { AlignError, AlignValidationError } from "@/core/errors";
 
 // Customer types
 export type {
@@ -50,7 +56,7 @@ export type {
   KycStatusBreakdown,
   KycSubStatus,
   CustomerDocument,
-} from '@/resources/customers/customers.types';
+} from "@/resources/customers/customers.types";
 
 // Virtual Account types
 export type {
@@ -67,7 +73,7 @@ export type {
   VirtualAccount,
   CreateVirtualAccountRequest,
   VirtualAccountListResponse,
-} from '@/resources/virtual-accounts/virtual-accounts.types';
+} from "@/resources/virtual-accounts/virtual-accounts.types";
 
 // Transfer types
 export type {
@@ -92,7 +98,7 @@ export type {
   IbanAccountDetails,
   UsAccountDetails,
   DestinationBankAccount,
-} from '@/resources/transfers/transfers.types';
+} from "@/resources/transfers/transfers.types";
 
 // Cross-Chain types
 export type {
@@ -103,7 +109,7 @@ export type {
   CreatePermanentRouteRequest,
   PermanentRouteAddress,
   PermanentRouteListResponse,
-} from '@/resources/cross-chain/cross-chain.types';
+} from "@/resources/cross-chain/cross-chain.types";
 
 // External Account types
 export type {
@@ -117,13 +123,13 @@ export type {
   UsAccountRequest,
   IbanAccountResponse,
   UsAccountResponse,
-} from '@/resources/external-accounts/external-accounts.types';
+} from "@/resources/external-accounts/external-accounts.types";
 
 // Wallet types
 export type {
   VerifyWalletRequest,
   WalletVerification,
-} from '@/resources/wallets/wallets.types';
+} from "@/resources/wallets/wallets.types";
 
 // Webhook types
 export type {
@@ -133,20 +139,20 @@ export type {
   WebhookEventType,
   WebhookEntityType,
   WebhookListResponse,
-} from '@/resources/webhooks/webhooks.types';
+} from "@/resources/webhooks/webhooks.types";
 
 // Developer types
-export type { 
+export type {
   ServiceType,
   AccrualBasis,
   DeveloperReceivableFee,
   DeveloperFeesResponse,
   UpdateDeveloperFeesRequest,
-} from '@/resources/developers/developers.types';
+} from "@/resources/developers/developers.types";
 
 // Files types
-export type { UploadFileResponse } from '@/resources/files/files.types';
+export type { UploadFileResponse } from "@/resources/files/files.types";
 
-export * from '@/resources/files/files.resource';
-export * from '@/resources/developers/developers.resource';
-export * from '@/resources/cross-chain/cross-chain.types';
+export * from "@/resources/files/files.resource";
+export * from "@/resources/developers/developers.resource";
+export * from "@/resources/cross-chain/cross-chain.types";

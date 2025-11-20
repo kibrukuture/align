@@ -1,5 +1,5 @@
 {
-  "name": "@schnl/align",
+  "name": "@tolbel/align",
   "version": "1.0.0",
   "description": "SDK for the AlignLab API - Build powerful payment infrastructure with fiat-to-crypto, crypto-to-fiat, and cross-chain transfers",
   "main": "./dist/index.js",
@@ -22,11 +22,11 @@
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "bun run typecheck && bun run build",
-    "pub": "bun run typecheck && bun run build && git push && npm publish"
+    "pub": "bun run typecheck && bun run build   && npm publish"
   },
   "keywords": [
     "alignlab",
-    "schnl",
+    "tolbel",
     "payments",
     "crypto",
     "fiat",

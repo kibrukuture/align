@@ -18,7 +18,7 @@ import { CrossChainResource } from "@/resources/cross-chain/cross-chain.resource
  *
  * @example
  * ```typescript
- * import Align from '@schnl/align';
+ * import Align from '@tolbel/align';
  *
  * const align = new Align({
  *   apiKey: process.env.ALIGNLAB_API_KEY!,

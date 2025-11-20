@@ -2,7 +2,7 @@
 
 **Unofficial** TypeScript/JavaScript SDK for the [AlignLab](https://docs.alignlabs.dev) API. Build powerful payment infrastructure with support for fiat-to-crypto (onramp), crypto-to-fiat (offramp), cross-chain transfers, virtual accounts, and more.
 
-[![npm version](https://img.shields.io/npm/v/@schnl/align.svg)](https://www.npmjs.com/package/@schnl/align)
+[![npm version](https://img.shields.io/npm/v/@tolbel/align.svg)](https://www.npmjs.com/package/@tolbel/align)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -20,25 +20,25 @@
 ## Installation
 
 ```bash
-npm install @schnl/align
+npm install @tolbel/align
 ```
 
 ```bash
-yarn add @schnl/align
+yarn add @tolbel/align
 ```
 
 ```bash
-pnpm add @schnl/align
+pnpm add @tolbel/align
 ```
 
 ```bash
-bun add @schnl/align
+bun add @tolbel/align
 ```
 
 ## Quick Start
 
 ```typescript
-import Align from "@schnl/align";
+import Align from "@tolbel/align";
 
 // Initialize the client
 const align = new Align({
@@ -972,7 +972,7 @@ Verify that webhook requests are genuinely from AlignLab using HMAC-SHA256 signa
 
 ```typescript
 import express from "express";
-import type { WebhookEvent } from "@schnl/align";
+import type { WebhookEvent } from "@tolbel/align";
 
 const app = express();
 
@@ -1089,7 +1089,7 @@ The SDK provides custom error classes for better error handling.
 ### Error Types
 
 ```typescript
-import { AlignError, AlignValidationError } from '@schnl/align';
+import { AlignError, AlignValidationError } from '@tolbel/align';
 
 try {
   const customer = await align.customers.create({
@@ -1215,7 +1215,7 @@ import type {
   // Errors
   AlignError,
   AlignValidationError,
-} from "@schnl/align";
+} from "@tolbel/align";
 ```
 
 ---
@@ -1225,7 +1225,7 @@ import type {
 ### Custom HTTP Client Configuration
 
 ```typescript
-import Align from "@schnl/align";
+import Align from "@tolbel/align";
 
 const align = new Align({
   apiKey: process.env.ALIGNLAB_API_KEY!,
@@ -1240,7 +1240,7 @@ const align = new Align({
 Enable logging to debug requests and responses:
 
 ```typescript
-import Align from "@schnl/align";
+import Align from "@tolbel/align";
 
 const align = new Align({
   apiKey: process.env.ALIGNLAB_API_KEY!,
@@ -1266,7 +1266,7 @@ import {
   Align,
   type CreateCustomerRequest,
   AlignValidationError,
-} from "@schnl/align";
+} from "@tolbel/align";
 
 const align = new Align({
   apiKey: process.env.ALIGNLAB_API_KEY!,
@@ -1333,7 +1333,7 @@ import {
   type CreateCustomerRequest,
   type Customer,
   AlignValidationError,
-} from "@schnl/align";
+} from "@tolbel/align";
 
 const align = new Align({
   apiKey: process.env.ALIGNLAB_API_KEY!,
@@ -1382,7 +1382,7 @@ import {
   type CreateCustomerRequest,
   AlignValidationError,
   AlignError,
-} from "@schnl/align";
+} from "@tolbel/align";
 
 const app = express();
 const align = new Align({
@@ -1468,7 +1468,7 @@ import {
   Align,
   type CreateCustomerRequest,
   AlignValidationError,
-} from "@schnl/align";
+} from "@tolbel/align";
 
 const fastify = Fastify({ logger: true });
 
@@ -1508,7 +1508,7 @@ import {
   Align,
   type CreateCustomerRequest,
   AlignValidationError,
-} from "@schnl/align";
+} from "@tolbel/align";
 
 const app = new Hono();
 
