@@ -10,6 +10,8 @@
  * ```
  */
 
+import type { Network } from "@/resources/blockchain/constants/networks";
+
 // Re-export all wallet types
 export * from '@/resources/blockchain/wallets/wallets.types';
 
@@ -32,6 +34,6 @@ export interface BlockchainConfig {
    * Custom RPC URLs for specific networks
    * Overrides default RPC providers
    */
-  customRpcUrls?: Record<string, string>;
+  customRpcUrls?: Record<Network, string>;
 }
 

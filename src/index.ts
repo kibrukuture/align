@@ -156,3 +156,30 @@ export type { UploadFileResponse } from "@/resources/files/files.types";
 export * from "@/resources/files/files.resource";
 export * from "@/resources/developers/developers.resource";
 export * from "@/resources/cross-chain/cross-chain.types";
+
+// Blockchain types
+export type {
+  // Wallet types
+  Wallet,
+  EncryptedWallet,
+  WalletBalance,
+  WalletCreationOptions,
+  
+  // Transaction types
+  Transaction,
+  TransactionStatus,
+  TransactionReceiptData,
+  GasEstimate,
+  
+  // Token types
+  Token,
+  TokenBalance,
+  TokenInfo,
+  
+  // Network types
+  Network,
+  NetworkConfig,
+  
+  // Config
+  BlockchainConfig,
+} from "@/resources/blockchain/blockchain.types";

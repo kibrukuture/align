@@ -9,6 +9,7 @@ import { WalletsResource } from "@/resources/wallets/wallets.resource";
 import { FilesResource } from "@/resources/files/files.resource";
 import { DevelopersResource } from "@/resources/developers/developers.resource";
 import { CrossChainResource } from "@/resources/cross-chain/cross-chain.resource";
+import { BlockchainResource } from "@/resources/blockchain/blockchain.resource";
 
 /**
  * Main SDK client for interacting with the AlignLab API.
@@ -73,6 +74,9 @@ export class Align {
   /** Cross-chain transfer operations */
   public readonly crossChain: CrossChainResource;
 
+  /** Blockchain operations (wallets, transactions, tokens) */
+  public readonly blockchain: BlockchainResource;
+
   /**
    * Initialize the Align SDK client.
    *
@@ -95,6 +99,7 @@ export class Align {
     this.files = new FilesResource(this.httpClient);
     this.developers = new DevelopersResource(this.httpClient);
     this.crossChain = new CrossChainResource(this.httpClient);
+    this.blockchain = new BlockchainResource(config.blockchain);
   }
 }
 
@@ -106,3 +111,4 @@ export * from "@/resources/transfers/transfers.types";
 export * from "@/resources/webhooks/webhooks.types";
 export * from "@/resources/external-accounts/external-accounts.types";
 export * from "@/resources/wallets/wallets.types";
+export * from "@/resources/blockchain/blockchain.types";

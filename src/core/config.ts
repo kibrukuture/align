@@ -1,3 +1,5 @@
+import type { Network } from "@/resources/blockchain/constants/networks";
+
 export type AlignEnvironment = "sandbox" | "production";
 
 export interface AlignConfig {
@@ -34,6 +36,14 @@ export interface AlignConfig {
    * @default 'error'
    */
   logLevel?: "error" | "warn" | "info" | "debug";
+
+  /**
+   * Optional blockchain configuration
+   * Allows users to provide custom RPC URLs for different networks
+   */
+  blockchain?: {
+    customRpcUrls?: Record<Network, string>;
+  };
 }
 
 export const DEFAULT_CONFIG: Partial<AlignConfig> = {
