@@ -13,8 +13,8 @@
  */
 
 // Export all token balance handlers
-export * from './balance.handler';
+export * from '@/resources/blockchain/tokens/handlers/balance.handler';
 
 // Export all token information handlers
-export * from './info.handler';
+export * from '@/resources/blockchain/tokens/handlers/info.handler';
 

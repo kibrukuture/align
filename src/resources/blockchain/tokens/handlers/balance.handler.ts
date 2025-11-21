@@ -19,7 +19,7 @@ import type { TokenBalance } from "@/resources/blockchain/tokens/tokens.types";
 import type { Network } from "@/resources/blockchain/wallets/wallets.types";
 import { getTokenBalance as walletGetTokenBalance } from "@/resources/blockchain/wallets/handlers/get.handler";
 import { getBalance as walletGetBalance } from "@/resources/blockchain/wallets/handlers/get.handler";
-import { getTokenInfo } from "./info.handler";
+import { getTokenInfo } from "@/resources/blockchain/tokens/handlers/info.handler";
 
 /**
  * Get ERC-20 token balance for an address
