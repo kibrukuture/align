@@ -13,8 +13,8 @@
  */
 
 // Export all address utility functions
-export * from './address';
+export * from '@/resources/blockchain/utils/address';
 
 // Export all formatting utility functions
-export * from './format';
+export * from '@/resources/blockchain/utils/format';
 

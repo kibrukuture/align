@@ -12,8 +12,8 @@
 
 import { z } from "zod/v4";
 import { isAddress } from "ethers";
-import { WalletAddressSchema } from "../wallets/wallets.validator";
-import { NetworkSchema, TokenSchema, AmountSchema } from "../transactions/transactions.validator";
+import { WalletAddressSchema } from "@/resources/blockchain/wallets/wallets.validator";
+import { NetworkSchema, TokenSchema, AmountSchema } from "@/resources/blockchain/transactions/transactions.validator";
 
 /**
  * Validates ERC-20 token contract address format

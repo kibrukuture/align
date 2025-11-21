@@ -19,12 +19,12 @@
  * ```
  */
 
-import { ProvidersResource } from "./providers/providers.resource";
-import { WalletsResource } from "./wallets/wallets.resource";
-import { TransactionsResource } from "./transactions/transactions.resource";
-import { TokensResource } from "./tokens/tokens.resource";
-import * as Utils from "./utils";
-import type { BlockchainConfig } from "./blockchain.types";
+import { ProvidersResource } from "@/resources/blockchain/providers/providers.resource";
+import { WalletsResource } from "@/resources/blockchain/wallets/wallets.resource";
+import { TransactionsResource } from "@/resources/blockchain/transactions/transactions.resource";
+import { TokensResource } from "@/resources/blockchain/tokens/tokens.resource";
+import * as Utils from "@/resources/blockchain/utils";
+import type { BlockchainConfig } from "@/resources/blockchain/blockchain.types";
 
 export class BlockchainResource {
   /**

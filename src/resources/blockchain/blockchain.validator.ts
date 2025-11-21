@@ -11,11 +11,11 @@
  */
 
 // Re-export all wallet validators
-export * from './wallets/wallets.validator';
+export * from '@/resources/blockchain/wallets/wallets.validator';
 
 // Re-export all transaction validators
-export * from './transactions/transactions.validator';
+export * from '@/resources/blockchain/transactions/transactions.validator';
 
 // Re-export all token validators
-export * from './tokens/tokens.validator';
+export * from '@/resources/blockchain/tokens/tokens.validator';
 

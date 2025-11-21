@@ -14,8 +14,8 @@
  */
 
 import { JsonRpcProvider } from "ethers";
-import type { Network } from "../wallets/wallets.types";
-import type { NetworkConfig } from "./providers.types";
+import type { Network } from "@/resources/blockchain/wallets/wallets.types";
+import type { NetworkConfig } from "@/resources/blockchain/providers/providers.types"; 
 
 const DEFAULT_NETWORK_CONFIGS: Record<Network, NetworkConfig> = {
   ethereum: {

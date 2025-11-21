@@ -19,7 +19,7 @@ import type {
   Transaction,
   TransactionStatus,
   TransactionReceiptData,
-} from "../transactions.types";
+} from "@/resources/blockchain/transactions/transactions.types";
 
 /**
  * Get transaction status
@@ -34,11 +34,11 @@ import type {
  *
  * @example
  * ```typescript
- * const status = await getTransactionStatusHandler('0x1234...abcd', provider);
+ * const status = await getTransactionStatus('0x1234...abcd', provider);
  * console.log(status); // "pending" | "confirmed" | "failed" | "replaced"
  * ```
  */
-export async function getTransactionStatusHandler(
+export async function getTransactionStatus(
   txHash: string,
   provider: JsonRpcProvider
 ): Promise<TransactionStatus> {
@@ -72,11 +72,11 @@ export async function getTransactionStatusHandler(
  *
  * @example
  * ```typescript
- * const receipt = await waitForConfirmationHandler('0x1234...abcd', 3, provider);
+ * const receipt = await waitForConfirmation('0x1234...abcd', 3, provider);
  * console.log(receipt.status); // 1 (success) or 0 (failure)
  * ```
  */
-export async function waitForConfirmationHandler(
+export async function waitForConfirmation(
   txHash: string,
   confirmations: number,
   provider: JsonRpcProvider
@@ -128,13 +128,13 @@ export async function waitForConfirmationHandler(
  *
  * @example
  * ```typescript
- * const receipt = await getTransactionReceiptHandler('0x1234...abcd', provider);
+ * const receipt = await getTransactionReceipt('0x1234...abcd', provider);
  * if (receipt) {
  *   console.log(receipt.gasUsed); // Gas used by transaction
  * }
  * ```
  */
-export async function getTransactionReceiptHandler(
+export async function getTransactionReceipt(
   txHash: string,
   provider: JsonRpcProvider
 ): Promise<TransactionReceiptData | null> {
@@ -179,10 +179,10 @@ export async function getTransactionReceiptHandler(
  *
  * @example
  * ```typescript
- * const receipt = await pollTransactionHandler('0x1234...abcd', provider, 3000, 60000);
+ * const receipt = await pollTransaction('0x1234...abcd', provider, 3000, 60000);
  * ```
  */
-export async function pollTransactionHandler(
+export async function pollTransaction(
   txHash: string,
   provider: JsonRpcProvider,
   interval: number = 5000,
@@ -191,7 +191,7 @@ export async function pollTransactionHandler(
   const startTime = Date.now();
 
   while (Date.now() - startTime < timeout) {
-    const receipt = await getTransactionReceiptHandler(txHash, provider);
+    const receipt = await getTransactionReceipt(txHash, provider);
 
     if (receipt) {
       return receipt;

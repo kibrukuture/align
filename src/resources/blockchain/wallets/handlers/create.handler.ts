@@ -12,11 +12,11 @@
  */
 
 import { HDNodeWallet, Wallet } from "ethers";
-import type { Wallet as SDKWallet, EncryptedWallet } from "../wallets.types";
+import type { Wallet as SDKWallet, EncryptedWallet } from "@/resources/blockchain/wallets/wallets.types";
 import {
-  decryptPrivateKeyHandler,
-  decryptWalletHandler,
-} from "./encrypt.handler";
+  decryptPrivateKey,
+  decryptWallet,
+} from "@/resources/blockchain/wallets/handlers/encrypt.handler";
 
 /**
  * Create a new random wallet
@@ -28,11 +28,11 @@ import {
  *
  * @example
  * ```typescript
- * const wallet = await createWalletHandler();
+ * const wallet = await createWallet();
  * console.log(wallet.address); // "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
  * ```
  */
-export async function createWalletHandler(): Promise<SDKWallet> {
+export async function createWallet(): Promise<SDKWallet> {
   // Create random wallet using ethers.js
   const ethersWallet = Wallet.createRandom();
 
@@ -55,11 +55,11 @@ export async function createWalletHandler(): Promise<SDKWallet> {
  *
  * @example
  * ```typescript
- * const wallet = await createFromMnemonicHandler('word1 word2 ... word12');
+ * const wallet = await createFromMnemonic('word1 word2 ... word12');
  * console.log(wallet.mnemonic?.phrase); // The mnemonic phrase
  * ```
  */
-export async function createFromMnemonicHandler(
+export async function createFromMnemonic(
   mnemonic: string
 ): Promise<SDKWallet> {
   // Create wallet from mnemonic using ethers.js
@@ -89,11 +89,11 @@ export async function createFromMnemonicHandler(
  *
  * @example
  * ```typescript
- * const wallet = await createFromPrivateKeyHandler('0x1234...abcd');
+ * const wallet = await createFromPrivateKey('0x1234...abcd');
  * console.log(wallet.address);
  * ```
  */
-export async function createFromPrivateKeyHandler(
+export async function createFromPrivateKey(
   privateKey: string
 ): Promise<SDKWallet> {
   // Normalize private key (ensure 0x prefix)
@@ -125,10 +125,10 @@ export async function createFromPrivateKeyHandler(
  *
  * @example
  * ```typescript
- * const wallet = await createFromEncryptedHandler(encryptedData, 'password123');
+ * const wallet = await createFromEncrypted(encryptedData, 'password123');
  * ```
  */
-export async function createFromEncryptedHandler(
+export async function createFromEncrypted(
   encrypted: string | EncryptedWallet,
   password: string
 ): Promise<SDKWallet> {
@@ -150,7 +150,7 @@ export async function createFromEncryptedHandler(
       // Parse the string as our EncryptedWallet format
       try {
         const encryptedWallet: EncryptedWallet = JSON.parse(encrypted);
-        return decryptWalletHandler(encryptedWallet, password);
+        return decryptWallet(encryptedWallet, password);
       } catch {
         throw new Error(
           "Invalid encrypted format. Must be ethers.js JSON format or our EncryptedWallet format."
@@ -159,6 +159,6 @@ export async function createFromEncryptedHandler(
     }
   } else {
     // Already EncryptedWallet object, use our decrypt handler
-    return decryptWalletHandler(encrypted, password);
+    return decryptWallet(encrypted, password);
   }
 }

@@ -11,7 +11,7 @@
  */
 
 import type { HDNodeWallet, Mnemonic } from "ethers";
-import type { Network } from "../constants/networks";
+import type { Network } from "@/resources/blockchain/constants/networks";
 export type { Network };
 
 /**

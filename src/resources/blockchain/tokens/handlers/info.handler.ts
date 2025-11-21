@@ -15,8 +15,8 @@
 
 import { Contract } from "ethers";
 import type { JsonRpcProvider } from "ethers";
-import type { Token, Network } from "../../wallets/wallets.types";
-import type { TokenInfo } from "../tokens.types";
+import type { Token, Network } from "@/resources/blockchain/wallets/wallets.types";
+import type { TokenInfo } from "@/resources/blockchain/tokens/tokens.types";
 
 /**
  * Token address mappings per network
@@ -75,11 +75,11 @@ const TOKEN_ADDRESSES: Record<Network, Record<Token, string>> = {
  *
  * @example
  * ```typescript
- * const address = getTokenAddressHandler('usdc', 'polygon');
+ * const address = getTokenAddress('usdc', 'polygon');
  * console.log(address); // "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
  * ```
  */
-export function getTokenAddressHandler(token: Token, network: Network): string {
+export function getTokenAddress(token: Token, network: Network): string {
   const address = TOKEN_ADDRESSES[network]?.[token];
 
   if (!address) {
@@ -106,7 +106,7 @@ export function getTokenAddressHandler(token: Token, network: Network): string {
  *
  * @example
  * ```typescript
- * const info = await getTokenInfoHandler(
+ * const info = await getTokenInfo(
  *   '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
  *   provider,
  *   'polygon',
@@ -117,7 +117,7 @@ export function getTokenAddressHandler(token: Token, network: Network): string {
  * console.log(info.decimals); // 6
  * ```
  */
-export async function getTokenInfoHandler(
+export async function getTokenInfo(
   tokenAddress: string,
   provider: JsonRpcProvider,
   network: Network,
@@ -190,20 +190,20 @@ export async function getTokenInfoHandler(
  *
  * @example
  * ```typescript
- * const isValid = await validateTokenAddressHandler(
+ * const isValid = await validateTokenAddress(
  *   '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
  *   provider
  * );
  * ```
  */
-export async function validateTokenAddressHandler(
+export async function validateTokenAddress(
   address: string,
   provider: JsonRpcProvider,
   network: Network
 ): Promise<boolean> {
   try {
     // Try to get token info - if it succeeds, it's a valid token contract
-    await getTokenInfoHandler(address, provider, network);
+    await getTokenInfo(address, provider, network);
     return true;
   } catch {
     return false;

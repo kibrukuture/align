@@ -6,14 +6,14 @@
  * 
  * Usage:
  * ```typescript
- * import { ProvidersResource } from './providers';
- * import type { Network, NetworkConfig } from './providers';
+ * import { ProvidersResource } from '@/resources/blockchain/providers';
+ * import type { Network, NetworkConfig } from '@/resources/blockchain/providers';
  * ```
  */
 
 // Export the providers resource class
-export { ProvidersResource } from './providers.resource';
+export { ProvidersResource } from '@/resources/blockchain/providers/providers.resource';
 
 // Export provider types
-export * from './providers.types';
+export * from '@/resources/blockchain/providers/providers.types';
 

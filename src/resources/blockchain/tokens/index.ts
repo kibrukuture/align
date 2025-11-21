@@ -6,19 +6,19 @@
  *
  * Usage:
  * ```typescript
- * import { TokensResource } from './tokens';
- * import type { TokenBalance, TokenInfo } from './tokens';
+ * import { TokensResource } from '@/resources/blockchain/tokens';
+ * import type { TokenBalance, TokenInfo } from '@/resources/blockchain/tokens';
  * ```
  */
 
 // Export the tokens resource class
-export { TokensResource } from "./tokens.resource";
+export { TokensResource } from "@/resources/blockchain/tokens/tokens.resource";
 
 // Export token types
-export * from "./tokens.types";
+export * from "@/resources/blockchain/tokens/tokens.types";
 
 // Export token validators
-export * from "./tokens.validator";
+export * from "@/resources/blockchain/tokens/tokens.validator";
 
 // Export handlers (for advanced use cases)
-export * from "./handlers";
+export * from "@/resources/blockchain/tokens/handlers";

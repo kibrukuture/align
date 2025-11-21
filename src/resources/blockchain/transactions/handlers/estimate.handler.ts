@@ -16,7 +16,7 @@
 
 import { parseUnits, formatUnits } from "ethers";
 import type { JsonRpcProvider } from "ethers";
-import type { GasEstimate } from "../transactions.types";
+import type { GasEstimate } from "@/resources/blockchain/transactions/transactions.types";
 
 /**
  * Estimate gas limit for a transaction
@@ -34,7 +34,7 @@ import type { GasEstimate } from "../transactions.types";
  *
  * @example
  * ```typescript
- * const gasLimit = await estimateGasHandler(
+ * const gasLimit = await estimateGas(
  *   '0x742d35...',
  *   '0x1234...abcd',
  *   '1000000000000000000',
@@ -44,7 +44,7 @@ import type { GasEstimate } from "../transactions.types";
  * console.log(gasLimit); // "21000"
  * ```
  */
-export async function estimateGasHandler(
+export async function estimateGas(
   from: string,
   to: string,
   value: string,
@@ -74,11 +74,11 @@ export async function estimateGasHandler(
  *
  * @example
  * ```typescript
- * const gasPrice = await getGasPriceHandler(provider);
+ * const gasPrice = await getGasPrice(provider);
  * console.log(gasPrice); // "20000000000" (20 gwei)
  * ```
  */
-export async function getGasPriceHandler(
+export async function getGasPrice(
   provider: JsonRpcProvider
 ): Promise<string> {
   // Get fee data from provider
@@ -110,7 +110,7 @@ export async function getGasPriceHandler(
  *
  * @example
  * ```typescript
- * const gasLimit = await estimateTokenTransferGasHandler(
+ * const gasLimit = await estimateTokenTransferGas(
  *   '0x742d35...',
  *   '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174', // USDC
  *   '0x1234...abcd',
@@ -119,7 +119,7 @@ export async function getGasPriceHandler(
  * );
  * ```
  */
-export async function estimateTokenTransferGasHandler(
+export async function estimateTokenTransferGas(
   from: string,
   tokenAddress: string,
   to: string,
@@ -159,12 +159,12 @@ export async function estimateTokenTransferGasHandler(
  *
  * @example
  * ```typescript
- * const estimate = await calculateTransactionCostHandler('21000', '20000000000');
+ * const estimate = await calculateTransactionCost('21000', '20000000000');
  * console.log(estimate.totalCost); // "420000000000000" (in wei)
  * console.log(estimate.totalCostFormatted); // "0.00042" (in ETH)
  * ```
  */
-export async function calculateTransactionCostHandler(
+export async function calculateTransactionCost(
   gasLimit: string,
   gasPrice: string
 ): Promise<GasEstimate> {

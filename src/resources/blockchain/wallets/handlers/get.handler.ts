@@ -15,7 +15,7 @@
 
 import type { JsonRpcProvider } from "ethers";
 import { Contract, formatUnits } from "ethers";
-import type { Wallet as SDKWallet } from "../wallets.types";
+import type { Wallet as SDKWallet } from "@/resources/blockchain/wallets/wallets.types";
 
 /**
  * Get wallet address from wallet object
@@ -27,11 +27,11 @@ import type { Wallet as SDKWallet } from "../wallets.types";
  *
  * @example
  * ```typescript
- * const address = getAddressFromWalletHandler(wallet);
+ * const address = getAddressFromWallet(wallet);
  * console.log(address); // "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
  * ```
  */
-export function getAddressFromWalletHandler(wallet: SDKWallet): string {
+export function getAddressFromWallet(wallet: SDKWallet): string {
   return wallet.address;
 }
 
@@ -50,14 +50,14 @@ export function getAddressFromWalletHandler(wallet: SDKWallet): string {
  *
  * @example
  * ```typescript
- * const balance = await getBalanceHandler(
+ * const balance = await getBalance(
  *   '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
  *   provider
  * );
  * console.log(balance); // "1.5" (in MATIC)
  * ```
  */
-export async function getBalanceHandler(
+export async function getBalance(
   address: string,
   provider: JsonRpcProvider
 ): Promise<string> {
@@ -83,7 +83,7 @@ export async function getBalanceHandler(
  *
  * @example
  * ```typescript
- * const balance = await getTokenBalanceHandler(
+ * const balance = await getTokenBalance(
  *   '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
  *   '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174', // USDC on Polygon
  *   provider
@@ -91,7 +91,7 @@ export async function getBalanceHandler(
  * console.log(balance); // "100.0" (in USDC)
  * ```
  */
-export async function getTokenBalanceHandler(
+export async function getTokenBalance(
   address: string,
   tokenAddress: string,
   provider: JsonRpcProvider
@@ -140,14 +140,14 @@ export async function getTokenBalanceHandler(
  *
  * @example
  * ```typescript
- * const transactions = await getTransactionHistoryHandler(
+ * const transactions = await getTransactionHistory(
  *   '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
  *   provider,
  *   20
  * );
  * ```
  */
-export async function getTransactionHistoryHandler(
+export async function getTransactionHistory(
   address: string,
   provider: JsonRpcProvider,
   limit: number = 10

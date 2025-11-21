@@ -15,14 +15,14 @@
 
 import { AlignValidationError } from "@/core/errors";
 import { formatZodError } from "@/core/validation";
-import { ProvidersResource } from "../providers/providers.resource";
-import * as Handlers from "./handlers";
-import type { TokenBalance } from "./tokens.types";
+import { ProvidersResource } from "@/resources/blockchain/providers/providers.resource";
+import * as Handlers from "@/resources/blockchain/tokens/handlers";
+import type { TokenBalance } from "@/resources/blockchain/tokens/tokens.types";
 import {
   TokenBalanceRequestSchema,
   TokenAddressRequestSchema,
-} from "./tokens.validator";
-import type { Network, Token } from "../wallets/wallets.types";
+} from "@/resources/blockchain/tokens/tokens.validator";
+import type { Network, Token } from "@/resources/blockchain/wallets/wallets.types";
 import { parseUnits } from "ethers";
 
 export class TokensResource {
@@ -53,10 +53,10 @@ export class TokensResource {
     const provider = this.providers.getProvider(network);
 
     // Resolve token contract address
-    const tokenAddress = Handlers.getTokenAddressHandler(token, network);
+    const tokenAddress = Handlers.getTokenAddress(token, network);
 
     // Call handler for complex logic
-    return Handlers.getTokenBalanceHandler(address, tokenAddress, provider);
+    return Handlers.getTokenBalance(address, tokenAddress, provider);
   }
 
   /**
@@ -71,14 +71,14 @@ export class TokensResource {
       );
     }
 
-    return Handlers.getTokenAddressHandler(token, network);
+    return Handlers.getTokenAddress(token, network);
   }
 
   /**
    * Format token amount with decimals
    */
   public formatAmount(amount: string, decimals: number): string {
-    return Handlers.formatBalanceHandler(amount, decimals);
+    return Handlers.formatBalance(amount, decimals);
   }
 
   /**

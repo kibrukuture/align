@@ -13,11 +13,11 @@
  */
 
 // Export main blockchain resource class
-export { BlockchainResource } from './blockchain.resource';
+export { BlockchainResource } from '@/resources/blockchain/blockchain.resource';
 
 // Export all blockchain types
-export * from './blockchain.types';
+export * from '@/resources/blockchain/blockchain.types';
 
 // Export all blockchain validators
-export * from './blockchain.validator';
+export * from '@/resources/blockchain/blockchain.validator';
 

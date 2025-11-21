@@ -13,8 +13,8 @@
 
 import { z } from "zod/v4";
 import { isAddress, isHexString } from "ethers";
-import { WalletAddressSchema } from "../wallets/wallets.validator";
-import { NETWORKS } from "../constants/networks";
+import { WalletAddressSchema } from "@/resources/blockchain/wallets/wallets.validator";
+import { NETWORKS } from "@/resources/blockchain/constants/networks";
 
 /**
  * Validates Ethereum transaction hash format

@@ -17,12 +17,12 @@
  */
 
 import type { JsonRpcProvider } from "ethers";
-import type { Wallet as SDKWallet } from "../../wallets/wallets.types";
-import type { Transaction } from "../transactions.types";
+import type { Wallet as SDKWallet } from "@/resources/blockchain/wallets/wallets.types";
+import type { Transaction } from "@/resources/blockchain/transactions/transactions.types";
 import {
-  sendNativeTokenHandler as walletSendNativeToken,
-  sendTokenHandler as walletSendToken,
-} from "../../wallets/handlers/send.handler";
+  sendNativeToken as walletSendNativeToken,
+  sendToken as walletSendToken,
+} from "@/resources/blockchain/wallets/handlers/send.handler";
 
 /**
  * Send native token transaction
@@ -39,10 +39,10 @@ import {
  *
  * @example
  * ```typescript
- * const tx = await sendNativeTokenHandler(wallet, '0x742d35...', '1.5', provider);
+ * const tx = await sendNativeToken(wallet, '0x742d35...', '1.5', provider);
  * ```
  */
-export async function sendNativeTokenHandler(
+export async function sendNativeToken(
   wallet: SDKWallet,
   to: string,
   amount: string,
@@ -68,10 +68,10 @@ export async function sendNativeTokenHandler(
  *
  * @example
  * ```typescript
- * const tx = await sendTokenHandler(wallet, tokenAddress, '0x742d35...', '100.0', provider);
+ * const tx = await sendToken(wallet, tokenAddress, '0x742d35...', '100.0', provider);
  * ```
  */
-export async function sendTokenHandler(
+export async function sendToken(
   wallet: SDKWallet,
   tokenAddress: string,
   to: string,

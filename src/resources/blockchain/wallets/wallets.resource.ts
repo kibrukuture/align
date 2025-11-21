@@ -15,11 +15,11 @@
 
 import { AlignValidationError } from '@/core/errors';
 import { formatZodError } from '@/core/validation';
-import { ProvidersResource } from '../providers/providers.resource';
-import * as Handlers from './handlers';
-import type { Wallet, EncryptedWallet, Network } from './wallets.types';
-import type { Transaction } from '../transactions/transactions.types';
-import { CreateWalletSchema, EncryptSchema } from './wallets.validator';
+import { ProvidersResource } from '@/resources/blockchain/providers/providers.resource';
+import * as Handlers from '@/resources/blockchain/wallets/handlers';
+import type { Wallet, EncryptedWallet, Network } from '@/resources/blockchain/wallets/wallets.types';
+import type { Transaction } from '@/resources/blockchain/transactions/transactions.types';
+import { CreateWalletSchema, EncryptSchema } from '@/resources/blockchain/wallets/wallets.validator';
 
 export class WalletsResource {
   constructor(private providers: ProvidersResource) {}
@@ -31,7 +31,7 @@ export class WalletsResource {
   public async create(): Promise<Wallet> {
     // Simple validation (if needed)
     // Call handler for complex logic
-    return Handlers.createWalletHandler();
+    return Handlers.createWallet();
   }
 
   /**
@@ -45,7 +45,7 @@ export class WalletsResource {
     }
 
     // Call handler for complex logic
-    return Handlers.createFromMnemonicHandler(mnemonic);
+    return Handlers.createFromMnemonic(mnemonic);
   }
 
   /**
@@ -59,7 +59,7 @@ export class WalletsResource {
     }
 
     // Call handler for complex logic
-    return Handlers.createFromPrivateKeyHandler(privateKey);
+    return Handlers.createFromPrivateKey(privateKey);
   }
 
   /**
@@ -73,7 +73,7 @@ export class WalletsResource {
     }
 
     // Call handler for complex logic
-    return Handlers.createFromEncryptedHandler(encrypted, password);
+    return Handlers.createFromEncrypted(encrypted, password);
   }
 
   /**
@@ -81,7 +81,7 @@ export class WalletsResource {
    */
   public getAddress(wallet: Wallet): string {
     // Simple logic: extract address from wallet object
-    return Handlers.getAddressFromWalletHandler(wallet);
+    return Handlers.getAddressFromWallet(wallet);
   }
 
   /**
@@ -93,7 +93,7 @@ export class WalletsResource {
     const provider = this.providers.getProvider(network);
     
     // Call handler for complex logic
-    return Handlers.getBalanceHandler(address, provider);
+    return Handlers.getBalance(address, provider);
   }
 
   /**
@@ -105,7 +105,7 @@ export class WalletsResource {
     const provider = this.providers.getProvider(network);
     
     // Call handler for complex logic
-    return Handlers.getTokenBalanceHandler(address, token, provider);
+    return Handlers.getTokenBalance(address, token, provider);
   }
 
   /**
@@ -117,7 +117,7 @@ export class WalletsResource {
     const provider = this.providers.getProvider(network);
     
     // Call handler for complex logic
-    return Handlers.sendNativeTokenHandler(wallet, to, amount, provider);
+    return Handlers.sendNativeToken(wallet, to, amount, provider);
   }
 
   /**
@@ -129,7 +129,7 @@ export class WalletsResource {
     const provider = this.providers.getProvider(network);
     
     // Call handler for complex logic
-    return Handlers.sendTokenHandler(wallet, token, to, amount, provider);
+    return Handlers.sendToken(wallet, token, to, amount, provider);
   }
 
   /**
@@ -143,7 +143,7 @@ export class WalletsResource {
     }
 
     // Call handler for complex encryption logic
-    return Handlers.encryptPrivateKeyHandler(privateKey, password);
+    return Handlers.encryptPrivateKey(privateKey, password);
   }
 
   /**
@@ -157,7 +157,7 @@ export class WalletsResource {
     }
 
     // Call handler for complex decryption logic
-    return Handlers.decryptPrivateKeyHandler(encrypted, password);
+    return Handlers.decryptPrivateKey(encrypted, password);
   }
 
   /**
@@ -171,7 +171,7 @@ export class WalletsResource {
     }
 
     // Call handler for complex encryption logic
-    return Handlers.encryptWalletHandler(wallet, password);
+    return Handlers.encryptWallet(wallet, password);
   }
 
   /**
@@ -185,7 +185,7 @@ export class WalletsResource {
     }
 
     // Call handler for complex decryption logic
-    return Handlers.decryptWalletHandler(encrypted, password);
+    return Handlers.decryptWallet(encrypted, password);
   }
 }
 

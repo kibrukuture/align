@@ -15,11 +15,11 @@
 
 import { formatUnits, parseUnits } from "ethers";
 import type { JsonRpcProvider } from "ethers";
-import type { TokenBalance } from "../tokens.types";
-import type { Network } from "../../wallets/wallets.types";
-import { getTokenBalanceHandler as walletGetTokenBalance } from "../../wallets/handlers/get.handler";
-import { getBalanceHandler as walletGetBalance } from "../../wallets/handlers/get.handler";
-import { getTokenInfoHandler } from "./info.handler";
+import type { TokenBalance } from "@/resources/blockchain/tokens/tokens.types";
+import type { Network } from "@/resources/blockchain/wallets/wallets.types";
+import { getTokenBalance as walletGetTokenBalance } from "@/resources/blockchain/wallets/handlers/get.handler";
+import { getBalance as walletGetBalance } from "@/resources/blockchain/wallets/handlers/get.handler";
+import { getTokenInfo } from "./info.handler";
 
 /**
  * Get ERC-20 token balance for an address
@@ -35,7 +35,7 @@ import { getTokenInfoHandler } from "./info.handler";
  *
  * @example
  * ```typescript
- * const balance = await getTokenBalanceHandler(
+ * const balance = await getTokenBalance(
  *   '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
  *   '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174', // USDC on Polygon
  *   provider
@@ -43,7 +43,7 @@ import { getTokenInfoHandler } from "./info.handler";
  * console.log(balance); // "100.0" (in USDC)
  * ```
  */
-export async function getTokenBalanceHandler(
+export async function getTokenBalance(
   address: string,
   tokenAddress: string,
   provider: JsonRpcProvider
@@ -66,14 +66,14 @@ export async function getTokenBalanceHandler(
  *
  * @example
  * ```typescript
- * const balance = await getNativeBalanceHandler(
+ * const balance = await getNativeBalance(
  *   '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
  *   provider
  * );
  * console.log(balance); // "1.5" (in MATIC)
  * ```
  */
-export async function getNativeBalanceHandler(
+export async function getNativeBalance(
   address: string,
   provider: JsonRpcProvider
 ): Promise<string> {
@@ -95,14 +95,14 @@ export async function getNativeBalanceHandler(
  *
  * @example
  * ```typescript
- * const balances = await getTokenBalancesHandler(
+ * const balances = await getTokenBalances(
  *   '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
  *   ['0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174', '0xc2132D05D31c914a87C6611C10748AEb04B58e8F'],
  *   provider
  * );
  * ```
  */
-export async function getTokenBalancesHandler(
+export async function getTokenBalances(
   address: string,
   tokenAddresses: string[],
   provider: JsonRpcProvider,
@@ -110,14 +110,14 @@ export async function getTokenBalancesHandler(
 ): Promise<TokenBalance[]> {
   // Query all balances in parallel
   const balancePromises = tokenAddresses.map(async (tokenAddress) => {
-    const balanceFormatted = await getTokenBalanceHandler(
+    const balanceFormatted = await getTokenBalance(
       address,
       tokenAddress,
       provider
     );
 
     // Get token info to include in result
-    const tokenInfo = await getTokenInfoHandler(
+    const tokenInfo = await getTokenInfo(
       tokenAddress,
       provider,
       network
@@ -152,11 +152,11 @@ export async function getTokenBalancesHandler(
  *
  * @example
  * ```typescript
- * const formatted = formatBalanceHandler('1000000', 6);
+ * const formatted = formatBalance('1000000', 6);
  * console.log(formatted); // "1.0" (for USDC with 6 decimals)
  * ```
  */
-export function formatBalanceHandler(
+export function formatBalance(
   balance: string,
   decimals: number
 ): string {

@@ -6,21 +6,21 @@
  * 
  * Usage:
  * ```typescript
- * import * as Handlers from './handlers';
+ * import * as Handlers from '@/resources/blockchain/wallets/handlers';
  * // or
- * import { createWalletHandler, encryptPrivateKeyHandler } from './handlers';
+ * import { createWalletHandler, encryptPrivateKeyHandler } from '@/resources/blockchain/wallets/handlers';
  * ```
  */
 
 // Export all wallet creation handlers
-export * from './create.handler';
+export * from '@/resources/blockchain/wallets/handlers/create.handler';
 
 // Export all wallet encryption handlers
-export * from './encrypt.handler';
+export * from '@/resources/blockchain/wallets/handlers/encrypt.handler';
 
 // Export all wallet sending handlers
-export * from './send.handler';
+export * from '@/resources/blockchain/wallets/handlers/send.handler';
 
 // Export all wallet information retrieval handlers
-export * from './get.handler';
+export * from '@/resources/blockchain/wallets/handlers/get.handler';
 

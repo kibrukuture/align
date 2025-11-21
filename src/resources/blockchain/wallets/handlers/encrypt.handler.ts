@@ -14,7 +14,7 @@
  * Uses Web Crypto API which is available in both Node.js and Cloudflare Workers.
  */
 
-import type { Wallet as SDKWallet, EncryptedWallet } from "../wallets.types";
+import type { Wallet as SDKWallet, EncryptedWallet } from "@/resources/blockchain/wallets/wallets.types";
 
 /**
  * Derive encryption key from password using PBKDF2
@@ -105,12 +105,12 @@ function base64ToBytes(base64: string): Uint8Array {
  *
  * @example
  * ```typescript
- * const encrypted = await encryptPrivateKeyHandler('0x1234...abcd', 'password123');
+ * const encrypted = await encryptPrivateKey('0x1234...abcd', 'password123');
  * console.log(encrypted.encrypted); // Encrypted data
  * console.log(encrypted.iv); // IV needed for decryption
  * ```
  */
-export async function encryptPrivateKeyHandler(
+export async function encryptPrivateKey(
   privateKey: string,
   password: string
 ): Promise<EncryptedWallet> {
@@ -151,11 +151,11 @@ export async function encryptPrivateKeyHandler(
  *
  * @example
  * ```typescript
- * const privateKey = await decryptPrivateKeyHandler(encrypted, 'password123');
+ * const privateKey = await decryptPrivateKey(encrypted, 'password123');
  * console.log(privateKey); // "0x1234...abcd"
  * ```
  */
-export async function decryptPrivateKeyHandler(
+export async function decryptPrivateKey(
   encrypted: EncryptedWallet,
   password: string
 ): Promise<string> {
@@ -198,10 +198,10 @@ export async function decryptPrivateKeyHandler(
  *
  * @example
  * ```typescript
- * const encrypted = await encryptWalletHandler(wallet, 'password123');
+ * const encrypted = await encryptWallet(wallet, 'password123');
  * ```
  */
-export async function encryptWalletHandler(
+export async function encryptWallet(
   wallet: SDKWallet,
   password: string
 ): Promise<EncryptedWallet> {
@@ -245,10 +245,10 @@ export async function encryptWalletHandler(
  *
  * @example
  * ```typescript
- * const wallet = await decryptWalletHandler(encrypted, 'password123');
+ * const wallet = await decryptWallet(encrypted, 'password123');
  * ```
  */
-export async function decryptWalletHandler(
+export async function decryptWallet(
   encrypted: EncryptedWallet,
   password: string
 ): Promise<SDKWallet> {

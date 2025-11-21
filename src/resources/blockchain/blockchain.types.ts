@@ -11,16 +11,16 @@
  */
 
 // Re-export all wallet types
-export * from './wallets/wallets.types';
+export * from '@/resources/blockchain/wallets/wallets.types';
 
 // Re-export all transaction types
-export * from './transactions/transactions.types';
+export * from '@/resources/blockchain/transactions/transactions.types';
 
 // Re-export all token types
-export * from './tokens/tokens.types';
+export * from '@/resources/blockchain/tokens/tokens.types';
 
 // Re-export all provider types
-export * from './providers/providers.types';
+export * from '@/resources/blockchain/providers/providers.types';
 
 /**
  * Blockchain Resource Configuration

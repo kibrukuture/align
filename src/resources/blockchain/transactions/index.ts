@@ -6,20 +6,20 @@
  * 
  * Usage:
  * ```typescript
- * import { TransactionsResource } from './transactions';
- * import type { Transaction, TransactionStatus } from './transactions';
+ * import { TransactionsResource } from '@/resources/blockchain/transactions';
+ * import type { Transaction, TransactionStatus } from '@/resources/blockchain/transactions';
  * ```
  */
 
 // Export the transactions resource class
-export { TransactionsResource } from './transactions.resource';
+export { TransactionsResource } from '@/resources/blockchain/transactions/transactions.resource';
 
 // Export transaction types
-export * from './transactions.types';
+export * from '@/resources/blockchain/transactions/transactions.types';
 
 // Export transaction validators
-export * from './transactions.validator';
+export * from '@/resources/blockchain/transactions/transactions.validator';
 
 // Export handlers (for advanced use cases)
-export * from './handlers';
+export * from '@/resources/blockchain/transactions/handlers';
 

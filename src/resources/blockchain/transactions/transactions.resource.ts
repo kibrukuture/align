@@ -15,26 +15,26 @@
 
 import { AlignValidationError } from "@/core/errors";
 import { formatZodError } from "@/core/validation";
-import { ProvidersResource } from "../providers/providers.resource";
-import * as Handlers from "./handlers";
+import { ProvidersResource } from "@/resources/blockchain/providers/providers.resource";
+import * as Handlers from "@/resources/blockchain/transactions/handlers";
 import type {
   Transaction,
   TransactionStatus,
   GasEstimate,
   TransactionReceiptData,
-} from "./transactions.types";
+} from "@/resources/blockchain/transactions/transactions.types"; 
 import {
   SendTransactionSchema,
   SendTokenTransactionSchema,
   GasEstimateRequestSchema,
   TransactionStatusRequestSchema,
-} from "./transactions.validator";
+} from "@/resources/blockchain/transactions/transactions.validator";
 import type {
   Wallet as SDKWallet,
   Network,
   Token,
-} from "../wallets/wallets.types";
-import { getTokenAddressHandler } from "../tokens/handlers/info.handler";
+} from "@/resources/blockchain/wallets/wallets.types";
+import { getTokenAddress } from "@/resources/blockchain/tokens/handlers/info.handler";
 
 export class TransactionsResource {
   constructor(private providers: ProvidersResource) {}
@@ -62,7 +62,7 @@ export class TransactionsResource {
     const provider = this.providers.getProvider(parsed.network);
 
     // Call handler for complex logic
-    return Handlers.sendNativeTokenHandler(
+    return Handlers.sendNativeToken(
       wallet,
       parsed.to,
       parsed.amount,
@@ -99,10 +99,10 @@ export class TransactionsResource {
     const provider = this.providers.getProvider(parsed.network);
 
     // Resolve token contract address
-    const tokenAddress = getTokenAddressHandler(parsed.token, parsed.network);
+    const tokenAddress = getTokenAddress(parsed.token, parsed.network);
 
     // Call handler for complex logic
-    return Handlers.sendTokenHandler(
+    return Handlers.sendToken(
       wallet,
       tokenAddress,
       parsed.to,
@@ -141,7 +141,7 @@ export class TransactionsResource {
     const provider = this.providers.getProvider(parsed.network);
 
     // Estimate gas limit and price, then calculate total cost
-    const gasLimit = await Handlers.estimateGasHandler(
+    const gasLimit = await Handlers.estimateGas(
       parsed.from,
       parsed.to,
       parsed.amount,
@@ -149,9 +149,9 @@ export class TransactionsResource {
       provider
     );
 
-    const gasPrice = await Handlers.getGasPriceHandler(provider);
+    const gasPrice = await Handlers.getGasPrice(provider);
 
-    return Handlers.calculateTransactionCostHandler(gasLimit, gasPrice);
+    return Handlers.calculateTransactionCost(gasLimit, gasPrice);
   }
 
   /**
@@ -175,7 +175,7 @@ export class TransactionsResource {
     const parsed = validation.data;
     const provider = this.providers.getProvider(parsed.network);
 
-    return Handlers.getTransactionStatusHandler(parsed.txHash, provider);
+    return Handlers.getTransactionStatus(parsed.txHash, provider);
   }
 
   /**
@@ -200,7 +200,7 @@ export class TransactionsResource {
     const parsed = validation.data;
     const provider = this.providers.getProvider(parsed.network);
 
-    return Handlers.waitForConfirmationHandler(
+    return Handlers.waitForConfirmation(
       parsed.txHash,
       confirmations,
       provider

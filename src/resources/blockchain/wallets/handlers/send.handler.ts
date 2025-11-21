@@ -17,8 +17,8 @@
 import { Wallet, Contract, parseUnits, formatUnits } from "ethers";
 import type { JsonRpcProvider } from "ethers";
 import type { TransactionResponse } from "ethers";
-import type { Wallet as SDKWallet, Network, Token } from "../wallets.types";
-import type { Transaction } from "../../transactions/transactions.types";
+import type { Wallet as SDKWallet, Network, Token } from "@/resources/blockchain/wallets/wallets.types";
+import type { Transaction } from "@/resources/blockchain/transactions/transactions.types";
 
 /**
  * Send native token (ETH, MATIC, etc.) from a wallet
@@ -35,7 +35,7 @@ import type { Transaction } from "../../transactions/transactions.types";
  *
  * @example
  * ```typescript
- * const tx = await sendNativeTokenHandler(
+ * const tx = await sendNativeToken(
  *   wallet,
  *   '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
  *   '1.5',
@@ -44,7 +44,7 @@ import type { Transaction } from "../../transactions/transactions.types";
  * console.log(tx.hash); // Transaction hash
  * ```
  */
-export async function sendNativeTokenHandler(
+export async function sendNativeToken(
   wallet: SDKWallet,
   to: string,
   amount: string,
@@ -120,7 +120,7 @@ export async function sendNativeTokenHandler(
  *
  * @example
  * ```typescript
- * const tx = await sendTokenHandler(
+ * const tx = await sendToken(
  *   wallet,
  *   '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174', // USDC on Polygon
  *   '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
@@ -130,7 +130,7 @@ export async function sendNativeTokenHandler(
  * console.log(tx.hash); // Transaction hash
  * ```
  */
-export async function sendTokenHandler(
+export async function sendToken(
   wallet: SDKWallet,
   tokenAddress: string,
   to: string,

@@ -11,7 +11,7 @@
  */
 
 import type { JsonRpcProvider } from "ethers";
-import type { Network } from "../wallets/wallets.types";
+import type { Network } from "@/resources/blockchain/wallets/wallets.types";
 
 /**
  * Network configuration

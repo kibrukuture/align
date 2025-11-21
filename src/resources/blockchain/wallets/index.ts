@@ -12,14 +12,14 @@
  */
 
 // Export the wallets resource class
-export { WalletsResource } from './wallets.resource';
+export { WalletsResource } from '@/resources/blockchain/wallets/wallets.resource';
 
 // Export wallet types
-export * from './wallets.types';
+export * from '@/resources/blockchain/wallets/wallets.types';
 
 // Export wallet validators
-export * from './wallets.validator';
+export * from '@/resources/blockchain/wallets/wallets.validator';
 
 // Export handlers (for advanced use cases)
-export * from './handlers';
+export * from '@/resources/blockchain/wallets/handlers';
 
