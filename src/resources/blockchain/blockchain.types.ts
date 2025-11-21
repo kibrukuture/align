@@ -1,5 +1,5 @@
 /**
- * Blockchain Resource - Main Type Definitions
+ * Blockchain - Main Type Definitions
  * 
  * This file re-exports all type definitions from blockchain sub-modules.
  * Provides a single import point for all blockchain-related types.
@@ -25,9 +25,9 @@ export * from '@/resources/blockchain/tokens/tokens.types';
 export * from '@/resources/blockchain/providers/providers.types';
 
 /**
- * Blockchain Resource Configuration
+ * Blockchain Configuration
  * 
- * Optional configuration for initializing the BlockchainResource.
+ * Optional configuration for initializing the Blockchain.
  */
 export interface BlockchainConfig {
   /**

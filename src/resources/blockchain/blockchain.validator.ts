@@ -1,5 +1,5 @@
 /**
- * Blockchain Resource - Main Validation Schemas
+ * Blockchain - Main Validation Schemas
  * 
  * This file re-exports all validation schemas from blockchain sub-modules.
  * Provides a single import point for all blockchain-related validators.

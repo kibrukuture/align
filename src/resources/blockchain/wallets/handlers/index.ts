@@ -1,15 +1,16 @@
 /**
- * Wallets Handlers Module Exports
- * 
- * This file exports all wallet-related handlers.
- * Provides a clean API for importing wallet business logic.
- * 
- * Usage:
- * ```typescript
- * import * as Handlers from '@/resources/blockchain/wallets/handlers';
- * // or
- * import { createWalletHandler, encryptPrivateKeyHandler } from '@/resources/blockchain/wallets/handlers';
- * ```
+ * Wallets Handlers Module
+ *
+ * This module exports all low-level handler functions for wallet operations.
+ * These handlers contain the core business logic and are used by the `Wallets` class.
+ *
+ * **Categories:**
+ * - **Creation:** Generate new wallets, import from mnemonic/private key.
+ * - **Encryption:** Securely encrypt/decrypt private keys and wallets.
+ * - **Sending:** Transfer native tokens (ETH, MATIC) and ERC-20 tokens.
+ * - **Retrieval:** Get balances, addresses, and transaction history.
+ *
+ * @module WalletsHandlers
  */
 
 // Export all wallet creation handlers

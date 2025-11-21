@@ -63,20 +63,57 @@ const TOKEN_ADDRESSES: Record<Network, Record<Token, string>> = {
 };
 
 /**
- * Get token contract address for a network
+ * Retrieves the contract address for a known token on a specific network
  *
- * Retrieves the contract address for a token on a specific network.
+ * Uses the internal configuration to look up the correct contract address for supported tokens
+ * (USDC, USDT, EURC) on supported networks (Ethereum, Polygon, Base, etc.).
  *
- * @param token - The token identifier (usdc, usdt, eurc)
- * @param network - The network identifier
- * @returns The token contract address
+ * This helper ensures you're always using the official, verified contract address for
+ * major stablecoins, avoiding the risk of interacting with fake or malicious tokens.
  *
- * @throws {Error} If token or network is not supported
+ * **Supported Tokens:**
+ * - USDC (USD Coin)
+ * - USDT (Tether)
+ * - EURC (Euro Coin)
+ *
+ * **Supported Networks:**
+ * - Ethereum Mainnet
+ * - Polygon (POS)
+ * - Base
+ * - Arbitrum One
+ * - Optimism
+ *
+ * @param {Token} token - The token identifier
+ *   Values: "usdc" | "usdt" | "eurc"
+ *
+ * @param {Network} network - The blockchain network identifier
+ *   Values: "ethereum" | "polygon" | "base" | "arbitrum" | "optimism"
+ *
+ * @returns {string} The official contract address for the token
+ *   Example: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
+ *
+ * @throws {Error} If:
+ *   - The token is not supported on the specified network
+ *   - The network is not configured
+ *   - The address is missing from configuration
  *
  * @example
+ * Getting USDC address on Polygon
  * ```typescript
- * const address = getTokenAddress('usdc', 'polygon');
- * console.log(address); // "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
+ * const address = getTokenAddress("usdc", "polygon");
+ * console.log(address);
+ * // Output: 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174
+ * ```
+ *
+ * @example
+ * Dynamic token lookup
+ * ```typescript
+ * function getStablecoinAddresses(network: Network) {
+ *   return {
+ *     USDC: getTokenAddress("usdc", network),
+ *     USDT: getTokenAddress("usdt", network),
+ *   };
+ * }
  * ```
  */
 export function getTokenAddress(token: Token, network: Network): string {
@@ -92,29 +129,70 @@ export function getTokenAddress(token: Token, network: Network): string {
 }
 
 /**
- * Get token information (name, symbol, decimals) from contract
+ * Retrieves metadata (name, symbol, decimals) from an ERC-20 token contract
  *
- * Queries the ERC-20 token contract for its metadata.
+ * Queries the blockchain to read the standard ERC-20 metadata functions from a contract.
+ * This is useful for:
+ * - Validating that an address is actually a token contract
+ * - Getting the correct decimal places for balance formatting
+ * - Displaying token details in the UI
  *
- * @param tokenAddress - The ERC-20 token contract address
- * @param provider - The ethers.js provider instance
- * @param network - The network identifier
- * @param token - Optional token identifier (usdc, usdt, eurc) for type safety
- * @returns Promise resolving to token information
+ * The function also attempts to identify if the token is one of the supported stablecoins
+ * (USDC, USDT, EURC) by checking against the internal address registry.
  *
- * @throws {Error} If the provider is not connected, token contract is invalid, or contract doesn't implement ERC-20
+ * **Metadata Retrieved:**
+ * - `name`: Full name (e.g., "USD Coin")
+ * - `symbol`: Ticker symbol (e.g., "USDC")
+ * - `decimals`: Number of decimal places (e.g., 6)
+ *
+ * @param {string} tokenAddress - The ERC-20 token contract address
+ *   Must be a valid contract address on the connected network
+ *
+ * @param {JsonRpcProvider} provider - Connected ethers.js JSON-RPC provider
+ *   Must be connected to the network where the token exists
+ *
+ * @param {Network} network - The blockchain network identifier
+ *   Used to cross-reference with known token addresses
+ *
+ * @param {Token} [token] - Optional known token identifier
+ *   If provided, forces the result to use this identifier
+ *
+ * @returns {Promise<TokenInfo>} A promise that resolves to the token information object
+ *   Contains: token, name, symbol, decimals, address, network
+ *
+ * @throws {Error} If:
+ *   - Provider is not connected
+ *   - Contract address is invalid
+ *   - Contract does not implement ERC-20 standard functions (name, symbol, decimals)
+ *   - Network RPC error
  *
  * @example
+ * Getting info for a known token
  * ```typescript
+ * const provider = new JsonRpcProvider("https://polygon-rpc.com");
+ * const usdcAddress = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
+ * 
  * const info = await getTokenInfo(
- *   '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+ *   usdcAddress,
  *   provider,
- *   'polygon',
- *   'usdc'
+ *   "polygon"
  * );
- * console.log(info.name); // "USD Coin"
- * console.log(info.symbol); // "USDC"
- * console.log(info.decimals); // 6
+ * 
+ * console.log(`${info.name} (${info.symbol})`);
+ * console.log(`Decimals: ${info.decimals}`);
+ * // Output:
+ * // USD Coin (USDC)
+ * // Decimals: 6
+ * ```
+ *
+ * @example
+ * Getting info for an unknown custom token
+ * ```typescript
+ * const customTokenAddress = "0x..."; // Some random token
+ * const info = await getTokenInfo(customTokenAddress, provider, "ethereum");
+ * 
+ * console.log(`Found token: ${info.symbol}`);
+ * // Output: Found token: PEPE
  * ```
  */
 export async function getTokenInfo(
@@ -179,21 +257,52 @@ export async function getTokenInfo(
 }
 
 /**
- * Validate token contract address
+ * Validates if an address is a valid ERC-20 token contract
  *
- * Validates that an address is a valid ERC-20 token contract by checking
- * if it implements the required ERC-20 functions.
+ * Checks if the address exists on-chain and implements the required ERC-20 standard functions
+ * (name, symbol, decimals). This is useful for verifying user input before attempting
+ * token transfers or other operations.
  *
- * @param address - The address to validate
- * @param provider - The ethers.js provider instance
- * @returns Promise resolving to true if valid token contract, false otherwise
+ * This is a "duck typing" check - if it walks like a token and quacks like a token,
+ * we treat it as a token.
+ *
+ * @param {string} address - The contract address to validate
+ *   Must be a valid Ethereum-style address
+ *
+ * @param {JsonRpcProvider} provider - Connected ethers.js JSON-RPC provider
+ *   Must be connected to the network where the address exists
+ *
+ * @param {Network} network - The blockchain network identifier
+ *
+ * @returns {Promise<boolean>} A promise that resolves to:
+ *   - `true`: If the address is a valid ERC-20 token contract
+ *   - `false`: If the address is not a contract, or doesn't implement ERC-20
  *
  * @example
+ * Validating user input
  * ```typescript
- * const isValid = await validateTokenAddress(
- *   '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
- *   provider
- * );
+ * const userInput = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
+ * const isValid = await validateTokenAddress(userInput, provider, "polygon");
+ * 
+ * if (isValid) {
+ *   console.log("Valid token contract");
+ * } else {
+ *   console.log("Invalid token address");
+ * }
+ * ```
+ *
+ * @example
+ * checking if address is a token or wallet
+ * ```typescript
+ * async function checkAddressType(address: string, provider: JsonRpcProvider) {
+ *   // Check if it's a token
+ *   const isToken = await validateTokenAddress(address, provider, "ethereum");
+ *   if (isToken) return "token";
+ *   
+ *   // Check if it's a wallet (has code?)
+ *   const code = await provider.getCode(address);
+ *   return code === "0x" ? "wallet" : "contract";
+ * }
  * ```
  */
 export async function validateTokenAddress(

@@ -1,15 +1,15 @@
 /**
- * Transactions Handlers Module Exports
- * 
- * This file exports all transaction-related handlers.
- * Provides a clean API for importing transaction business logic.
- * 
- * Usage:
- * ```typescript
- * import * as Handlers from '@/resources/  blockchain/transactions/handlers';
- * // or
- * import { sendNativeTokenHandler, waitForConfirmationHandler } from '@/resources/blockchain/transactions/handlers';
- * ```
+ * Transactions Handlers Module
+ *
+ * This module exports all low-level handler functions for transaction operations.
+ * These handlers contain the core business logic and are used by the `Transactions` class.
+ *
+ * **Categories:**
+ * - **Sending:** Low-level functions to sign and broadcast transactions.
+ * - **Monitoring:** Poll for status updates and wait for confirmations.
+ * - **Estimation:** Calculate gas limits, gas prices, and total transaction costs.
+ *
+ * @module TransactionsHandlers
  */
 
 // Export all transaction sending handlers

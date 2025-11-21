@@ -82,25 +82,126 @@ export async function getNativeBalance(
 }
 
 /**
- * Get multiple token balances in one call
+ * Retrieves balances for multiple ERC-20 tokens in a single efficient call
  *
- * Queries balances for multiple tokens in parallel for efficiency.
+ * Queries multiple token contracts in parallel to get balances for all specified tokens.
+ * This is much more efficient than calling getTokenBalance multiple times sequentially.
  *
- * @param address - The wallet address to query
- * @param tokenAddresses - Array of ERC-20 token contract addresses
- * @param provider - The ethers.js provider instance
- * @returns Promise resolving to an array of token balances
+ * Each balance includes the token information (symbol, name, decimals) along with both
+ * raw and formatted balance values.
  *
- * @throws {Error} If the provider is not connected, address is invalid, or any token contract is invalid
+ * **Performance Benefits:**
+ * - Parallel queries (all tokens fetched simultaneously)
+ * - Single function call for multiple balances
+ * - Includes token metadata in response
+ *
+ * **Use Cases:**
+ * - Portfolio displays showing all token holdings
+ * - Balance checks before multi-token operations
+ * - Wallet dashboards with multiple assets
+ *
+ * @param {string} address - The wallet address to query
+ *   Must be a valid Ethereum-style address
+ *
+ * @param {string[]} tokenAddresses - Array of ERC-20 token contract addresses
+ *   Example: ["0x2791...", "0xc213...", "0x8f3C..."]
+ *   Each must be a valid contract address on the specified network
+ *
+ * @param {JsonRpcProvider} provider - Connected ethers.js JSON-RPC provider
+ *   Must be connected to the network where tokens exist
+ *
+ * @param {Network} network - The blockchain network identifier
+ *   Example: "polygon", "ethereum", "base", "arbitrum"
+ *
+ * @returns {Promise<TokenBalance[]>} A promise that resolves to an array of token balances
+ *   Each balance object contains:
+ *   - `token` (string): Token symbol (e.g., "USDC")
+ *   - `address` (string): Token contract address
+ *   - `balance` (string): Raw balance in smallest unit
+ *   - `balanceFormatted` (string): Human-readable balance
+ *   - `decimals` (number): Token decimal places
+ *   - `network` (Network): Network identifier
+ *
+ * @throws {Error} If:
+ *   - Provider is not connected
+ *   - Address is invalid
+ *   - Any token contract address is invalid
+ *   - Token contract doesn't implement required ERC-20 functions
+ *   - Network RPC error
  *
  * @example
+ * Getting balances for multiple stablecoins on Polygon
  * ```typescript
+ * const provider = new JsonRpcProvider("https://polygon-rpc.com");
+ * const stablecoins = [
+ *   "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174", // USDC
+ *   "0xc2132D05D31c914a87C6611C10748AEb04B58e8F", // USDT
+ *   "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063", // DAI
+ * ];
+ * 
  * const balances = await getTokenBalances(
- *   '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
- *   ['0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174', '0xc2132D05D31c914a87C6611C10748AEb04B58e8F'],
- *   provider
+ *   "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+ *   stablecoins,
+ *   provider,
+ *   "polygon"
  * );
+ * 
+ * balances.forEach(b => {
+ *   console.log(`${b.token}: ${b.balanceFormatted}`);
+ * });
+ * // Output:
+ * // USDC: 100.0
+ * // USDT: 50.5
+ * // DAI: 25.75
  * ```
+ *
+ * @example
+ * Building a portfolio display
+ * ```typescript
+ * async function getPortfolio(walletAddress: string) {
+ *   const tokens = [
+ *     "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174", // USDC
+ *     "0xc2132D05D31c914a87C6611C10748AEb04B58e8F", // USDT
+ *   ];
+ *   
+ *   const balances = await getTokenBalances(
+ *     walletAddress,
+ *     tokens,
+ *     provider,
+ *     "polygon"
+ *   );
+ *   
+ *   // Filter out zero balances
+ *   const nonZeroBalances = balances.filter(b => 
+ *     parseFloat(b.balanceFormatted) > 0
+ *   );
+ *   
+ *   return nonZeroBalances.map(b => ({
+ *     symbol: b.token,
+ *     balance: b.balanceFormatted,
+ *     network: b.network,
+ *   }));
+ * }
+ * ```
+ *
+ * @example
+ * Calculating total value in USD
+ * ```typescript
+ * const balances = await getTokenBalances(address, tokenAddresses, provider, "polygon");
+ * 
+ * // Assume you have price data
+ * const prices = { USDC: 1.0, USDT: 1.0, DAI: 1.0 };
+ * 
+ * const totalValue = balances.reduce((sum, b) => {
+ *   const value = parseFloat(b.balanceFormatted) * prices[b.token];
+ *   return sum + value;
+ * }, 0);
+ * 
+ * console.log(`Total portfolio value: $${totalValue.toFixed(2)}`);
+ * ```
+ *
+ * @see {@link getTokenBalance} To get a single token balance
+ * @see {@link getNativeBalance} To get native token balance
  */
 export async function getTokenBalances(
   address: string,
@@ -142,18 +243,70 @@ export async function getTokenBalances(
 }
 
 /**
- * Format token balance with decimals
+ * Formats a raw token balance to human-readable format
  *
- * Formats a raw balance (in wei/smallest unit) to human-readable format.
+ * Converts a balance from its smallest unit (like wei for ETH) to a decimal format
+ * that's easy for humans to read. This utility function handles the decimal conversion
+ * based on the token's decimal places.
  *
- * @param balance - The raw balance as a string (in smallest unit)
- * @param decimals - The number of decimals for the token
- * @returns Formatted balance as a string
+ * **Common Token Decimals:**
+ * - Most tokens: 18 decimals (ETH, DAI, LINK)
+ * - Stablecoins: 6 decimals (USDC, USDT)
+ * - Bitcoin-pegged: 8 decimals (WBTC)
+ *
+ * @param {string} balance - The raw balance as a string in smallest unit
+ *   Example: "1000000" (for USDC with 6 decimals = 1.0 USDC)
+ *   Example: "1500000000000000000" (for ETH with 18 decimals = 1.5 ETH)
+ *
+ * @param {number} decimals - The number of decimal places for the token
+ *   Typically 6, 8, or 18 depending on the token
+ *
+ * @returns {string} The formatted balance as a human-readable string
+ *   Example: "1.0" or "1.5" or "100.25"
  *
  * @example
+ * Formatting USDC balance (6 decimals)
  * ```typescript
- * const formatted = formatBalance('1000000', 6);
- * console.log(formatted); // "1.0" (for USDC with 6 decimals)
+ * const rawBalance = "1000000"; // 1 USDC in smallest unit
+ * const formatted = formatBalance(rawBalance, 6);
+ * console.log(formatted); // "1.0"
+ * ```
+ *
+ * @example
+ * Formatting ETH balance (18 decimals)
+ * ```typescript
+ * const rawBalance = "1500000000000000000"; // 1.5 ETH in wei
+ * const formatted = formatBalance(rawBalance, 18);
+ * console.log(formatted); // "1.5"
+ * ```
+ *
+ * @example
+ * Formatting for display
+ * ```typescript
+ * const rawBalance = "123456789"; // USDC
+ * const formatted = formatBalance(rawBalance, 6);
+ * const display = parseFloat(formatted).toFixed(2);
+ * console.log(`Balance: $${display}`);
+ * // Output: Balance: $123.46
+ * ```
+ *
+ * @example
+ * Handling different token types
+ * ```typescript
+ * const tokens = [
+ *   { raw: "1000000", decimals: 6, symbol: "USDC" },
+ *   { raw: "1000000000000000000", decimals: 18, symbol: "DAI" },
+ *   { raw: "100000000", decimals: 8, symbol: "WBTC" },
+ * ];
+ * 
+ * tokens.forEach(t => {
+ *   const formatted = formatBalance(t.raw, t.decimals);
+ *   console.log(`${t.symbol}: ${formatted}`);
+ * });
+ * // Output:
+ * // USDC: 1.0
+ * // DAI: 1.0
+ * // WBTC: 1.0
  * ```
  */
 export function formatBalance(

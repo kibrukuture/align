@@ -25,22 +25,55 @@ import {
 } from "@/resources/blockchain/wallets/handlers/send.handler";
 
 /**
- * Send native token transaction
+ * Sends a native token transaction (ETH, MATIC, etc.)
  *
- * Delegates to wallet send handler but provides transaction-specific interface.
+ * This is a convenience wrapper around the wallet's `sendNativeToken` function.
+ * It handles the entire flow of creating, signing, and broadcasting a transaction
+ * to transfer native currency from the provided wallet to a recipient.
  *
- * @param wallet - The wallet object containing address and private key
- * @param to - The recipient address
- * @param amount - The amount to send (as string, e.g., "1.5")
- * @param provider - The ethers.js provider instance
- * @returns Promise resolving to the transaction object
+ * **Process:**
+ * 1. Validates addresses and balance
+ * 2. Estimates gas limit and price
+ * 3. Constructs transaction object
+ * 4. Signs with wallet's private key
+ * 5. Broadcasts to the network
  *
- * @throws {Error} If the wallet is invalid, provider is not connected, or transaction fails
+ * @param {SDKWallet} wallet - The sender's wallet object
+ *   Must contain the private key for signing
+ *
+ * @param {string} to - The recipient's wallet address
+ *   Must be a valid Ethereum-style address
+ *
+ * @param {string} amount - The amount to send in human-readable format
+ *   Example: "1.5" (for 1.5 ETH)
+ *   The function handles conversion to wei (10^18)
+ *
+ * @param {JsonRpcProvider} provider - Connected ethers.js JSON-RPC provider
+ *   Must be connected to the network
+ *
+ * @returns {Promise<Transaction>} A promise that resolves to the submitted transaction object
+ *   Contains hash, from, to, value, nonce, etc.
+ *
+ * @throws {Error} If:
+ *   - Insufficient funds (amount + gas)
+ *   - Invalid addresses
+ *   - Network error
+ *   - Transaction execution reverted
  *
  * @example
+ * Sending 0.1 ETH
  * ```typescript
- * const tx = await sendNativeToken(wallet, '0x742d35...', '1.5', provider);
+ * const tx = await sendNativeToken(
+ *   myWallet,
+ *   "0xRecipientAddress...",
+ *   "0.1",
+ *   provider
+ * );
+ * 
+ * console.log(`Transaction sent! Hash: ${tx.hash}`);
  * ```
+ *
+ * @see {@link walletSendNativeToken} The underlying implementation in wallet handlers
  */
 export async function sendNativeToken(
   wallet: SDKWallet,
@@ -53,23 +86,58 @@ export async function sendNativeToken(
 }
 
 /**
- * Send ERC-20 token transaction
+ * Sends an ERC-20 token transaction (USDC, USDT, etc.)
  *
- * Delegates to wallet send handler but provides transaction-specific interface.
+ * This is a convenience wrapper around the wallet's `sendToken` function.
+ * It handles the complexities of interacting with ERC-20 smart contracts
+ * to transfer tokens.
  *
- * @param wallet - The wallet object containing address and private key
- * @param tokenAddress - The ERC-20 token contract address
- * @param to - The recipient address
- * @param amount - The amount to send (as string, e.g., "100.0")
- * @param provider - The ethers.js provider instance
- * @returns Promise resolving to the transaction object
+ * **Process:**
+ * 1. Validates addresses and token contract
+ * 2. Checks token balance
+ * 3. Estimates gas for contract execution
+ * 4. Encodes function call data (transfer method)
+ * 5. Signs and broadcasts transaction
  *
- * @throws {Error} If the wallet is invalid, provider is not connected, token contract is invalid, or transaction fails
+ * @param {SDKWallet} wallet - The sender's wallet object
+ *   Must contain the private key for signing
+ *
+ * @param {string} tokenAddress - The ERC-20 token contract address
+ *   Example: "0x2791..." (USDC on Polygon)
+ *
+ * @param {string} to - The recipient's wallet address
+ *
+ * @param {string} amount - The amount to send in human-readable format
+ *   Example: "100.50" (for 100.50 USDC)
+ *   The function handles conversion based on token decimals
+ *
+ * @param {JsonRpcProvider} provider - Connected ethers.js JSON-RPC provider
+ *
+ * @returns {Promise<Transaction>} A promise that resolves to the submitted transaction object
+ *
+ * @throws {Error} If:
+ *   - Insufficient token balance
+ *   - Insufficient native token for gas
+ *   - Invalid token contract
+ *   - Network error
  *
  * @example
+ * Sending 50 USDC
  * ```typescript
- * const tx = await sendToken(wallet, tokenAddress, '0x742d35...', '100.0', provider);
+ * const usdcAddress = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
+ * 
+ * const tx = await sendToken(
+ *   myWallet,
+ *   usdcAddress,
+ *   "0xRecipientAddress...",
+ *   "50.0",
+ *   provider
+ * );
+ * 
+ * console.log(`Transfer successful! Hash: ${tx.hash}`);
  * ```
+ *
+ * @see {@link walletSendToken} The underlying implementation in wallet handlers
  */
 export async function sendToken(
   wallet: SDKWallet,

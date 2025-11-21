@@ -1,21 +1,28 @@
 /**
- * Tokens Resource
+ * Tokens
  *
- * This is a thin wrapper class that handles validation, orchestration, and error handling.
- * Complex business logic is delegated to handlers in the handlers/ folder.
+ * The main entry point for token-related operations in the SDK.
+ * This class acts as a facade/orchestrator that:
+ * 1. Validates user inputs using Zod schemas
+ * 2. Manages dependencies (like Providers)
+ * 3. Delegates complex business logic to specialized handlers
+ * 4. Standardizes error handling
  *
- * Responsibilities:
- * - Input validation (using Zod schemas)
- * - Error handling and formatting
- * - Orchestrating handler calls
- * - Simple data preparation
+ * **Key Features:**
+ * - Token balance checking (USDC, USDT, etc.)
+ * - Token address lookup
+ * - Amount formatting and parsing
  *
- * Business logic (token balance queries, token info retrieval) is in handlers/.
+ * @example
+ * Initialize the resource
+ * ```typescript
+ * const sdk = new AlignSDK({ apiKey: '...' });
+ * const tokens = sdk.blockchain.tokens;
+ * ```
  */
-
 import { AlignValidationError } from "@/core/errors";
 import { formatZodError } from "@/core/validation";
-import { ProvidersResource } from "@/resources/blockchain/providers/providers.resource";
+import { Providers } from "@/resources/blockchain/providers/providers.resource";
 import * as Handlers from "@/resources/blockchain/tokens/handlers";
 import type { TokenBalance } from "@/resources/blockchain/tokens/tokens.types";
 import {
@@ -25,11 +32,30 @@ import {
 import type { Network, Token } from "@/resources/blockchain/wallets/wallets.types";
 import { parseUnits } from "ethers";
 
-export class TokensResource {
-  constructor(private providers: ProvidersResource) {}
+export class Tokens {
+  constructor(private providers: Providers) {}
 
   /**
-   * Get token balance
+   * Gets the balance of a specific token for an address
+   *
+   * @param {string} address - The wallet address to check
+   * @param {Token} token - The token identifier (e.g., "usdc")
+   * @param {Network} network - The network to query
+   *
+   * @returns {Promise<string>} The balance as a formatted string (e.g., "100.0")
+   *
+   * @throws {AlignValidationError} If inputs are invalid
+   * @throws {Error} If balance check fails
+   *
+   * @example
+   * ```typescript
+   * const balance = await sdk.blockchain.tokens.getBalance(
+   *   "0xAddress...",
+   *   "usdc",
+   *   "polygon"
+   * );
+   * console.log(`Balance: ${balance} USDC`);
+   * ```
    */
   public async getBalance(
     address: string,
@@ -60,7 +86,17 @@ export class TokensResource {
   }
 
   /**
-   * Get token contract address
+   * Gets the contract address for a supported token
+   *
+   * @param {Token} token - The token identifier
+   * @param {Network} network - The network
+   *
+   * @returns {string} The contract address
+   *
+   * @example
+   * ```typescript
+   * const address = sdk.blockchain.tokens.getAddress("usdc", "polygon");
+   * ```
    */
   public getAddress(token: Token, network: Network): string {
     const validation = TokenAddressRequestSchema.safeParse({ token, network });
@@ -75,14 +111,34 @@ export class TokensResource {
   }
 
   /**
-   * Format token amount with decimals
+   * Formats a raw token amount to a human-readable string
+   *
+   * @param {string} amount - Raw amount (e.g., "1000000")
+   * @param {number} decimals - Token decimals (e.g., 6)
+   *
+   * @returns {string} Formatted amount (e.g., "1.0")
+   *
+   * @example
+   * ```typescript
+   * const formatted = sdk.blockchain.tokens.formatAmount("1000000", 6);
+   * ```
    */
   public formatAmount(amount: string, decimals: number): string {
     return Handlers.formatBalance(amount, decimals);
   }
 
   /**
-   * Parse token amount to raw format
+   * Parses a human-readable amount to a raw token amount
+   *
+   * @param {string} amount - Formatted amount (e.g., "1.0")
+   * @param {number} decimals - Token decimals (e.g., 6)
+   *
+   * @returns {string} Raw amount (e.g., "1000000")
+   *
+   * @example
+   * ```typescript
+   * const raw = sdk.blockchain.tokens.parseAmount("1.0", 6);
+   * ```
    */
   public parseAmount(amount: string, decimals: number): string {
     return parseUnits(amount, decimals).toString();

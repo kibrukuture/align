@@ -1,21 +1,30 @@
 /**
- * Transactions Resource
+ * Transactions
  *
- * This is a thin wrapper class that handles validation, orchestration, and error handling.
- * Complex business logic is delegated to handlers in the handlers/ folder.
+ * The main entry point for transaction-related operations in the SDK.
+ * This class acts as a facade/orchestrator that:
+ * 1. Validates user inputs using Zod schemas
+ * 2. Manages dependencies (like Providers)
+ * 3. Delegates complex business logic to specialized handlers
+ * 4. Standardizes error handling
  *
- * Responsibilities:
- * - Input validation (using Zod schemas)
- * - Error handling and formatting
- * - Orchestrating handler calls
- * - Simple data preparation
+ * **Key Features:**
+ * - Sending native transactions (ETH, MATIC)
+ * - Sending ERC-20 token transactions (USDC, USDT)
+ * - Gas estimation and cost calculation
+ * - Transaction status monitoring
+ * - Confirmation waiting
  *
- * Business logic (transaction sending, monitoring, gas estimation) is in handlers/.
+ * @example
+ * Initialize the resource
+ * ```typescript
+ * const sdk = new AlignSDK({ apiKey: '...' });
+ * const transactions = sdk.blockchain.transactions;
+ * ```
  */
-
 import { AlignValidationError } from "@/core/errors";
 import { formatZodError } from "@/core/validation";
-import { ProvidersResource } from "@/resources/blockchain/providers/providers.resource";
+import { Providers } from "@/resources/blockchain/providers/providers.resource";
 import * as Handlers from "@/resources/blockchain/transactions/handlers";
 import type {
   Transaction,
@@ -36,11 +45,32 @@ import type {
 } from "@/resources/blockchain/wallets/wallets.types";
 import { getTokenAddress } from "@/resources/blockchain/tokens/handlers/info.handler";
 
-export class TransactionsResource {
-  constructor(private providers: ProvidersResource) {}
+export class Transactions {
+  constructor(private providers: Providers) {}
 
   /**
-   * Send native token transaction
+   * Sends a native token transaction (ETH, MATIC, etc.)
+   *
+   * @param {SDKWallet} wallet - The sender's wallet object
+   * @param {string} to - The recipient's address
+   * @param {string} amount - Amount to send (e.g., "0.1")
+   * @param {Network} network - The network to use
+   *
+   * @returns {Promise<Transaction>} The submitted transaction object
+   *
+   * @throws {AlignValidationError} If inputs are invalid
+   * @throws {Error} If transaction fails
+   *
+   * @example
+   * ```typescript
+   * const tx = await sdk.blockchain.transactions.sendNativeToken(
+   *   wallet,
+   *   "0xRecipient...",
+   *   "0.1",
+   *   "ethereum"
+   * );
+   * console.log(`Tx Hash: ${tx.hash}`);
+   * ```
    */
   public async sendNativeToken(
     wallet: SDKWallet,
@@ -71,7 +101,29 @@ export class TransactionsResource {
   }
 
   /**
-   * Send ERC-20 token transaction
+   * Sends an ERC-20 token transaction
+   *
+   * @param {SDKWallet} wallet - The sender's wallet object
+   * @param {Token} token - The token identifier (e.g., "usdc")
+   * @param {string} to - The recipient's address
+   * @param {string} amount - Amount to send (e.g., "100.0")
+   * @param {Network} network - The network to use
+   *
+   * @returns {Promise<Transaction>} The submitted transaction object
+   *
+   * @throws {AlignValidationError} If inputs are invalid
+   * @throws {Error} If transaction fails
+   *
+   * @example
+   * ```typescript
+   * const tx = await sdk.blockchain.transactions.sendToken(
+   *   wallet,
+   *   "usdc",
+   *   "0xRecipient...",
+   *   "50.0",
+   *   "polygon"
+   * );
+   * ```
    */
   public async sendToken(
     wallet: SDKWallet,
@@ -112,7 +164,29 @@ export class TransactionsResource {
   }
 
   /**
-   * Estimate gas for transaction
+   * Estimates the gas cost for a transaction
+   *
+   * Calculates the estimated gas limit and total cost in native currency.
+   * Useful for showing "Max Network Fee" in UIs.
+   *
+   * @param {string} from - Sender address
+   * @param {string} to - Recipient address
+   * @param {string} amount - Amount to send
+   * @param {Network} network - Network to use
+   * @param {string} [data] - Optional transaction data
+   *
+   * @returns {Promise<GasEstimate>} Gas estimation details
+   *
+   * @example
+   * ```typescript
+   * const estimate = await sdk.blockchain.transactions.estimateGas(
+   *   fromAddress,
+   *   toAddress,
+   *   "1.0",
+   *   "ethereum"
+   * );
+   * console.log(`Estimated Fee: ${estimate.totalCostFormatted} ETH`);
+   * ```
    */
   public async estimateGas(
     from: string,
@@ -155,7 +229,17 @@ export class TransactionsResource {
   }
 
   /**
-   * Get transaction status
+   * Gets the current status of a transaction
+   *
+   * @param {string} txHash - Transaction hash
+   * @param {Network} network - Network to check
+   *
+   * @returns {Promise<TransactionStatus>} "pending" | "confirmed" | "failed"
+   *
+   * @example
+   * ```typescript
+   * const status = await sdk.blockchain.transactions.getStatus(hash, "polygon");
+   * ```
    */
   public async getStatus(
     txHash: string,
@@ -179,7 +263,20 @@ export class TransactionsResource {
   }
 
   /**
-   * Wait for transaction confirmation
+   * Waits for a transaction to be confirmed
+   *
+   * Blocks until the transaction reaches the specified number of confirmations.
+   *
+   * @param {string} txHash - Transaction hash
+   * @param {Network} network - Network to check
+   * @param {number} [confirmations=1] - Number of confirmations to wait for
+   *
+   * @returns {Promise<TransactionReceiptData>} The transaction receipt
+   *
+   * @example
+   * ```typescript
+   * const receipt = await sdk.blockchain.transactions.waitForConfirmation(hash, "ethereum", 3);
+   * ```
    */
   public async waitForConfirmation(
     txHash: string,

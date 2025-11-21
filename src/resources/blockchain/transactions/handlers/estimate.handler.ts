@@ -19,29 +19,66 @@ import type { JsonRpcProvider } from "ethers";
 import type { GasEstimate } from "@/resources/blockchain/transactions/transactions.types";
 
 /**
- * Estimate gas limit for a transaction
+ * Estimates the gas limit required for a transaction
  *
- * Estimates the gas limit needed for a transaction without actually sending it.
+ * Simulates the transaction execution on the blockchain node to determine how much gas
+ * will be consumed. This is crucial for ensuring transactions don't fail out of gas.
  *
- * @param from - The sender address
- * @param to - The recipient address
- * @param value - The transaction value in wei (as string)
- * @param data - Optional transaction data (for contract calls)
- * @param provider - The ethers.js provider instance
- * @returns Promise resolving to the estimated gas limit as a string
+ * **How it works:**
+ * The node runs the transaction in a virtual environment without broadcasting it.
+ * It returns the exact amount of gas used.
  *
- * @throws {Error} If the provider is not connected or estimation fails
+ * **Important Notes:**
+ * - The actual gas used may vary slightly from the estimate
+ * - It's common practice to add a buffer (e.g., +10-20%) to this estimate
+ * - If the transaction would fail (e.g., insufficient funds), this function will throw
+ *
+ * @param {string} from - The sender's wallet address
+ *   Must be a valid Ethereum-style address
+ *
+ * @param {string} to - The recipient's wallet address
+ *   Must be a valid Ethereum-style address
+ *
+ * @param {string} value - The amount of native token to send in wei
+ *   Example: "1000000000000000000" (1 ETH)
+ *   Use "0" for contract calls that don't send value
+ *
+ * @param {string | undefined} data - Optional hex data for contract interactions
+ *   Example: "0xa9059cbb..." (ERC-20 transfer data)
+ *   Use undefined or "0x" for simple transfers
+ *
+ * @param {JsonRpcProvider} provider - Connected ethers.js JSON-RPC provider
+ *   Must be connected to the network
+ *
+ * @returns {Promise<string>} A promise that resolves to the estimated gas limit
+ *   Example: "21000" (standard transfer) or "65000" (token transfer)
+ *
+ * @throws {Error} If:
+ *   - Transaction would fail (revert)
+ *   - Provider is not connected
+ *   - Addresses are invalid
+ *   - Network RPC error
  *
  * @example
+ * Estimating a simple transfer
  * ```typescript
  * const gasLimit = await estimateGas(
- *   '0x742d35...',
- *   '0x1234...abcd',
- *   '1000000000000000000',
- *   undefined,
+ *   "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb", // From
+ *   "0x1234567890abcdef1234567890abcdef12345678", // To
+ *   "1000000000000000000", // 1 ETH in wei
+ *   undefined, // No data
  *   provider
  * );
- * console.log(gasLimit); // "21000"
+ * console.log(`Gas limit: ${gasLimit}`); // "21000"
+ * ```
+ *
+ * @example
+ * Estimating with a buffer
+ * ```typescript
+ * const estimated = await estimateGas(from, to, value, data, provider);
+ * 
+ * // Add 20% buffer for safety
+ * const safeGasLimit = (BigInt(estimated) * 120n / 100n).toString();
  * ```
  */
 export async function estimateGas(
@@ -63,19 +100,47 @@ export async function estimateGas(
 }
 
 /**
- * Get current gas price
+ * Retrieves the current gas price from the network
  *
- * Retrieves the current gas price from the network.
+ * Queries the blockchain node for the current fee data. This supports both:
+ * - Legacy gas price (pre-EIP-1559)
+ * - EIP-1559 maxFeePerGas (modern standard)
  *
- * @param provider - The ethers.js provider instance
- * @returns Promise resolving to the gas price in wei as a string
+ * The returned price represents the cost per unit of gas in wei.
+ * Total transaction cost = gasLimit * gasPrice.
  *
- * @throws {Error} If the provider is not connected
+ * **Network Variations:**
+ * - Polygon: Often has higher gas prices during congestion
+ * - Arbitrum/Optimism: L2s usually have much lower gas prices
+ * - Ethereum: Gas prices fluctuate significantly
+ *
+ * @param {JsonRpcProvider} provider - Connected ethers.js JSON-RPC provider
+ *   Must be connected to the network
+ *
+ * @returns {Promise<string>} A promise that resolves to the gas price in wei
+ *   Example: "30000000000" (30 gwei)
+ *
+ * @throws {Error} If:
+ *   - Provider is not connected
+ *   - Network fails to return fee data
  *
  * @example
+ * Getting current gas price
  * ```typescript
  * const gasPrice = await getGasPrice(provider);
- * console.log(gasPrice); // "20000000000" (20 gwei)
+ * console.log(`Gas Price: ${gasPrice} wei`);
+ * ```
+ *
+ * @example
+ * Displaying in Gwei (human readable)
+ * ```typescript
+ * import { formatUnits } from "ethers";
+ * 
+ * const gasPriceWei = await getGasPrice(provider);
+ * const gasPriceGwei = formatUnits(gasPriceWei, 9);
+ * 
+ * console.log(`Current Gas: ${gasPriceGwei} Gwei`);
+ * // Output: Current Gas: 30.5 Gwei
  * ```
  */
 export async function getGasPrice(
@@ -95,28 +160,50 @@ export async function getGasPrice(
 }
 
 /**
- * Estimate gas for ERC-20 token transfer
+ * Estimates the gas limit for an ERC-20 token transfer
  *
- * Estimates the gas limit needed for an ERC-20 token transfer.
+ * Specifically estimates gas for calling the `transfer` function on an ERC-20 token contract.
+ * This is more complex than a native transfer because it involves executing smart contract code.
  *
- * @param from - The sender address
- * @param tokenAddress - The ERC-20 token contract address
- * @param to - The recipient address
- * @param amount - The amount to transfer in wei (as string)
- * @param provider - The ethers.js provider instance
- * @returns Promise resolving to the estimated gas limit as a string
+ * **Factors affecting token transfer gas:**
+ * - Token contract implementation complexity
+ * - Storage updates (changing balances)
+ * - Network congestion
  *
- * @throws {Error} If the provider is not connected, token contract is invalid, or estimation fails
+ * Typical cost is ~65,000 gas, but can vary.
+ *
+ * @param {string} from - The sender's wallet address
+ *   Must have enough tokens to transfer
+ *
+ * @param {string} tokenAddress - The ERC-20 token contract address
+ *   Must be a valid contract
+ *
+ * @param {string} to - The recipient's wallet address
+ *
+ * @param {string} amount - The amount to transfer in token's smallest unit
+ *   Example: "1000000" (1 USDC)
+ *
+ * @param {JsonRpcProvider} provider - Connected ethers.js JSON-RPC provider
+ *
+ * @returns {Promise<string>} A promise that resolves to the estimated gas limit
+ *   Example: "65000"
+ *
+ * @throws {Error} If:
+ *   - Token contract is invalid
+ *   - Sender has insufficient tokens (some contracts check this)
+ *   - Transaction would revert
  *
  * @example
+ * Estimating USDC transfer
  * ```typescript
  * const gasLimit = await estimateTokenTransferGas(
- *   '0x742d35...',
- *   '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174', // USDC
- *   '0x1234...abcd',
- *   '100000000', // 100 USDC (6 decimals)
+ *   "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb", // From
+ *   "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174", // USDC Contract
+ *   "0x1234567890abcdef1234567890abcdef12345678", // To
+ *   "1000000", // 1 USDC
  *   provider
  * );
+ * console.log(`Estimated gas: ${gasLimit}`);
  * ```
  */
 export async function estimateTokenTransferGas(
@@ -148,20 +235,51 @@ export async function estimateTokenTransferGas(
 }
 
 /**
- * Calculate total transaction cost
+ * Calculates the total estimated cost of a transaction
  *
- * Calculates the total cost of a transaction (gasLimit * gasPrice) in wei
- * and formats it in the native token.
+ * Combines gas limit and gas price to determine the total network fee in native tokens.
+ * This is useful for showing users "Max Network Fee" before they confirm a transaction.
  *
- * @param gasLimit - The gas limit as a string
- * @param gasPrice - The gas price in wei as a string
- * @returns Promise resolving to gas estimate with total cost
+ * **Formula:**
+ * Total Cost (wei) = Gas Limit * Gas Price (wei)
+ *
+ * @param {string} gasLimit - The estimated gas limit
+ *   Example: "21000"
+ *
+ * @param {string} gasPrice - The current gas price in wei
+ *   Example: "30000000000" (30 gwei)
+ *
+ * @returns {Promise<GasEstimate>} A promise that resolves to the cost estimate object:
+ *   - `gasLimit`: The input gas limit
+ *   - `gasPrice`: The input gas price
+ *   - `totalCost`: Total cost in wei (string)
+ *   - `totalCostFormatted`: Total cost in native token (e.g., "0.00063")
  *
  * @example
+ * Calculating cost for UI
  * ```typescript
- * const estimate = await calculateTransactionCost('21000', '20000000000');
- * console.log(estimate.totalCost); // "420000000000000" (in wei)
- * console.log(estimate.totalCostFormatted); // "0.00042" (in ETH)
+ * const gasLimit = "21000";
+ * const gasPrice = "30000000000"; // 30 gwei
+ * 
+ * const estimate = await calculateTransactionCost(gasLimit, gasPrice);
+ * 
+ * console.log(`Max Fee: ${estimate.totalCostFormatted} ETH`);
+ * // Output: Max Fee: 0.00063 ETH
+ * ```
+ *
+ * @example
+ * Full estimation flow
+ * ```typescript
+ * // 1. Get gas price
+ * const gasPrice = await getGasPrice(provider);
+ * 
+ * // 2. Estimate limit
+ * const gasLimit = await estimateGas(from, to, value, undefined, provider);
+ * 
+ * // 3. Calculate total
+ * const cost = await calculateTransactionCost(gasLimit, gasPrice);
+ * 
+ * console.log(`Estimated fee: ${cost.totalCostFormatted}`);
  * ```
  */
 export async function calculateTransactionCost(

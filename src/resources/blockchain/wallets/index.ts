@@ -1,18 +1,23 @@
 /**
- * Wallets Module Exports
- * 
- * This file exports the WalletsResource class and all related types and validators.
- * Provides a clean API for importing wallet functionality.
- * 
+ * Wallets Module
+ *
+ * This module provides functionality for managing blockchain wallets.
+ * It includes the main resource class, type definitions, validators, and low-level handlers.
+ *
+ * **Key Components:**
+ * - {@link Wallets}: The main facade for wallet operations.
+ * - {@link Wallet}: Type definition for a wallet object.
+ * - {@link EncryptedWallet}: Type definition for encrypted wallet data.
+ *
  * Usage:
  * ```typescript
- * import { WalletsResource } from './wallets';
+ * import { Wallets } from './wallets';
  * import type { Wallet, EncryptedWallet } from './wallets';
  * ```
  */
 
 // Export the wallets resource class
-export { WalletsResource } from '@/resources/blockchain/wallets/wallets.resource';
+export { Wallets } from '@/resources/blockchain/wallets/wallets.resource';
 
 // Export wallet types
 export * from '@/resources/blockchain/wallets/wallets.types';

@@ -1,21 +1,31 @@
 /**
- * Providers Resource
+ * Providers
  *
- * This class manages RPC provider instances for different blockchain networks.
- * Caches providers to avoid recreating expensive connections.
+ * Manages connections to blockchain networks (RPC providers).
+ * This class acts as a singleton-like registry that:
+ * 1. Maintains active connections to different chains
+ * 2. Handles network configuration
+ * 3. Supports custom RPC URLs
+ * 4. Caches providers for performance
  *
- * Handles:
- * - Provider instance creation and caching
- * - Custom RPC URL configuration
- * - Network configuration management
- * - Provider connection status
+ * **Key Features:**
+ * - Lazy initialization of providers
+ * - Connection pooling/caching
+ * - Support for all major EVM chains
+ * - Custom RPC configuration
  *
- * This is a shared resource used by wallets, transactions, and tokens.
+ * @example
+ * Initialize the resource
+ * ```typescript
+ * const providers = new Providers({
+ *   ethereum: 'https://eth-mainnet.g.alchemy.com/v2/...',
+ *   polygon: 'https://polygon-mainnet.g.alchemy.com/v2/...'
+ * });
+ * ```
  */
-
 import { JsonRpcProvider } from "ethers";
-import type { Network } from "@/resources/blockchain/wallets/wallets.types";
-import type { NetworkConfig } from "@/resources/blockchain/providers/providers.types"; 
+import type {NetworkConfig} from "@/resources/blockchain/providers/providers.types"; 
+import type {Network} from "@/resources/blockchain/blockchain.types";
 
 const DEFAULT_NETWORK_CONFIGS: Record<Network, NetworkConfig> = {
   ethereum: {
@@ -69,7 +79,7 @@ const DEFAULT_NETWORK_CONFIGS: Record<Network, NetworkConfig> = {
   },
 };
 
-export class ProvidersResource {
+export class Providers {
   // Cache provider instances (expensive to create)
   private providers: Map<Network, JsonRpcProvider> = new Map();
 
@@ -93,8 +103,23 @@ export class ProvidersResource {
   }
 
   /**
-   * Get or create RPC provider for a network
-   * Providers are cached for efficiency
+   * Gets an active JSON-RPC provider for the specified network
+   *
+   * Returns a cached provider instance if one exists, or creates a new one.
+   * This ensures we don't create multiple connections to the same network,
+   * which saves memory and prevents hitting rate limits.
+   *
+   * @param {Network} network - The network identifier (e.g., "ethereum", "polygon")
+   *
+   * @returns {JsonRpcProvider} An ethers.js JsonRpcProvider instance
+   *
+   * @throws {Error} If the network is not supported
+   *
+   * @example
+   * ```typescript
+   * const provider = sdk.blockchain.providers.getProvider("polygon");
+   * const feeData = await provider.getFeeData();
+   * ```
    */
   public getProvider(network: Network): JsonRpcProvider {
     const cached = this.providers.get(network);
@@ -118,7 +143,25 @@ export class ProvidersResource {
   }
 
   /**
-   * Set custom RPC URL for a network
+   * Overrides the default RPC URL for a specific network
+   *
+   * Useful for using premium RPC providers (Alchemy, Infura, QuickNode) instead
+   * of public endpoints, or for connecting to local development nodes.
+   *
+   * **Note:** This clears the cached provider for this network, forcing a reconnection
+   * on the next `getProvider` call.
+   *
+   * @param {Network} network - The network to configure
+   * @param {string} rpcUrl - The new RPC URL
+   *
+   * @example
+   * Using Alchemy
+   * ```typescript
+   * sdk.blockchain.providers.setCustomRpc(
+   *   "ethereum",
+   *   "https://eth-mainnet.g.alchemy.com/v2/YOUR-API-KEY"
+   * );
+   * ```
    */
   public setCustomRpc(network: Network, rpcUrl: string): void {
     this.customRpcUrls.set(network, rpcUrl);
@@ -126,7 +169,19 @@ export class ProvidersResource {
   }
 
   /**
-   * Get network configuration
+   * Retrieves configuration details for a supported network
+   *
+   * @param {Network} network - The network identifier
+   *
+   * @returns {NetworkConfig} Configuration object containing chainId, name, currency, etc.
+   *
+   * @throws {Error} If the network is not supported
+   *
+   * @example
+   * ```typescript
+   * const config = sdk.blockchain.providers.getNetworkInfo("base");
+   * console.log(`Chain ID: ${config.chainId}`); // 8453
+   * ```
    */
   public getNetworkInfo(network: Network): NetworkConfig {
     const config = this.networkConfigs.get(network);

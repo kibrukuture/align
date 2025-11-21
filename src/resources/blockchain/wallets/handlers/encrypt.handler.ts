@@ -95,20 +95,70 @@ function base64ToBytes(base64: string): Uint8Array {
 }
 
 /**
- * Encrypt private key with password using AES-256-GCM
+ * Encrypts a private key using AES-256-GCM encryption with password-based key derivation
  *
- * @param privateKey - The private key to encrypt
- * @param password - The password for encryption
- * @returns Promise resolving to encrypted wallet data
+ * Securely encrypts a wallet's private key using industry-standard AES-256-GCM encryption.
+ * The password is used to derive an encryption key using PBKDF2 with 100,000 iterations,
+ * making brute-force attacks computationally expensive.
  *
- * @throws {Error} If encryption fails
+ * This function is useful when you only need to encrypt the private key (not the full wallet object).
+ * The encrypted data can be safely stored in a database.
+ *
+ * **Security Features:**
+ * - AES-256-GCM authenticated encryption
+ * - PBKDF2 key derivation with 100,000 iterations
+ * - Random salt and IV for each encryption
+ * - Works in Node.js, browsers, and Cloudflare Workers (Web Crypto API)
+ *
+ * @param {string} privateKey - The private key to encrypt (with or without "0x" prefix)
+ *   Example: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+ *
+ * @param {string} password - The password used for encryption
+ *   Should be strong and memorable. The same password is required for decryption.
+ *
+ * @returns {Promise<EncryptedWallet>} A promise that resolves to an object containing:
+ *   - `encrypted` (string): Base64-encoded encrypted private key
+ *   - `iv` (string): Base64-encoded initialization vector (needed for decryption)
+ *   - `salt` (string): Base64-encoded salt (needed for decryption)
+ *   - `algorithm` (string): "aes-256-gcm" (encryption algorithm used)
+ *
+ * @throws {Error} If encryption fails (rare, usually due to system crypto unavailability)
  *
  * @example
+ * Basic private key encryption
  * ```typescript
- * const encrypted = await encryptPrivateKey('0x1234...abcd', 'password123');
- * console.log(encrypted.encrypted); // Encrypted data
- * console.log(encrypted.iv); // IV needed for decryption
+ * const privateKey = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
+ * const encrypted = await encryptPrivateKey(privateKey, "myStrongPassword123");
+ * 
+ * console.log("Encrypted:", encrypted.encrypted);
+ * console.log("IV:", encrypted.iv);
+ * console.log("Salt:", encrypted.salt);
+ * 
+ * // Store in database
+ * await database.keys.create({
+ *   userId: "user123",
+ *   encrypted: encrypted.encrypted,
+ *   iv: encrypted.iv,
+ *   salt: encrypted.salt,
+ * });
  * ```
+ *
+ * @example
+ * Encrypting before API response
+ * ```typescript
+ * async function createAndEncryptKey(password: string) {
+ *   const wallet = await createWallet();
+ *   const encrypted = await encryptPrivateKey(wallet.privateKey, password);
+ *   
+ *   return {
+ *     address: wallet.address,
+ *     encryptedKey: encrypted,
+ *   };
+ * }
+ * ```
+ *
+ * @see {@link decryptPrivateKey} To decrypt the private key
+ * @see {@link encryptWallet} To encrypt the entire wallet object (including mnemonic)
  */
 export async function encryptPrivateKey(
   privateKey: string,
@@ -141,19 +191,69 @@ export async function encryptPrivateKey(
 }
 
 /**
- * Decrypt private key with password
+ * Decrypts a private key that was encrypted with encryptPrivateKey
  *
- * @param encrypted - The encrypted wallet data
- * @param password - The password used for encryption
- * @returns Promise resolving to the decrypted private key
+ * Decrypts an encrypted private key using the password that was used during encryption.
+ * Uses AES-256-GCM decryption with PBKDF2 key derivation.
  *
- * @throws {Error} If decryption fails or password is incorrect
+ * The decryption will fail if:
+ * - The password is incorrect
+ * - The encrypted data has been tampered with or corrupted
+ * - The IV or salt is missing or invalid
+ *
+ * @param {EncryptedWallet} encrypted - The encrypted wallet data object containing:
+ *   - `encrypted`: Base64-encoded encrypted private key
+ *   - `iv`: Base64-encoded initialization vector
+ *   - `salt`: Base64-encoded salt used for key derivation
+ *
+ * @param {string} password - The password that was used during encryption
+ *   Must exactly match the password used in encryptPrivateKey
+ *
+ * @returns {Promise<string>} A promise that resolves to the decrypted private key
+ *   Example: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+ *
+ * @throws {Error} With message "Decryption failed. Incorrect password or corrupted data." if:
+ *   - The password is wrong
+ *   - The encrypted data is corrupted
+ *   - The IV or salt is invalid
  *
  * @example
+ * Decrypting a private key from database
  * ```typescript
- * const privateKey = await decryptPrivateKey(encrypted, 'password123');
- * console.log(privateKey); // "0x1234...abcd"
+ * // Retrieve encrypted key from database
+ * const encryptedData = await database.keys.findOne({ userId: "user123" });
+ * 
+ * try {
+ *   const privateKey = await decryptPrivateKey(encryptedData, userPassword);
+ *   console.log("Decrypted private key:", privateKey);
+ *   
+ *   // Use the private key to create a wallet
+ *   const wallet = await createFromPrivateKey(privateKey);
+ *   
+ *   // Clear from memory after use
+ *   privateKey = "";
+ * } catch (error) {
+ *   console.error("Failed to decrypt:", error.message);
+ * }
  * ```
+ *
+ * @example
+ * Handling incorrect password
+ * ```typescript
+ * async function unlockPrivateKey(userId: string, password: string) {
+ *   const encrypted = await database.getEncryptedKey(userId);
+ *   
+ *   try {
+ *     const privateKey = await decryptPrivateKey(encrypted, password);
+ *     return { success: true, privateKey };
+ *   } catch (error) {
+ *     return { success: false, error: "Incorrect password" };
+ *   }
+ * }
+ * ```
+ *
+ * @see {@link encryptPrivateKey} To encrypt a private key
+ * @see {@link decryptWallet} To decrypt a full wallet object
  */
 export async function decryptPrivateKey(
   encrypted: EncryptedWallet,
@@ -188,18 +288,96 @@ export async function decryptPrivateKey(
 }
 
 /**
- * Encrypt entire wallet object with password
+ * Encrypts an entire wallet object (including private key and mnemonic) using AES-256-GCM
  *
- * @param wallet - The wallet object to encrypt
- * @param password - The password for encryption
- * @returns Promise resolving to encrypted wallet data
+ * Securely encrypts a complete wallet object, including the private key and mnemonic phrase (if present).
+ * This is more comprehensive than encryptPrivateKey as it preserves the entire wallet structure.
+ *
+ * The wallet is serialized to JSON, then encrypted using AES-256-GCM with PBKDF2 key derivation.
+ * This ensures that both the private key and mnemonic are protected with the same strong encryption.
+ *
+ * **What gets encrypted:**
+ * - Private key
+ * - Mnemonic phrase (if present)
+ * - Derivation path (if present)
+ * - Any other wallet metadata
+ *
+ * **What stays unencrypted:**
+ * - Wallet address (safe to store publicly)
+ *
+ * @param {SDKWallet} wallet - The complete wallet object to encrypt, containing:
+ *   - `address`: The wallet address
+ *   - `privateKey`: The private key
+ *   - `mnemonic`: Optional mnemonic object with phrase and path
+ *
+ * @param {string} password - The password used for encryption
+ *   Should be strong and memorable. Required for decryption.
+ *
+ * @returns {Promise<EncryptedWallet>} A promise that resolves to an object containing:
+ *   - `encrypted` (string): Base64-encoded encrypted wallet JSON
+ *   - `iv` (string): Base64-encoded initialization vector
+ *   - `salt` (string): Base64-encoded salt
+ *   - `algorithm` (string): "aes-256-gcm"
  *
  * @throws {Error} If encryption fails
  *
  * @example
+ * Encrypting a wallet for database storage
  * ```typescript
- * const encrypted = await encryptWallet(wallet, 'password123');
+ * const wallet = await createWallet();
+ * const encrypted = await encryptWallet(wallet, "userPassword123");
+ * 
+ * // Store in database
+ * await database.wallets.create({
+ *   userId: "user123",
+ *   address: wallet.address, // Store address unencrypted for lookups
+ *   encrypted: encrypted.encrypted,
+ *   iv: encrypted.iv,
+ *   salt: encrypted.salt,
+ *   algorithm: encrypted.algorithm,
+ * });
+ * 
+ * console.log("Wallet encrypted and stored successfully");
  * ```
+ *
+ * @example
+ * Encrypting after wallet creation
+ * ```typescript
+ * async function createUserWallet(userId: string, password: string) {
+ *   // Create new wallet
+ *   const wallet = await createWallet();
+ *   
+ *   // Encrypt before storing
+ *   const encrypted = await encryptWallet(wallet, password);
+ *   
+ *   // Save to database
+ *   await database.wallets.insert({
+ *     userId,
+ *     address: wallet.address,
+ *     ...encrypted,
+ *     createdAt: new Date(),
+ *   });
+ *   
+ *   return {
+ *     address: wallet.address,
+ *     mnemonic: wallet.mnemonic, // Return mnemonic once for user to backup
+ *   };
+ * }
+ * ```
+ *
+ * @example
+ * Encrypting imported wallet
+ * ```typescript
+ * const mnemonic = "abandon abandon abandon...";
+ * const wallet = await createFromMnemonic(mnemonic);
+ * const encrypted = await encryptWallet(wallet, "securePassword");
+ * 
+ * // Wallet with mnemonic is now encrypted
+ * console.log("Mnemonic encrypted:", encrypted.encrypted.length > 0);
+ * ```
+ *
+ * @see {@link decryptWallet} To decrypt the wallet
+ * @see {@link encryptPrivateKey} To encrypt only the private key
  */
 export async function encryptWallet(
   wallet: SDKWallet,
@@ -235,18 +413,100 @@ export async function encryptWallet(
 }
 
 /**
- * Decrypt wallet object with password
+ * Decrypts a wallet object that was encrypted with encryptWallet
  *
- * @param encrypted - The encrypted wallet data
- * @param password - The password used for encryption
- * @returns Promise resolving to the decrypted wallet object
+ * Decrypts an encrypted wallet and returns the complete wallet object with private key and mnemonic.
+ * This is the counterpart to encryptWallet and restores the full wallet structure.
  *
- * @throws {Error} If decryption fails or password is incorrect
+ * After decryption, you can use the wallet to sign transactions. For security, always clear
+ * the decrypted wallet from memory after use.
+ *
+ * @param {EncryptedWallet} encrypted - The encrypted wallet data object containing:
+ *   - `encrypted`: Base64-encoded encrypted wallet JSON
+ *   - `iv`: Base64-encoded initialization vector
+ *   - `salt`: Base64-encoded salt
+ *
+ * @param {string} password - The password that was used during encryption
+ *   Must exactly match the password used in encryptWallet
+ *
+ * @returns {Promise<SDKWallet>} A promise that resolves to the decrypted wallet object:
+ *   - `address` (string): The wallet address
+ *   - `privateKey` (string): The decrypted private key
+ *   - `mnemonic` (object | undefined): The decrypted mnemonic (if it was encrypted)
+ *
+ * @throws {Error} With message "Decryption failed. Incorrect password or corrupted data." if:
+ *   - The password is incorrect
+ *   - The encrypted data is corrupted or tampered with
+ *   - The IV or salt is missing or invalid
  *
  * @example
+ * Decrypting wallet for transaction signing
  * ```typescript
- * const wallet = await decryptWallet(encrypted, 'password123');
+ * // User wants to send a transaction
+ * const encryptedWallet = await database.wallets.findOne({ userId });
+ * 
+ * try {
+ *   // Decrypt with user's password
+ *   const wallet = await decryptWallet(encryptedWallet, userPassword);
+ *   
+ *   // Sign and send transaction
+ *   const tx = await sendNativeToken(
+ *     wallet,
+ *     recipientAddress,
+ *     "0.1",
+ *     "polygon"
+ *   );
+ *   
+ *   console.log("Transaction sent:", tx.hash);
+ *   
+ *   // IMPORTANT: Clear sensitive data from memory
+ *   wallet.privateKey = "";
+ *   if (wallet.mnemonic) wallet.mnemonic.phrase = "";
+ *   
+ * } catch (error) {
+ *   console.error("Failed to decrypt wallet:", error.message);
+ * }
  * ```
+ *
+ * @example
+ * Handling decryption with error recovery
+ * ```typescript
+ * async function unlockWallet(userId: string, password: string) {
+ *   const encrypted = await database.getEncryptedWallet(userId);
+ *   
+ *   try {
+ *     const wallet = await decryptWallet(encrypted, password);
+ *     return {
+ *       success: true,
+ *       address: wallet.address,
+ *       wallet, // Return for immediate use
+ *     };
+ *   } catch (error) {
+ *     return {
+ *       success: false,
+ *       error: "Incorrect password or corrupted wallet data",
+ *     };
+ *   }
+ * }
+ * ```
+ *
+ * @example
+ * Decrypting to export mnemonic
+ * ```typescript
+ * async function exportMnemonic(userId: string, password: string) {
+ *   const encrypted = await database.getEncryptedWallet(userId);
+ *   const wallet = await decryptWallet(encrypted, password);
+ *   
+ *   if (!wallet.mnemonic) {
+ *     throw new Error("Wallet has no mnemonic (imported from private key)");
+ *   }
+ *   
+ *   return wallet.mnemonic.phrase;
+ * }
+ * ```
+ *
+ * @see {@link encryptWallet} To encrypt a wallet
+ * @see {@link createFromEncrypted} Higher-level function that handles both formats
  */
 export async function decryptWallet(
   encrypted: EncryptedWallet,

@@ -1,15 +1,14 @@
 /**
- * Tokens Handlers Module Exports
- * 
- * This file exports all token-related handlers.
- * Provides a clean API for importing token business logic.
- * 
- * Usage:
- * ```typescript
- * import * as Handlers from './handlers';
- * // or
- * import { getTokenBalanceHandler, getTokenInfoHandler } from './handlers';
- * ```
+ * Tokens Handlers Module
+ *
+ * This module exports all low-level handler functions for token operations.
+ * These handlers contain the core business logic and are used by the `Tokens` class.
+ *
+ * **Categories:**
+ * - **Balance:** Retrieve and format token balances.
+ * - **Info:** Get token metadata (decimals, name, symbol) and validate addresses.
+ *
+ * @module TokensHandlers
  */
 
 // Export all token balance handlers

@@ -1,38 +1,42 @@
 /**
- * Blockchain Resource - Main Container Class
+ * Blockchain
  *
- * This is the main container class that provides access to all blockchain functionality.
- * It follows the same pattern as the Align class - holding resource instances.
+ * The central hub for all blockchain functionality in the Align SDK.
+ * This class aggregates specialized resources for wallets, transactions, tokens, and providers.
  *
- * Structure:
- * - providers: Shared provider management (cached RPC connections)
- * - wallets: Wallet operations (creation, encryption, transactions)
- * - transactions: Transaction operations (sending, monitoring, gas estimation)
- * - tokens: Token operations (balance, addresses, formatting)
- * - utils: Utility functions (address validation, formatting)
+ * **Architecture:**
+ * - **Providers:** Manages network connections (RPC)
+ * - **Wallets:** Manages accounts, keys, and signing
+ * - **Transactions:** Handles sending and monitoring transactions
+ * - **Tokens:** Handles ERC-20 token interactions
+ * - **Utils:** Provides common helper functions
  *
- * Usage:
+ * @example
+ * Initialize the SDK
  * ```typescript
- * const align = new Align({ apiKey: '...' });
- * const wallet = await align.blockchain.wallets.create();
- * const balance = await align.blockchain.wallets.getBalance(wallet.address, 'polygon');
+ * import { AlignSDK } from '@align/sdk';
+ *
+ * const sdk = new AlignSDK({ apiKey: '...' });
+ *
+ * // Access blockchain features
+ * const wallet = await sdk.blockchain.wallets.create();
+ * const balance = await sdk.blockchain.tokens.getBalance(wallet.address, 'USDC');
  * ```
  */
-
-import { ProvidersResource } from "@/resources/blockchain/providers/providers.resource";
-import { WalletsResource } from "@/resources/blockchain/wallets/wallets.resource";
-import { TransactionsResource } from "@/resources/blockchain/transactions/transactions.resource";
-import { TokensResource } from "@/resources/blockchain/tokens/tokens.resource";
+import { Providers } from "@/resources/blockchain/providers/providers.resource";
+import { Wallets } from "@/resources/blockchain/wallets/wallets.resource";
+import { Transactions } from "@/resources/blockchain/transactions/transactions.resource";
+import { Tokens } from "@/resources/blockchain/tokens/tokens.resource";
 import * as Utils from "@/resources/blockchain/utils";
 import type { BlockchainConfig } from "@/resources/blockchain/blockchain.types";
 
-export class BlockchainResource {
+export class Blockchain {
   /**
    * Provider management
    * Shared resource that manages RPC provider instances and network configurations.
    * Other resources use this to get providers for blockchain interactions.
    */
-  public readonly providers: ProvidersResource;
+  public readonly providers: Providers;
 
   /**
    * Wallet operations
@@ -41,7 +45,7 @@ export class BlockchainResource {
    * - Send transactions (native tokens, ERC-20 tokens)
    * - Encrypt/decrypt wallets for secure storage
    */
-  public readonly wallets: WalletsResource;
+  public readonly wallets: Wallets;
 
   /**
    * Transaction operations
@@ -49,7 +53,7 @@ export class BlockchainResource {
    * - Monitor transaction status and wait for confirmations
    * - Estimate gas costs for transactions
    */
-  public readonly transactions: TransactionsResource;
+  public readonly transactions: Transactions;
 
   /**
    * Token operations
@@ -57,7 +61,7 @@ export class BlockchainResource {
    * - Get token addresses and information
    * - Format token amounts (with decimals)
    */
-  public readonly tokens: TokensResource;
+  public readonly tokens: Tokens;
 
   /**
    * Utility functions
@@ -71,18 +75,31 @@ export class BlockchainResource {
   };
 
   /**
-   * Initialize the Blockchain Resource
+   * Initializes the Blockchain and its sub-resources.
    *
-   * @param config - Optional configuration for blockchain operations
-   * @param config.customRpcUrls - Custom RPC URLs for specific networks
+   * Sets up the shared Providers with any custom configuration,
+   * then injects it into dependent resources (Wallets, Transactions, Tokens).
+   *
+   * @param {BlockchainConfig} [config] - Optional configuration
+   * @param {Record<Network, string>} [config.customRpcUrls] - Custom RPC endpoints for specific networks
+   *
+   * @example
+   * Initialize with custom RPC
+   * ```typescript
+   * const blockchain = new Blockchain({
+   *   customRpcUrls: {
+   *     ethereum: "https://eth-mainnet.g.alchemy.com/v2/KEY"
+   *   }
+   * });
+   * ```
    */
   constructor(config?: BlockchainConfig) {
     // Initialize providers first (shared state)
-    this.providers = new ProvidersResource(config);
+    this.providers = new Providers(config);
 
-    // Initialize other resources, passing providers for shared state
-    this.wallets = new WalletsResource(this.providers);
-    this.transactions = new TransactionsResource(this.providers);
-    this.tokens = new TokensResource(this.providers);
+    // Initialize sub-resources with the shared provider instance
+    this.wallets = new Wallets(this.providers);
+    this.transactions = new Transactions(this.providers);
+    this.tokens = new Tokens(this.providers);
   }
 }
