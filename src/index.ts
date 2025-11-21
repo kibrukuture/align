@@ -155,7 +155,7 @@ export type { UploadFileResponse } from "@/resources/files/files.types";
 
 export * from "@/resources/files/files.resource";
 export * from "@/resources/developers/developers.resource";
-export * from './resources/blockchain';
+export * from '@/resources/blockchain';
 
 // Blockchain types
 export type {
