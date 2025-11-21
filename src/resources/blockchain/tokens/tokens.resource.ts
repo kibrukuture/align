@@ -24,13 +24,15 @@ import { AlignValidationError } from "@/core/errors";
 import { formatZodError } from "@/core/validation";
 import { Providers } from "@/resources/blockchain/providers/providers.resource";
 import * as Handlers from "@/resources/blockchain/tokens/handlers";
-import type { TokenBalance } from "@/resources/blockchain/tokens/tokens.types";
+import type { TokenBalance, TokenInfo } from "@/resources/blockchain/tokens/tokens.types";
 import {
   TokenBalanceRequestSchema,
   TokenAddressRequestSchema,
 } from "@/resources/blockchain/tokens/tokens.validator";
 import type { Network, Token } from "@/resources/blockchain/wallets/wallets.types";
+import type { JsonRpcProvider } from "ethers";
 import { parseUnits } from "ethers";
+
 
 export class Tokens {
   constructor(private providers: Providers) {}
@@ -143,4 +145,34 @@ export class Tokens {
   public parseAmount(amount: string, decimals: number): string {
     return parseUnits(amount, decimals).toString();
   }
+
+
+
+    /**
+   * Retrieves token metadata (name, symbol, decimals, etc.).
+   *
+   * @param tokenAddress - Contract address of the token.
+   * @param provider     - Connected ethers.js provider for the network.
+   * @param network      - Network identifier (e.g. "polygon").
+   * @param token        - Optional known token identifier (usdc, usdt, …).
+   *
+   * @returns TokenInfo object with full metadata.
+   *
+   * @example
+   * const info = await sdk.blockchain.tokens.getTokenInfo(
+   *   "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+   *   provider,
+   *   "polygon"
+   * );
+   */
+  public async getTokenInfo(
+    tokenAddress: string,
+    provider: JsonRpcProvider,
+    network: Network,
+    token?: Token
+  ): Promise<TokenInfo> {
+    // No validation needed here – the handler performs its own checks.
+    return Handlers.getTokenInfo(tokenAddress, provider, network, token);
+  }
+
 }
