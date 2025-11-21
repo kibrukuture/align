@@ -71,7 +71,7 @@ const DEFAULT_NETWORK_CONFIGS: Record<Network, NetworkConfig> = {
 
 export class ProvidersResource {
   // Cache provider instances (expensive to create)
-  private providers: Map<Network, any> = new Map();
+  private providers: Map<Network, JsonRpcProvider> = new Map();
 
   // Store network configurations
   private networkConfigs: Map<Network, NetworkConfig> = new Map();

@@ -17,7 +17,8 @@ import { AlignValidationError } from '@/core/errors';
 import { formatZodError } from '@/core/validation';
 import { ProvidersResource } from '../providers/providers.resource';
 import * as Handlers from './handlers';
-import type { Wallet, CreateWalletRequest, EncryptedWallet } from './wallets.types';
+import type { Wallet, EncryptedWallet, Network } from './wallets.types';
+import type { Transaction } from '../transactions/transactions.types';
 import { CreateWalletSchema, EncryptSchema } from './wallets.validator';
 
 export class WalletsResource {
@@ -86,49 +87,49 @@ export class WalletsResource {
   /**
    * Get native token balance
    */
-  public async getBalance(address: string, network: string): Promise<string> {
+  public async getBalance(address: string, network: Network): Promise<string> {
     // Validate address format
     // Get provider from providers resource
     const provider = this.providers.getProvider(network);
     
     // Call handler for complex logic
-    return Handlers.getBalanceHandler(address, network, provider);
+    return Handlers.getBalanceHandler(address, provider);
   }
 
   /**
    * Get ERC-20 token balance
    */
-  public async getTokenBalance(address: string, token: string, network: string): Promise<string> {
+  public async getTokenBalance(address: string, token: string, network: Network): Promise<string> {
     // Validate inputs
     // Get provider and token address
     const provider = this.providers.getProvider(network);
     
     // Call handler for complex logic
-    return Handlers.getTokenBalanceHandler(address, token, network, provider);
+    return Handlers.getTokenBalanceHandler(address, token, provider);
   }
 
   /**
    * Send native token
    */
-  public async sendNativeToken(wallet: Wallet, to: string, amount: string, network: string): Promise<any> {
+  public async sendNativeToken(wallet: Wallet, to: string, amount: string, network: Network): Promise<Transaction> {
     // Validate inputs
     // Get provider
     const provider = this.providers.getProvider(network);
     
     // Call handler for complex logic
-    return Handlers.sendNativeTokenHandler(wallet, to, amount, network, provider);
+    return Handlers.sendNativeTokenHandler(wallet, to, amount, provider);
   }
 
   /**
    * Send ERC-20 token
    */
-  public async sendToken(wallet: Wallet, token: string, to: string, amount: string, network: string): Promise<any> {
+  public async sendToken(wallet: Wallet, token: string, to: string, amount: string, network: Network): Promise<Transaction> {
     // Validate inputs
     // Get provider
     const provider = this.providers.getProvider(network);
     
     // Call handler for complex logic
-    return Handlers.sendTokenHandler(wallet, token, to, amount, network, provider);
+    return Handlers.sendTokenHandler(wallet, token, to, amount, provider);
   }
 
   /**
@@ -148,7 +149,7 @@ export class WalletsResource {
   /**
    * Decrypt private key
    */
-  public async decryptPrivateKey(encrypted: string, password: string): Promise<string> {
+  public async decryptPrivateKey(encrypted: EncryptedWallet, password: string): Promise<string> {
     // Validate inputs
     const validation = EncryptSchema.safeParse({ encrypted, password });
     if (!validation.success) {
@@ -176,7 +177,7 @@ export class WalletsResource {
   /**
    * Decrypt wallet
    */
-  public async decryptWallet(encrypted: string, password: string): Promise<Wallet> {
+  public async decryptWallet(encrypted: EncryptedWallet, password: string): Promise<Wallet> {
     // Validate inputs
     const validation = EncryptSchema.safeParse({ encrypted, password });
     if (!validation.success) {
