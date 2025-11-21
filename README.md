@@ -73,6 +73,11 @@ console.log("Customer created:", customer.customer_id);
 - [Webhooks](#webhooks)
 - [Files](#files)
 - [Developers](#developers)
+- [Blockchain](#blockchain)
+  - [Wallets](#blockchain-wallets)
+  - [Transactions](#blockchain-transactions)
+  - [Tokens](#blockchain-tokens)
+  - [Utilities](#blockchain-utilities)
 - [Error Handling](#error-handling)
 - [TypeScript Types](#typescript-types)
 
@@ -736,7 +741,7 @@ console.log(`Route ID: ${route.id}`);
 // Any USDC sent to this address on Ethereum will automatically
 // be bridged to Solana and sent to the destination address
 
-````
+```
 
 ### List Permanent Routes
 
@@ -747,7 +752,7 @@ routes.forEach(route => {
   console.log(`${route.source_network} → ${route.destination_network}`);
   console.log(`Deposit: ${route.deposit_address}`);
 });
-````
+```
 
 ---
 
@@ -1078,9 +1083,903 @@ const response = await align.developers.updateFees({
 console.log("Fees updated successfully");
 ```
 
-````
+---
+
+## Blockchain
+
+> **⚠️ Important Note**
+>
+> The blockchain functionality is **additional functionality** provided by this SDK and is **NOT part of the AlignLab API**. It operates independently using [ethers.js](https://docs.ethers.org/) and public RPC providers. You can use it alongside AlignLab's API features or completely separately for blockchain operations.
+
+The blockchain module provides comprehensive Web3 functionality for managing wallets, sending transactions, and interacting with tokens across multiple blockchain networks.
+
+### Supported Networks
+
+- **Ethereum** (`ethereum`)
+- **Polygon** (`polygon`)
+- **Base** (`base`)
+- **Arbitrum** (`arbitrum`)
+- **Optimism** (`optimism`)
+- **Solana** (`solana`)
+- **Tron** (`tron`)
+
+### Configuration
+
+```typescript
+const align = new Align({
+  apiKey: process.env.ALIGNLAB_API_KEY!,
+  environment: "sandbox",
+  
+  // Optional: Provide custom RPC URLs
+  blockchain: {
+    customRpcUrls: {
+      polygon: "https://polygon-mainnet.g.alchemy.com/v2/YOUR_KEY",
+      ethereum: "https://eth-mainnet.g.alchemy.com/v2/YOUR_KEY",
+      base: "https://base-mainnet.g.alchemy.com/v2/YOUR_KEY",
+    },
+  },
+});
+
+// Access blockchain functionality
+const blockchain = align.blockchain;
+```
+
+If you don't provide custom RPC URLs, the SDK will use default public RPC providers.
 
 ---
+
+### Blockchain Wallets
+
+Create, manage, and secure cryptocurrency wallets.
+
+#### Types
+
+```typescript
+interface Wallet {
+  address: string;
+  privateKey: string;
+  mnemonic?: string;
+}
+
+interface EncryptedWallet {
+  address: string;
+  encrypted: string;
+  iv: string;
+  salt: string;
+}
+
+interface WalletBalance {
+  balance: string;
+  balanceFormatted: string;
+  decimals: number;
+  symbol: string;
+}
+
+interface WalletCreationOptions {
+  mnemonic?: string;
+  privateKey?: string;
+  encrypted?: EncryptedWallet;
+  password?: string;
+}
+```
+
+#### Create a New Wallet
+
+**Method:** `align.blockchain.wallets.create()`
+
+**Description:** Generates a brand new cryptocurrency wallet with a random private key and mnemonic phrase. This wallet can be used across all supported blockchain networks (Ethereum, Polygon, Base, etc.) since they all use the same address format.
+
+**Parameters:** None
+
+**Returns:** `Promise<Wallet>`
+- `address` (string): The public wallet address (e.g., `0x742d35...`)
+- `privateKey` (string): The private key used to sign transactions (keep this secret!)
+- `mnemonic` (string): A 12-word recovery phrase that can restore the wallet
+
+**Use Case:** Creating a new wallet for a user when they sign up, or generating a deposit address.
+
+```typescript
+// Create a random wallet
+const wallet = await align.blockchain.wallets.create();
+
+console.log("Address:", wallet.address);
+console.log("Private Key:", wallet.privateKey);
+console.log("Mnemonic:", wallet.mnemonic);
+// Output:
+// Address: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+// Private Key: 0x1234567890abcdef...
+// Mnemonic: abandon abandon abandon abandon abandon abandon...
+```
+
+> **⚠️ Security Warning:** Never expose the private key or mnemonic to users or store them in plain text. Always encrypt them before storage (see encryption examples below).
+
+---
+
+#### Create Wallet from Mnemonic
+
+**Method:** `align.blockchain.wallets.createFromMnemonic(mnemonic: string)`
+
+**Description:** Recovers an existing wallet from a 12 or 24-word mnemonic phrase. This is useful when users want to import an existing wallet or restore access to a wallet they created previously. The same mnemonic will always generate the same wallet address.
+
+**Parameters:**
+- `mnemonic` (string): A valid BIP39 mnemonic phrase (12 or 24 words separated by spaces)
+
+**Returns:** `Promise<Wallet>`
+- `address` (string): The wallet address derived from the mnemonic
+- `privateKey` (string): The private key derived from the mnemonic
+- `mnemonic` (string): The same mnemonic phrase provided
+
+**Use Case:** Allowing users to import their existing MetaMask or hardware wallet, or recovering a wallet from backup.
+
+```typescript
+const wallet = await align.blockchain.wallets.createFromMnemonic(
+  "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+);
+
+console.log("Address:", wallet.address);
+// Always generates the same address from the same mnemonic
+// Address: 0x9858EfFD232B4033E47d90003D41EC34EcaEda94
+```
+
+**Validation:** The SDK automatically validates that the mnemonic is a valid BIP39 phrase. Invalid mnemonics will throw an error.
+
+---
+
+#### Create Wallet from Private Key
+
+**Method:** `align.blockchain.wallets.createFromPrivateKey(privateKey: string)`
+
+**Description:** Imports an existing wallet using its private key. This is useful when you have a private key from another source (like a hardware wallet export or another application) and want to use it with this SDK.
+
+**Parameters:**
+- `privateKey` (string): A 64-character hexadecimal private key (with or without `0x` prefix)
+
+**Returns:** `Promise<Wallet>`
+- `address` (string): The wallet address derived from the private key
+- `privateKey` (string): The same private key provided
+- `mnemonic` (undefined): No mnemonic since the wallet was created from a private key
+
+**Use Case:** Importing a wallet from a private key backup or integrating with external key management systems.
+
+```typescript
+const wallet = await align.blockchain.wallets.createFromPrivateKey(
+  "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+);
+
+console.log("Address:", wallet.address);
+
+```
+
+---
+
+#### Get Wallet Balance
+
+**Method:** `align.blockchain.wallets.getBalance(address: string, network: Network)`
+
+**Description:** Retrieves the native cryptocurrency balance for a wallet address on a specific blockchain network. Native tokens are the blockchain's main currency (ETH on Ethereum, MATIC on Polygon, etc.).
+
+**Parameters:**
+- `address` (string): The wallet address to check (must be a valid Ethereum-style address)
+- `network` (Network): The blockchain network (`"ethereum"`, `"polygon"`, `"base"`, `"arbitrum"`, `"optimism"`)
+
+**Returns:** `Promise<WalletBalance>`
+- `balance` (string): Raw balance in smallest unit (wei for ETH, etc.)
+- `balanceFormatted` (string): Human-readable balance (e.g., "1.5")
+- `decimals` (number): Number of decimals for the token (usually 18)
+- `symbol` (string): Token symbol (e.g., "MATIC", "ETH")
+
+**Use Case:** Checking if a user has enough funds before allowing a withdrawal or displaying their balance in your app.
+
+```typescript
+// Get native token balance (ETH, MATIC, etc.)
+const balance = await align.blockchain.wallets.getBalance(
+  "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+  "polygon"
+);
+
+console.log(`Balance: ${balance.balanceFormatted} ${balance.symbol}`);
+// Output: Balance: 1.5 MATIC
+
+console.log(`Raw balance: ${balance.balance} wei`);
+// Output: Raw balance: 1500000000000000000 wei
+```
+
+---
+
+#### Get Token Balance
+
+**Method:** `align.blockchain.wallets.getTokenBalance(address: string, tokenAddress: string, network: Network)`
+
+**Description:** Retrieves the balance of a specific ERC-20 token (like USDC, USDT, DAI) for a wallet address. This is different from native balance - it checks how much of a specific token contract the wallet holds.
+
+**Parameters:**
+- `address` (string): The wallet address to check
+- `tokenAddress` (string): The ERC-20 token contract address (e.g., USDC contract address)
+- `network` (Network): The blockchain network where the token exists
+
+**Returns:** `Promise<WalletBalance>`
+- `balance` (string): Raw balance in smallest token unit
+- `balanceFormatted` (string): Human-readable balance
+- `decimals` (number): Token decimals (6 for USDC, 18 for most tokens)
+- `symbol` (string): Token symbol (e.g., "USDC")
+
+**Use Case:** Checking a user's stablecoin balance (USDC, USDT) before processing a payment or displaying token holdings.
+
+```typescript
+// Get ERC-20 token balance (USDC, USDT, etc.)
+const usdcBalance = await align.blockchain.wallets.getTokenBalance(
+  "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+  "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174", // USDC on Polygon
+  "polygon"
+);
+
+console.log(`USDC Balance: ${usdcBalance.balanceFormatted}`);
+// Output: USDC Balance: 100.50
+
+console.log(`Decimals: ${usdcBalance.decimals}`);
+// Output: Decimals: 6
+```
+
+**Note:** Each network has different token contract addresses. USDC on Polygon has a different address than USDC on Ethereum.
+
+---
+
+#### Send Native Token
+
+**Method:** `align.blockchain.wallets.sendNativeToken(wallet: Wallet, to: string, amount: string, network: Network)`
+
+**Description:** Sends native cryptocurrency (ETH, MATIC, etc.) from one wallet to another. This method handles transaction signing, gas estimation, and broadcasting to the blockchain network.
+
+**Parameters:**
+- `wallet` (Wallet): The sender's wallet object (must include `privateKey` for signing)
+- `to` (string): The recipient's wallet address
+- `amount` (string): Amount to send in human-readable format (e.g., "0.1" for 0.1 MATIC)
+- `network` (Network): The blockchain network to use
+
+**Returns:** `Promise<Transaction>`
+- `hash` (string): Transaction hash for tracking
+- `from` (string): Sender address
+- `to` (string): Recipient address
+- `value` (string): Amount sent
+- `status` (TransactionStatus): Initial status ("pending")
+- Other transaction details (gasLimit, gasPrice, nonce, etc.)
+
+**Use Case:** Sending cryptocurrency payments, withdrawals, or transferring funds between wallets.
+
+```typescript
+// Send MATIC on Polygon
+const tx = await align.blockchain.wallets.sendNativeToken(
+  wallet, // Wallet object with privateKey
+  "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb", // Recipient address
+  "0.1", // Amount in MATIC
+  "polygon"
+);
+
+console.log("Transaction hash:", tx.hash);
+console.log("Status:", tx.status); // "pending"
+
+// Wait for confirmation
+const receipt = await align.blockchain.transactions.waitForConfirmation(
+  tx.hash,
+  1, // Number of confirmations
+  "polygon"
+);
+
+console.log("Confirmed in block:", receipt.blockNumber);
+```
+
+**Important:** The wallet must have enough balance to cover both the amount being sent AND the gas fees. The transaction will fail if insufficient funds.
+
+---
+
+#### Send ERC-20 Token
+
+**Method:** `align.blockchain.wallets.sendToken(wallet: Wallet, tokenAddress: string, to: string, amount: string, network: Network)`
+
+**Description:** Sends ERC-20 tokens (USDC, USDT, DAI, etc.) from one wallet to another. This interacts with the token's smart contract to transfer ownership.
+
+**Parameters:**
+- `wallet` (Wallet): The sender's wallet (must have `privateKey`)
+- `tokenAddress` (string): The ERC-20 token contract address
+- `to` (string): The recipient's wallet address
+- `amount` (string): Amount to send in human-readable format (e.g., "10.0" for 10 USDC)
+- `network` (Network): The blockchain network
+
+**Returns:** `Promise<Transaction>`
+- Same structure as `sendNativeToken`
+
+**Use Case:** Sending stablecoin payments, token transfers, or processing withdrawals in USDC/USDT.
+
+```typescript
+// Send USDC on Polygon
+const tx = await align.blockchain.wallets.sendToken(
+  wallet,
+  "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174", // USDC contract address
+  "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb", // Recipient
+  "10.0", // Amount in USDC
+  "polygon"
+);
+
+console.log("Token transfer hash:", tx.hash);
+```
+
+**Gas Fees:** Even though you're sending tokens, you still need native cryptocurrency (MATIC, ETH) in the wallet to pay for gas fees.
+
+---
+
+#### Encrypt Wallet
+
+**Method:** `align.blockchain.wallets.encryptWallet(wallet: Wallet, password: string)`
+
+**Description:** Encrypts a wallet's private key and mnemonic using AES-256-GCM encryption with a password. This allows you to securely store wallet credentials in a database without exposing the private key. Uses the Web Crypto API for strong encryption.
+
+**Parameters:**
+- `wallet` (Wallet): The wallet object to encrypt (must have `privateKey` and optionally `mnemonic`)
+- `password` (string): A strong password used to encrypt the wallet (user should remember this!)
+
+**Returns:** `Promise<EncryptedWallet>`
+- `address` (string): The wallet address (not encrypted, safe to store publicly)
+- `encrypted` (string): The encrypted private key and mnemonic (base64 encoded)
+- `iv` (string): Initialization vector for decryption (base64 encoded)
+- `salt` (string): Salt used for key derivation (base64 encoded)
+
+**Use Case:** Storing user wallets securely in your database. Even if your database is compromised, the private keys remain encrypted and useless without the password.
+
+```typescript
+// Encrypt wallet for secure storage
+const encrypted = await align.blockchain.wallets.encryptWallet(
+  wallet,
+  "super-secure-password-123"
+);
+
+console.log("Encrypted data:", encrypted.encrypted);
+console.log("IV:", encrypted.iv);
+console.log("Salt:", encrypted.salt);
+
+// Store encrypted wallet in database
+await database.save({
+  address: encrypted.address,
+  encrypted: encrypted.encrypted,
+  iv: encrypted.iv,
+  salt: encrypted.salt,
+});
+```
+
+**Security Note:** The password is never stored - only the user knows it. If they forget it, the wallet cannot be recovered.
+
+---
+
+#### Decrypt Wallet
+
+**Method:** `align.blockchain.wallets.decryptWallet(encryptedWallet: EncryptedWallet, password: string)`
+
+**Description:** Decrypts an encrypted wallet using the password that was used to encrypt it. This restores the wallet object with the private key, allowing you to sign transactions.
+
+**Parameters:**
+- `encryptedWallet` (EncryptedWallet): The encrypted wallet object (from database)
+- `password` (string): The password used during encryption
+
+**Returns:** `Promise<Wallet>`
+- `address` (string): The wallet address
+- `privateKey` (string): The decrypted private key
+- `mnemonic` (string | undefined): The decrypted mnemonic (if it was encrypted)
+
+**Use Case:** Retrieving a user's wallet when they want to send a transaction. User enters their password, you decrypt the wallet, sign the transaction, then discard the decrypted wallet from memory.
+
+**Throws:** Error if the password is incorrect or the encrypted data is corrupted.
+
+```typescript
+// Retrieve encrypted wallet from database
+const encryptedWallet = await database.getWallet(userId);
+
+// Decrypt wallet
+const decrypted = await align.blockchain.wallets.decryptWallet(
+  encryptedWallet,
+  "super-secure-password-123"
+);
+
+console.log("Decrypted address:", decrypted.address);
+console.log("Private key:", decrypted.privateKey);
+
+// Now you can use the decrypted wallet to send transactions
+const tx = await align.blockchain.wallets.sendNativeToken(
+  decrypted,
+  recipientAddress,
+  "0.1",
+  "polygon"
+);
+
+// Clear the decrypted wallet from memory after use
+decrypted.privateKey = "";
+```
+
+**Best Practice:** Always clear the decrypted private key from memory after use to minimize security risks.
+
+---
+
+#### Encrypt/Decrypt Private Key Only
+
+**Encrypt Private Key**
+
+**Method:** `align.blockchain.wallets.encryptPrivateKey(privateKey: string, password: string)`
+
+**Description:** Encrypts only the private key (without the mnemonic). Useful when you only need to store the private key and don't have a mnemonic.
+
+**Parameters:**
+- `privateKey` (string): The private key to encrypt
+- `password` (string): Password for encryption
+
+**Returns:** `Promise<{ encrypted: string; iv: string; salt: string }>`
+
+**Decrypt Private Key**
+
+**Method:** `align.blockchain.wallets.decryptPrivateKey(encrypted: { encrypted: string; iv: string; salt: string }, password: string)`
+
+**Description:** Decrypts a previously encrypted private key.
+
+**Parameters:**
+- `encrypted` (object): The encrypted private key data
+- `password` (string): Password used during encryption
+
+**Returns:** `Promise<string>` - The decrypted private key
+
+```typescript
+// Encrypt just the private key
+const encryptedKey = await align.blockchain.wallets.encryptPrivateKey(
+  wallet.privateKey,
+  "password123"
+);
+
+console.log("Encrypted key:", encryptedKey.encrypted);
+
+// Decrypt private key
+const decryptedKey = await align.blockchain.wallets.decryptPrivateKey(
+  encryptedKey,
+  "password123"
+);
+
+console.log("Decrypted key:", decryptedKey);
+```
+
+---
+
+#### Get Transaction History
+
+**Method:** `align.blockchain.wallets.getTransactionHistory(address: string, network: Network, limit?: number)`
+
+**Description:** Retrieves the recent transaction history for a wallet address. Shows both incoming and outgoing transactions with details like amount, block number, and confirmation count.
+
+**Parameters:**
+- `address` (string): The wallet address to get history for
+- `network` (Network): The blockchain network
+- `limit` (number, optional): Maximum number of transactions to return (default: 10)
+
+**Returns:** `Promise<Transaction[]>` - Array of transaction objects
+
+**Use Case:** Displaying a user's transaction history, showing recent payments, or tracking wallet activity.
+
+**Note:** This uses the blockchain's RPC provider to fetch transaction history. Some public RPCs may have rate limits or may not support this feature fully.
+
+```typescript
+// Get recent transactions for an address
+const history = await align.blockchain.wallets.getTransactionHistory(
+  "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+  "polygon",
+  10 // Last 10 transactions
+);
+
+history.forEach((tx) => {
+  console.log(`${tx.hash}: ${tx.value} MATIC`);
+  console.log(`From: ${tx.from} → To: ${tx.to}`);
+  console.log(`Block: ${tx.blockNumber}, Confirmations: ${tx.confirmations}`);
+});
+```
+
+---
+
+### Blockchain Transactions
+
+Monitor and manage blockchain transactions.
+
+#### Types
+
+```typescript
+type TransactionStatus = "pending" | "confirmed" | "failed";
+
+interface Transaction {
+  hash: string;
+  from: string;
+  to: string;
+  value: string;
+  gasLimit: string;
+  gasPrice: string;
+  nonce: number;
+  data: string;
+  chainId: number;
+  status: TransactionStatus;
+}
+
+interface TransactionReceiptData {
+  transactionHash: string;
+  blockNumber: number;
+  blockHash: string;
+  from: string;
+  to: string;
+  gasUsed: string;
+  status: "success" | "failed";
+  confirmations: number;
+}
+
+interface GasEstimate {
+  gasLimit: string;
+  gasPrice: string;
+  gasPriceGwei: string;
+  totalCost: string;
+  totalCostFormatted: string;
+}
+```
+
+#### Get Transaction Status
+
+```typescript
+const status = await align.blockchain.transactions.getStatus(
+  "0x1234567890abcdef...",
+  "polygon"
+);
+
+console.log("Status:", status); // "pending" | "confirmed" | "failed"
+```
+
+#### Get Transaction Receipt
+
+```typescript
+const receipt = await align.blockchain.transactions.getReceipt(
+  "0x1234567890abcdef...",
+  "polygon"
+);
+
+console.log("Block number:", receipt.blockNumber);
+console.log("Gas used:", receipt.gasUsed);
+console.log("Status:", receipt.status); // "success" | "failed"
+console.log("Confirmations:", receipt.confirmations);
+```
+
+#### Wait for Confirmation
+
+```typescript
+// Wait for 3 confirmations
+const receipt = await align.blockchain.transactions.waitForConfirmation(
+  "0x1234567890abcdef...",
+  3, // Number of confirmations to wait for
+  "polygon",
+  60000 // Optional: timeout in ms (default: 60000)
+);
+
+console.log(`Transaction confirmed in block ${receipt.blockNumber}`);
+console.log(`Gas used: ${receipt.gasUsed}`);
+```
+
+#### Monitor Transaction
+
+```typescript
+// Monitor transaction with callback
+await align.blockchain.transactions.monitorTransaction(
+  "0x1234567890abcdef...",
+  "polygon",
+  (status, receipt) => {
+    console.log("Transaction status:", status);
+    
+    if (receipt) {
+      console.log("Confirmations:", receipt.confirmations);
+      console.log("Block:", receipt.blockNumber);
+    }
+    
+    if (status === "confirmed") {
+      console.log("Transaction confirmed!");
+    } else if (status === "failed") {
+      console.log("Transaction failed!");
+    }
+  },
+  3 // Wait for 3 confirmations
+);
+```
+
+#### Estimate Gas
+
+```typescript
+// Estimate gas for native token transfer
+const estimate = await align.blockchain.transactions.estimateGas(
+  "0xSenderAddress...",
+  "0xRecipientAddress...",
+  "0.1", // Amount
+  "polygon"
+);
+
+console.log("Gas limit:", estimate.gasLimit);
+console.log("Gas price:", estimate.gasPriceGwei, "Gwei");
+console.log("Total cost:", estimate.totalCostFormatted, "MATIC");
+```
+
+#### Estimate Gas for Token Transfer
+
+```typescript
+// Estimate gas for ERC-20 token transfer
+const estimate = await align.blockchain.transactions.estimateTokenGas(
+  "0xSenderAddress...",
+  "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174", // USDC
+  "0xRecipientAddress...",
+  "10.0", // Amount
+  "polygon"
+);
+
+console.log("Estimated gas:", estimate.gasLimit);
+console.log("Total cost:", estimate.totalCostFormatted, "MATIC");
+```
+
+#### Send Raw Transaction
+
+```typescript
+// Send a pre-signed transaction
+const tx = await align.blockchain.transactions.sendTransaction(
+  wallet,
+  "0xRecipientAddress...",
+  "0.1",
+  "polygon",
+  {
+    gasLimit: "21000",
+    gasPrice: "30000000000", // 30 Gwei
+  }
+);
+
+console.log("Transaction sent:", tx.hash);
+```
+
+---
+
+### Blockchain Tokens
+
+Get token information and manage token balances.
+
+#### Types
+
+```typescript
+type Token = "usdc" | "usdt" | "dai" | "weth" | "wbtc" | "matic" | "eth";
+
+interface TokenBalance {
+  balance: string;
+  balanceFormatted: string;
+  decimals: number;
+  symbol: string;
+  name: string;
+}
+
+interface TokenInfo {
+  address: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  totalSupply: string;
+}
+```
+
+#### Get Token Address
+
+```typescript
+// Get USDC address on Polygon
+const usdcAddress = await align.blockchain.tokens.getTokenAddress(
+  "usdc",
+  "polygon"
+);
+
+console.log("USDC on Polygon:", usdcAddress);
+// Output: 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174
+```
+
+#### Get Token Balance
+
+```typescript
+// Get USDC balance
+const balance = await align.blockchain.tokens.getBalance(
+  "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+  "usdc",
+  "polygon"
+);
+
+console.log(`Balance: ${balance.balanceFormatted} ${balance.symbol}`);
+console.log(`Name: ${balance.name}`);
+console.log(`Decimals: ${balance.decimals}`);
+```
+
+#### Get Token Balance by Address
+
+```typescript
+// Get balance for any ERC-20 token by contract address
+const balance = await align.blockchain.tokens.getBalanceByAddress(
+  "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb", // Wallet address
+  "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174", // Token contract
+  "polygon"
+);
+
+console.log(`Balance: ${balance.balanceFormatted}`);
+```
+
+#### Get Token Info
+
+```typescript
+// Get detailed token information
+const info = await align.blockchain.tokens.getTokenInfo(
+  "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+  "polygon"
+);
+
+console.log("Name:", info.name); // "USD Coin"
+console.log("Symbol:", info.symbol); // "USDC"
+console.log("Decimals:", info.decimals); // 6
+console.log("Total Supply:", info.totalSupply);
+```
+
+#### Format Token Amount
+
+```typescript
+// Format raw token amount to human-readable
+const formatted = align.blockchain.tokens.formatAmount(
+  "1000000", // 1 USDC in smallest unit (6 decimals)
+  6 // USDC decimals
+);
+
+console.log(formatted); // "1.0"
+```
+
+#### Parse Token Amount
+
+```typescript
+// Parse human-readable amount to smallest unit
+const parsed = align.blockchain.tokens.parseAmount(
+  "10.5", // 10.5 USDC
+  6 // USDC decimals
+);
+
+console.log(parsed); // "10500000"
+```
+
+---
+
+### Blockchain Utilities
+
+Helper functions for blockchain operations.
+
+#### Validate Address
+
+```typescript
+// Check if address is valid
+const isValid = align.blockchain.utils.isValidAddress(
+  "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
+);
+
+console.log("Valid address:", isValid); // true
+
+const invalid = align.blockchain.utils.isValidAddress("0xinvalid");
+console.log("Valid address:", invalid); // false
+```
+
+#### Format Ether
+
+```typescript
+// Convert wei to ether
+const formatted = align.blockchain.utils.formatEther("1500000000000000000");
+
+console.log(formatted); // "1.5"
+```
+
+#### Parse Ether
+
+```typescript
+// Convert ether to wei
+const wei = align.blockchain.utils.parseEther("1.5");
+
+console.log(wei); // "1500000000000000000"
+```
+
+---
+
+### Complete Blockchain Example
+
+Here's a complete example showing how to create a wallet, fund it, and send tokens:
+
+```typescript
+import Align from "@tolbel/align";
+
+const align = new Align({
+  apiKey: process.env.ALIGNLAB_API_KEY!,
+  environment: "sandbox",
+  blockchain: {
+    customRpcUrls: {
+      polygon: "https://polygon-mainnet.g.alchemy.com/v2/YOUR_KEY",
+    },
+  },
+});
+
+async function completeBlockchainWorkflow() {
+  // 1. Create a new wallet
+  const wallet = await align.blockchain.wallets.create();
+  console.log("Created wallet:", wallet.address);
+
+  // 2. Encrypt and store wallet
+  const encrypted = await align.blockchain.wallets.encryptWallet(
+    wallet,
+    "secure-password"
+  );
+  // Store encrypted wallet in your database
+  await database.saveWallet(userId, encrypted);
+
+  // 3. Later: Retrieve and decrypt wallet
+  const stored = await database.getWallet(userId);
+  const decrypted = await align.blockchain.wallets.decryptWallet(
+    stored,
+    "secure-password"
+  );
+
+  // 4. Check balance
+  const balance = await align.blockchain.wallets.getBalance(
+    decrypted.address,
+    "polygon"
+  );
+  console.log(`Balance: ${balance.balanceFormatted} ${balance.symbol}`);
+
+  // 5. Estimate gas before sending
+  const gasEstimate = await align.blockchain.transactions.estimateGas(
+    decrypted.address,
+    "0xRecipientAddress...",
+    "0.1",
+    "polygon"
+  );
+  console.log(`Estimated cost: ${gasEstimate.totalCostFormatted} MATIC`);
+
+  // 6. Send transaction
+  const tx = await align.blockchain.wallets.sendNativeToken(
+    decrypted,
+    "0xRecipientAddress...",
+    "0.1",
+    "polygon"
+  );
+  console.log("Transaction sent:", tx.hash);
+
+  // 7. Monitor transaction
+  await align.blockchain.transactions.monitorTransaction(
+    tx.hash,
+    "polygon",
+    (status, receipt) => {
+      console.log("Status:", status);
+      if (status === "confirmed") {
+        console.log("Transaction confirmed in block:", receipt?.blockNumber);
+      }
+    },
+    3 // Wait for 3 confirmations
+  );
+
+  // 8. Get token balance
+  const usdcBalance = await align.blockchain.tokens.getBalance(
+    decrypted.address,
+    "usdc",
+    "polygon"
+  );
+  console.log(`USDC Balance: ${usdcBalance.balanceFormatted}`);
+
+  // 9. Send tokens
+  const tokenTx = await align.blockchain.wallets.sendToken(
+    decrypted,
+    await align.blockchain.tokens.getTokenAddress("usdc", "polygon"),
+    "0xRecipientAddress...",
+    "10.0",
+    "polygon"
+  );
+  console.log("Token transfer:", tokenTx.hash);
+}
+
+completeBlockchainWorkflow().catch(console.error);
+```
+
+ 
 
 ## Error Handling
 
@@ -1110,7 +2009,12 @@ try {
     console.error('Unexpected error:', error);
   }
 }
-````
+```
+
+
+
+
+
 
 ### Handling API Errors
 
