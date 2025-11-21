@@ -11,7 +11,8 @@
  */
 
 import type { TransactionResponse, TransactionReceipt } from "ethers";
-import type { Network, Token } from "@/resources/blockchain/wallets/wallets.types";
+import type { Network } from "@/resources/blockchain/constants/networks";
+import type { Token } from "@/resources/blockchain/wallets/wallets.types";
 
 /**
  * Transaction status during lifecycle

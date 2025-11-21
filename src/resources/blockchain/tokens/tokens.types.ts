@@ -10,7 +10,8 @@
  * These types ensure type safety across all token operations.
  */
 
-import type { Network, Token } from "@/resources/blockchain/wallets/wallets.types";
+import type { Network } from "@/resources/blockchain/constants/networks";
+import type { Token } from "@/resources/blockchain/wallets/wallets.types";
 
 /**
  * Token balance information

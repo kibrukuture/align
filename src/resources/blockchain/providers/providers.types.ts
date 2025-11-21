@@ -11,7 +11,7 @@
  */
 
 import type { JsonRpcProvider } from "ethers";
-import type { Network } from "@/resources/blockchain/wallets/wallets.types";
+import type { Network } from "@/resources/blockchain/constants/networks";
  
 
 /**
@@ -184,15 +184,4 @@ export interface ProviderWrapper {
   customRpcUrl?: string;
 }
 
-/**
- * Blockchain Configuration
- *
- * Optional configuration for initializing the Blockchain.
- */
-export interface BlockchainConfig {
-  /**
-   * Custom RPC URLs for specific networks
-   * Overrides default RPC providers
-   */
-  customRpcUrls?: Record<Network, string>;
-}
+
