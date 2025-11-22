@@ -1,5 +1,4 @@
 import { TransactionResponse } from "ethers";
-import type { InterfaceAbi } from "ethers";
 
 import { AlignValidationError } from "@/core/errors";
 import { formatZodError } from "@/core/validation";
@@ -10,10 +9,6 @@ import {
   ContractTransactionSchema,
   ContractEventQuerySchema,
 } from "@/resources/blockchain/contracts/contracts.validator";
-import type {
-  Network,
-  Wallet,
-} from "@/resources/blockchain/wallets/wallets.types";
 
 import type {
   ContractEvent,
@@ -47,8 +42,8 @@ import type {
  * @example
  * Initialize the resource
  * ```typescript
- * const sdk = new AlignSDK({ apiKey: '...' });
- * const contracts = sdk.blockchain.contracts;
+ * const align = new Align({ apiKey: '...' });
+ * const contracts = align.blockchain.contracts;
  * ```
  */
 export class Contracts {

@@ -32,8 +32,8 @@ import {
  * @example
  * Initialize the resource
  * ```typescript
- * const sdk = new AlignSDK({ apiKey: '...' });
- * const wallets = sdk.blockchain.wallets;
+ * const align = new Align({ apiKey: '...' });
+ * const wallets = align.blockchain.wallets;
  * ```
  */
 export class Wallets {

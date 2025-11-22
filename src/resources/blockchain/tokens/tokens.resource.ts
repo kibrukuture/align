@@ -2,10 +2,7 @@ import { AlignValidationError } from "@/core/errors";
 import { formatZodError } from "@/core/validation";
 import { Providers } from "@/resources/blockchain/providers/providers.resource";
 import * as Handlers from "@/resources/blockchain/tokens/handlers";
-import type {
-  TokenBalance,
-  TokenInfo,
-} from "@/resources/blockchain/tokens/tokens.types";
+import type { TokenInfo } from "@/resources/blockchain/tokens/tokens.types";
 import {
   TokenBalanceRequestSchema,
   TokenAddressRequestSchema,
@@ -35,8 +32,8 @@ import { parseUnits } from "ethers";
  * @example
  * Initialize the resource
  * ```typescript
- * const sdk = new AlignSDK({ apiKey: '...' });
- * const tokens = sdk.blockchain.tokens;
+ * const align = new Align({ apiKey: '...' });
+ * const tokens = align.blockchain.tokens;
  * ```
  */
 export class Tokens {

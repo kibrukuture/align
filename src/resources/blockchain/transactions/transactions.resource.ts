@@ -41,8 +41,8 @@ import { getTokenAddress } from "@/resources/blockchain/tokens/handlers/info.han
  * @example
  * Initialize the resource
  * ```typescript
- * const sdk = new AlignSDK({ apiKey: '...' });
- * const transactions = sdk.blockchain.transactions;
+ * const align = new Align({ apiKey: '...' });
+ * const transactions = align.blockchain.transactions;
  * ```
  */
 export class Transactions {

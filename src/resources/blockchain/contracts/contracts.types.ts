@@ -6,7 +6,7 @@
  *
  * @module contracts/types
  */
-import type { InterfaceAbi, TransactionReceipt } from "ethers";
+import type { InterfaceAbi } from "ethers";
 import type {
   Network,
   Wallet,

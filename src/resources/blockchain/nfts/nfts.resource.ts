@@ -35,8 +35,8 @@ import type {
  * @example
  * Initialize the resource
  * ```typescript
- * const sdk = new AlignSDK({ apiKey: '...' });
- * const nfts = sdk.blockchain.nfts;
+ * const align = new Align({ apiKey: '...' });
+ * const nfts = align.blockchain.nfts;
  * ```
  */
 export class NFTs {
