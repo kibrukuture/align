@@ -79,10 +79,7 @@ export async function createWallet(): Promise<SDKWallet> {
   return {
     address: ethersWallet.address,
     privateKey: ethersWallet.privateKey,
-    mnemonic: {
-      phrase: ethersWallet.mnemonic?.phrase!,
-      // path: ethersWallet.mnemonic?.,
-    },
+    mnemonic: ethersWallet.mnemonic!,
   };
 }
 
@@ -151,10 +148,7 @@ export async function createFromMnemonic(mnemonic: string): Promise<SDKWallet> {
   return {
     address: ethersWallet.address,
     privateKey: ethersWallet.privateKey,
-    mnemonic: {
-      phrase: mnemonic,
-      path: ethersWallet.path || "m/44'/60'/0'/0/0",
-    },
+    mnemonic: ethersWallet.mnemonic!,
   };
 }
 

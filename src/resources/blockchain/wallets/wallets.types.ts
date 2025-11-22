@@ -52,17 +52,19 @@ export interface Wallet {
   /**
    * Optional mnemonic phrase if wallet was created from mnemonic
    */
-  mnemonic?: {
-    /**
-     * The mnemonic phrase (12 or 24 words)
-     */
-    phrase: string;
+  // mnemonic?: {
+  //   /**
+  //    * The mnemonic phrase (12 or 24 words)
+  //    */
+  //   phrase: string;
 
-    /**
-     * The path used for derivation (e.g., "m/44'/60'/0'/0/0")
-     */
-    path?: string;
-  };
+  //   /**
+  //    * The path used for derivation (e.g., "m/44'/60'/0'/0/0")
+  //    */
+  //   path?: string;
+  // };
+
+  mnemonic?: Mnemonic;
 }
 
 /**
