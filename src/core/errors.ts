@@ -7,18 +7,21 @@ export class AlignError extends Error {
   public readonly status: number;
   public readonly code?: string;
   public readonly requestId?: string;
+  public readonly body?: unknown;
 
   constructor(
     message: string,
     status: number,
     code?: string,
-    requestId?: string
+    requestId?: string,
+    body?: unknown
   ) {
     super(message);
     this.name = "AlignError";
     this.status = status;
     this.code = code;
     this.requestId = requestId;
+    this.body = body;
   }
 }
 

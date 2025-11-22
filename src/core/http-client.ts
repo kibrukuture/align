@@ -104,7 +104,13 @@ export class HttpClient {
         "API request failed"
       );
 
-      throw new AlignError(errorMessage, response?.status || 0, errorCode);
+      throw new AlignError(
+        errorMessage,
+        response?.status || 0,
+        errorCode,
+        undefined, // requestId – you can keep it undefined for now
+        response?.data // <-- this is the body you want to see later
+      );
     }
 
     if (error instanceof AlignError) {
