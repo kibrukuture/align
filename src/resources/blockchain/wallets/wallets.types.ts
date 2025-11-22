@@ -35,6 +35,12 @@ export type Token = "usdc" | "usdt" | "eurc";
  * const wallet: Wallet = {
  *   address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
  *   privateKey: '0x1234...abcd'
+ *  mnemonic: {
+ *    phrase: 'word1 word2 ... word12',
+ *    path: 'm/44'/60'/0'/0/0',
+ *    locale: 'en',
+ *    entropy: '0x1234...abcd'
+ *  }
  * };
  * ```
  */
@@ -48,21 +54,6 @@ export interface Wallet {
    * The private key of the wallet (64 hex characters, optionally prefixed with 0x)
    */
   privateKey: string;
-
-  /**
-   * Optional mnemonic phrase if wallet was created from mnemonic
-   */
-  // mnemonic?: {
-  //   /**
-  //    * The mnemonic phrase (12 or 24 words)
-  //    */
-  //   phrase: string;
-
-  //   /**
-  //    * The path used for derivation (e.g., "m/44'/60'/0'/0/0")
-  //    */
-  //   path?: string;
-  // };
 
   mnemonic?: Mnemonic;
 }

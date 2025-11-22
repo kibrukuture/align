@@ -156,6 +156,27 @@ export const CreateWalletSchema = z
     }
   );
 
+// /**
+//  * Schema for validating encryption/decryption requests
+//  *
+//  * Used when encrypting or decrypting wallet data
+//  */
+// export const EncryptSchema = z
+//   .object({
+//     privateKey: PrivateKeySchema.optional(),
+//     wallet: z
+//       .object({
+//         address: WalletAddressSchema,
+//         privateKey: PrivateKeySchema,
+//       })
+//       .optional(),
+//     encrypted: z.string().optional(),
+//     password: z.string().min(1, "Password is required"),
+//   })
+//   .refine((data) => data.privateKey || data.wallet || data.encrypted, {
+//     message: "Must provide either privateKey, wallet object, or encrypted data",
+//   });
+
 /**
  * Schema for validating encryption/decryption requests
  *
@@ -170,7 +191,14 @@ export const EncryptSchema = z
         privateKey: PrivateKeySchema,
       })
       .optional(),
-    encrypted: z.string().optional(),
+    encrypted: z
+      .object({
+        encrypted: z.string().min(1, "Encrypted data cannot be empty"),
+        iv: z.string().min(1, "Initialization vector (IV) cannot be empty"),
+        salt: z.string().optional(),
+        algorithm: z.string().optional(),
+      })
+      .optional(),
     password: z.string().min(1, "Password is required"),
   })
   .refine((data) => data.privateKey || data.wallet || data.encrypted, {
