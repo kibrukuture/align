@@ -12,11 +12,11 @@
  */
 
 import { HDNodeWallet, Wallet } from "ethers";
-import type { Wallet as SDKWallet, EncryptedWallet } from "@/resources/blockchain/wallets/wallets.types";
-import {
-  decryptPrivateKey,
-  decryptWallet,
-} from "@/resources/blockchain/wallets/handlers/encrypt.handler";
+import type {
+  Wallet as SDKWallet,
+  EncryptedWallet,
+} from "@/resources/blockchain/wallets/wallets.types";
+import { decryptWallet } from "@/resources/blockchain/wallets/handlers/encrypt.handler";
 
 /**
  * Creates a new random cryptocurrency wallet
@@ -51,10 +51,10 @@ import {
  * ```typescript
  * async function createUserWallet(userId: string) {
  *   const wallet = await createWallet();
- *   
+ *
  *   // Encrypt before storing in database
  *   const encrypted = await encryptWallet(wallet, userPassword);
- *   
+ *
  *   await database.wallets.create({
  *     userId,
  *     address: wallet.address,
@@ -62,7 +62,7 @@ import {
  *     iv: encrypted.iv,
  *     salt: encrypted.salt,
  *   });
- *   
+ *
  *   return wallet.address;
  * }
  * ```
@@ -79,6 +79,10 @@ export async function createWallet(): Promise<SDKWallet> {
   return {
     address: ethersWallet.address,
     privateKey: ethersWallet.privateKey,
+    mnemonic: {
+      phrase: ethersWallet.mnemonic?.phrase!,
+      // path: ethersWallet.mnemonic?.,
+    },
   };
 }
 
@@ -107,7 +111,7 @@ export async function createWallet(): Promise<SDKWallet> {
  * ```typescript
  * const mnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
  * const wallet = await createFromMnemonic(mnemonic);
- * 
+ *
  * console.log("Address:", wallet.address);
  * console.log("Derivation Path:", wallet.mnemonic?.path);
  * // Output:
@@ -121,13 +125,13 @@ export async function createWallet(): Promise<SDKWallet> {
  * async function restoreWallet(userId: string, mnemonic: string) {
  *   try {
  *     const wallet = await createFromMnemonic(mnemonic);
- *     
+ *
  *     // Verify this is the correct wallet
  *     const existingAddress = await database.getWalletAddress(userId);
  *     if (wallet.address !== existingAddress) {
  *       throw new Error("Mnemonic doesn't match the wallet on file");
  *     }
- *     
+ *
  *     return wallet;
  *   } catch (error) {
  *     throw new Error("Invalid mnemonic phrase");
@@ -138,9 +142,7 @@ export async function createWallet(): Promise<SDKWallet> {
  * @see {@link createWallet} To generate a new random wallet
  * @see {@link createFromPrivateKey} To import from a private key instead
  */
-export async function createFromMnemonic(
-  mnemonic: string
-): Promise<SDKWallet> {
+export async function createFromMnemonic(mnemonic: string): Promise<SDKWallet> {
   // Create wallet from mnemonic using ethers.js
   // HDNodeWallet.fromPhrase() creates a wallet from mnemonic with default path
   const ethersWallet = HDNodeWallet.fromPhrase(mnemonic);
@@ -181,7 +183,7 @@ export async function createFromMnemonic(
  * ```typescript
  * const privateKey = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
  * const wallet = await createFromPrivateKey(privateKey);
- * 
+ *
  * console.log("Address:", wallet.address);
  * console.log("Private Key:", wallet.privateKey);
  * ```
@@ -192,13 +194,13 @@ export async function createFromMnemonic(
  * async function importWalletFromKMS(userId: string) {
  *   // Retrieve private key from secure key management system
  *   const privateKey = await kms.getPrivateKey(userId);
- *   
+ *
  *   // Create wallet from the private key
  *   const wallet = await createFromPrivateKey(privateKey);
- *   
+ *
  *   // Use the wallet to sign transactions
  *   const tx = await sendNativeToken(wallet, recipientAddress, "0.1", "polygon");
- *   
+ *
  *   return tx.hash;
  * }
  * ```
@@ -208,10 +210,10 @@ export async function createFromMnemonic(
  * ```typescript
  * const key1 = "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
  * const key2 = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
- * 
+ *
  * const wallet1 = await createFromPrivateKey(key1); // Works
  * const wallet2 = await createFromPrivateKey(key2); // Also works
- * 
+ *
  * console.log(wallet1.address === wallet2.address); // true
  * ```
  *
@@ -268,13 +270,13 @@ export async function createFromPrivateKey(
  * ```typescript
  * // Retrieve encrypted wallet from database
  * const encryptedWallet = await database.wallets.findOne({ userId });
- * 
+ *
  * // Decrypt with user's password
  * const wallet = await createFromEncrypted(encryptedWallet, userPassword);
- * 
+ *
  * // Now you can use the wallet to sign transactions
  * const tx = await sendNativeToken(wallet, recipientAddress, "0.1", "polygon");
- * 
+ *
  * // Clear sensitive data from memory
  * wallet.privateKey = "";
  * ```
