@@ -1,3 +1,12 @@
+import { Providers } from "@/resources/blockchain/providers/providers.resource";
+import { Wallets } from "@/resources/blockchain/wallets/wallets.resource";
+import { Transactions } from "@/resources/blockchain/transactions/transactions.resource";
+import { Tokens } from "@/resources/blockchain/tokens/tokens.resource";
+import * as Utils from "@/resources/blockchain/utils";
+import type { BlockchainConfig } from "@/resources/blockchain/blockchain.types";
+import { Contracts } from "@/resources/blockchain/contracts/contracts.resource";
+import { NFTs } from "@/resources/blockchain/nfts/nfts.resource";
+
 /**
  * Blockchain
  *
@@ -14,23 +23,15 @@
  * @example
  * Initialize the SDK
  * ```typescript
- * import { AlignSDK } from '@align/sdk';
+ * import Align from '@tobel/align';
  *
- * const sdk = new AlignSDK({ apiKey: '...' });
+ * const align = new Align({ apiKey: '...' });
  *
  * // Access blockchain features
- * const wallet = await sdk.blockchain.wallets.create();
- * const balance = await sdk.blockchain.tokens.getBalance(wallet.address, 'USDC');
+ * const wallet = await align.blockchain.wallets.create();
+ * const balance = await align.blockchain.tokens.getBalance(wallet.address, 'USDC');
  * ```
  */
-import { Providers } from "@/resources/blockchain/providers/providers.resource";
-import { Wallets } from "@/resources/blockchain/wallets/wallets.resource";
-import { Transactions } from "@/resources/blockchain/transactions/transactions.resource";
-import { Tokens } from "@/resources/blockchain/tokens/tokens.resource";
-import * as Utils from "@/resources/blockchain/utils";
-import type { BlockchainConfig } from "@/resources/blockchain/blockchain.types";
-import { Contracts } from "@/resources/blockchain/contracts/contracts.resource";
-import { NFTs } from "@/resources/blockchain/nfts/nfts.resource";
 
 export class Blockchain {
   /**
