@@ -11,14 +11,16 @@ import { NFTs } from "@/resources/blockchain/nfts/nfts.resource";
  * Blockchain
  *
  * The central hub for all blockchain functionality in the Align SDK.
- * This class aggregates specialized resources for wallets, transactions, tokens, and providers.
+ * This class aggregates specialized resources for wallets, transactions, tokens, contracts, NFTs, and providers.
  *
  * **Architecture:**
  * - **Providers:** Manages network connections (RPC)
  * - **Wallets:** Manages accounts, keys, and signing
  * - **Transactions:** Handles sending and monitoring transactions
  * - **Tokens:** Handles ERC-20 token interactions
- * - **Utils:** Provides common helper functions
+ * - **Contracts:** Handles smart contract interactions (read/write/events)
+ * - **NFTs:** Handles ERC-721 and ERC-1155 NFT operations
+ * - **Utils:** Provides common helper functions (address, format, ENS, multicall)
  *
  * @example
  * Initialize the SDK
