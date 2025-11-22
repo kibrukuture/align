@@ -77,6 +77,8 @@ console.log("Customer created:", customer.customer_id);
   - [Wallets](#blockchain-wallets)
   - [Transactions](#blockchain-transactions)
   - [Tokens](#blockchain-tokens)
+  - [Contracts](#blockchain-contracts)
+  - [NFTs](#blockchain-nfts)
   - [Utilities](#blockchain-utilities)
 - [Error Handling](#error-handling)
 - [TypeScript Types](#typescript-types)
@@ -741,7 +743,7 @@ console.log(`Route ID: ${route.id}`);
 // Any USDC sent to this address on Ethereum will automatically
 // be bridged to Solana and sent to the destination address
 
-```
+````
 
 ### List Permanent Routes
 
@@ -752,7 +754,7 @@ routes.forEach(route => {
   console.log(`${route.source_network} → ${route.destination_network}`);
   console.log(`Deposit: ${route.deposit_address}`);
 });
-```
+````
 
 ---
 
@@ -1109,7 +1111,7 @@ The blockchain module provides comprehensive Web3 functionality for managing wal
 const align = new Align({
   apiKey: process.env.ALIGNLAB_API_KEY!,
   environment: "sandbox",
-  
+
   // Optional: Provide custom RPC URLs
   blockchain: {
     customRpcUrls: {
@@ -1172,6 +1174,7 @@ interface WalletCreationOptions {
 **Parameters:** None
 
 **Returns:** `Promise<Wallet>`
+
 - `address` (string): The public wallet address (e.g., `0x742d35...`)
 - `privateKey` (string): The private key used to sign transactions (keep this secret!)
 - `mnemonic` (string): A 12-word recovery phrase that can restore the wallet
@@ -1202,9 +1205,11 @@ console.log("Mnemonic:", wallet.mnemonic);
 **Description:** Recovers an existing wallet from a 12 or 24-word mnemonic phrase. This is useful when users want to import an existing wallet or restore access to a wallet they created previously. The same mnemonic will always generate the same wallet address.
 
 **Parameters:**
+
 - `mnemonic` (string): A valid BIP39 mnemonic phrase (12 or 24 words separated by spaces)
 
 **Returns:** `Promise<Wallet>`
+
 - `address` (string): The wallet address derived from the mnemonic
 - `privateKey` (string): The private key derived from the mnemonic
 - `mnemonic` (string): The same mnemonic phrase provided
@@ -1232,9 +1237,11 @@ console.log("Address:", wallet.address);
 **Description:** Imports an existing wallet using its private key. This is useful when you have a private key from another source (like a hardware wallet export or another application) and want to use it with this SDK.
 
 **Parameters:**
+
 - `privateKey` (string): A 64-character hexadecimal private key (with or without `0x` prefix)
 
 **Returns:** `Promise<Wallet>`
+
 - `address` (string): The wallet address derived from the private key
 - `privateKey` (string): The same private key provided
 - `mnemonic` (undefined): No mnemonic since the wallet was created from a private key
@@ -1247,7 +1254,6 @@ const wallet = await align.blockchain.wallets.createFromPrivateKey(
 );
 
 console.log("Address:", wallet.address);
-
 ```
 
 ---
@@ -1259,10 +1265,12 @@ console.log("Address:", wallet.address);
 **Description:** Retrieves the native cryptocurrency balance for a wallet address on a specific blockchain network. Native tokens are the blockchain's main currency (ETH on Ethereum, MATIC on Polygon, etc.).
 
 **Parameters:**
+
 - `address` (string): The wallet address to check (must be a valid Ethereum-style address)
 - `network` (Network): The blockchain network (`"ethereum"`, `"polygon"`, `"base"`, `"arbitrum"`, `"optimism"`)
 
 **Returns:** `Promise<WalletBalance>`
+
 - `balance` (string): Raw balance in smallest unit (wei for ETH, etc.)
 - `balanceFormatted` (string): Human-readable balance (e.g., "1.5")
 - `decimals` (number): Number of decimals for the token (usually 18)
@@ -1293,11 +1301,13 @@ console.log(`Raw balance: ${balance.balance} wei`);
 **Description:** Retrieves the balance of a specific ERC-20 token (like USDC, USDT, DAI) for a wallet address. This is different from native balance - it checks how much of a specific token contract the wallet holds.
 
 **Parameters:**
+
 - `address` (string): The wallet address to check
 - `tokenAddress` (string): The ERC-20 token contract address (e.g., USDC contract address)
 - `network` (Network): The blockchain network where the token exists
 
 **Returns:** `Promise<WalletBalance>`
+
 - `balance` (string): Raw balance in smallest token unit
 - `balanceFormatted` (string): Human-readable balance
 - `decimals` (number): Token decimals (6 for USDC, 18 for most tokens)
@@ -1331,12 +1341,14 @@ console.log(`Decimals: ${usdcBalance.decimals}`);
 **Description:** Sends native cryptocurrency (ETH, MATIC, etc.) from one wallet to another. This method handles transaction signing, gas estimation, and broadcasting to the blockchain network.
 
 **Parameters:**
+
 - `wallet` (Wallet): The sender's wallet object (must include `privateKey` for signing)
 - `to` (string): The recipient's wallet address
 - `amount` (string): Amount to send in human-readable format (e.g., "0.1" for 0.1 MATIC)
 - `network` (Network): The blockchain network to use
 
 **Returns:** `Promise<Transaction>`
+
 - `hash` (string): Transaction hash for tracking
 - `from` (string): Sender address
 - `to` (string): Recipient address
@@ -1379,6 +1391,7 @@ console.log("Confirmed in block:", receipt.blockNumber);
 **Description:** Sends ERC-20 tokens (USDC, USDT, DAI, etc.) from one wallet to another. This interacts with the token's smart contract to transfer ownership.
 
 **Parameters:**
+
 - `wallet` (Wallet): The sender's wallet (must have `privateKey`)
 - `tokenAddress` (string): The ERC-20 token contract address
 - `to` (string): The recipient's wallet address
@@ -1386,6 +1399,7 @@ console.log("Confirmed in block:", receipt.blockNumber);
 - `network` (Network): The blockchain network
 
 **Returns:** `Promise<Transaction>`
+
 - Same structure as `sendNativeToken`
 
 **Use Case:** Sending stablecoin payments, token transfers, or processing withdrawals in USDC/USDT.
@@ -1414,10 +1428,12 @@ console.log("Token transfer hash:", tx.hash);
 **Description:** Encrypts a wallet's private key and mnemonic using AES-256-GCM encryption with a password. This allows you to securely store wallet credentials in a database without exposing the private key. Uses the Web Crypto API for strong encryption.
 
 **Parameters:**
+
 - `wallet` (Wallet): The wallet object to encrypt (must have `privateKey` and optionally `mnemonic`)
 - `password` (string): A strong password used to encrypt the wallet (user should remember this!)
 
 **Returns:** `Promise<EncryptedWallet>`
+
 - `address` (string): The wallet address (not encrypted, safe to store publicly)
 - `encrypted` (string): The encrypted private key and mnemonic (base64 encoded)
 - `iv` (string): Initialization vector for decryption (base64 encoded)
@@ -1456,10 +1472,12 @@ await database.save({
 **Description:** Decrypts an encrypted wallet using the password that was used to encrypt it. This restores the wallet object with the private key, allowing you to sign transactions.
 
 **Parameters:**
+
 - `encryptedWallet` (EncryptedWallet): The encrypted wallet object (from database)
 - `password` (string): The password used during encryption
 
 **Returns:** `Promise<Wallet>`
+
 - `address` (string): The wallet address
 - `privateKey` (string): The decrypted private key
 - `mnemonic` (string | undefined): The decrypted mnemonic (if it was encrypted)
@@ -1506,6 +1524,7 @@ decrypted.privateKey = "";
 **Description:** Encrypts only the private key (without the mnemonic). Useful when you only need to store the private key and don't have a mnemonic.
 
 **Parameters:**
+
 - `privateKey` (string): The private key to encrypt
 - `password` (string): Password for encryption
 
@@ -1518,6 +1537,7 @@ decrypted.privateKey = "";
 **Description:** Decrypts a previously encrypted private key.
 
 **Parameters:**
+
 - `encrypted` (object): The encrypted private key data
 - `password` (string): Password used during encryption
 
@@ -1550,6 +1570,7 @@ console.log("Decrypted key:", decryptedKey);
 **Description:** Retrieves the recent transaction history for a wallet address. Shows both incoming and outgoing transactions with details like amount, block number, and confirmation count.
 
 **Parameters:**
+
 - `address` (string): The wallet address to get history for
 - `network` (Network): The blockchain network
 - `limit` (number, optional): Maximum number of transactions to return (default: 10)
@@ -1668,12 +1689,12 @@ await align.blockchain.transactions.monitorTransaction(
   "polygon",
   (status, receipt) => {
     console.log("Transaction status:", status);
-    
+
     if (receipt) {
       console.log("Confirmations:", receipt.confirmations);
       console.log("Block:", receipt.blockNumber);
     }
-    
+
     if (status === "confirmed") {
       console.log("Transaction confirmed!");
     } else if (status === "failed") {
@@ -1844,6 +1865,142 @@ console.log(parsed); // "10500000"
 
 ---
 
+### Blockchain Contracts
+
+Interact with smart contracts on EVM-compatible blockchains. Read contract state, write to contracts, and monitor contract events.
+
+#### Read from Contract
+
+Call view/pure functions on smart contracts without spending gas.
+
+```typescript
+// Read ERC-20 token balance
+const balance = await align.blockchain.contracts.read({
+  address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174", // USDC on Polygon
+  abi: ["function balanceOf(address) view returns (uint256)"],
+  method: "balanceOf",
+  args: ["0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"],
+  network: "polygon",
+});
+
+console.log("Balance:", balance); // BigInt value
+```
+
+#### Write to Contract
+
+Execute state-changing functions on smart contracts (requires gas).
+
+```typescript
+// Approve ERC-20 token spending
+const tx = await align.blockchain.contracts.write({
+  wallet: myWallet,
+  address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+  abi: ["function approve(address spender, uint256 amount) returns (bool)"],
+  method: "approve",
+  args: ["0xSpenderAddress...", "1000000"], // 1 USDC (6 decimals)
+  network: "polygon",
+});
+
+console.log("Transaction hash:", tx.hash);
+```
+
+#### Get Contract Events
+
+Query historical events emitted by smart contracts.
+
+```typescript
+// Get Transfer events from ERC-20 contract
+const events = await align.blockchain.contracts.getEvents({
+  address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+  abi: [
+    "event Transfer(address indexed from, address indexed to, uint256 value)",
+  ],
+  eventName: "Transfer",
+  network: "polygon",
+  fromBlock: 50000000,
+  toBlock: 50001000,
+});
+
+events.forEach((event) => {
+  console.log(`Transfer: ${event.args.from} → ${event.args.to}`);
+  console.log(`Amount: ${event.args.value}`);
+});
+```
+
+---
+
+### Blockchain NFTs
+
+Transfer and query NFT ownership for ERC-721 and ERC-1155 tokens.
+
+#### Transfer ERC-721 NFT
+
+Transfer a unique NFT (ERC-721) to another address.
+
+```typescript
+// Transfer NFT #123 to recipient
+const tx = await align.blockchain.nfts.transferERC721({
+  wallet: myWallet,
+  contractAddress: "0xNFTContractAddress...",
+  to: "0xRecipientAddress...",
+  tokenId: "123",
+  network: "ethereum",
+});
+
+console.log("NFT transferred:", tx.hash);
+```
+
+#### Transfer ERC-1155 NFT
+
+Transfer semi-fungible tokens (ERC-1155).
+
+```typescript
+// Transfer 5 units of token #456
+const tx = await align.blockchain.nfts.transferERC1155({
+  wallet: myWallet,
+  contractAddress: "0xERC1155ContractAddress...",
+  to: "0xRecipientAddress...",
+  tokenId: "456",
+  amount: "5",
+  network: "polygon",
+});
+
+console.log("ERC-1155 transferred:", tx.hash);
+```
+
+#### Get NFT Owner
+
+Check who owns a specific ERC-721 NFT.
+
+```typescript
+// Get owner of NFT #789
+const owner = await align.blockchain.nfts.getOwner({
+  contractAddress: "0xNFTContractAddress...",
+  tokenId: "789",
+  network: "ethereum",
+});
+
+console.log("NFT owner:", owner); // "0x742d35..."
+```
+
+#### Check NFT Ownership
+
+Verify if an address owns a specific NFT.
+
+```typescript
+// Check if address owns NFT #123
+const isOwner = await align.blockchain.nfts.isOwner({
+  contractAddress: "0xNFTContractAddress...",
+  tokenId: "123",
+  ownerAddress: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+  network: "ethereum",
+});
+
+console.log("Is owner:", isOwner); // true or false
+```
+
+---
+
 ### Blockchain Utilities
 
 Helper functions for blockchain operations.
@@ -1979,8 +2136,6 @@ async function completeBlockchainWorkflow() {
 completeBlockchainWorkflow().catch(console.error);
 ```
 
- 
-
 ## Error Handling
 
 The SDK provides custom error classes for better error handling.
@@ -1988,33 +2143,28 @@ The SDK provides custom error classes for better error handling.
 ### Error Types
 
 ```typescript
-import { AlignError, AlignValidationError } from '@tolbel/align';
+import { AlignError, AlignValidationError } from "@tolbel/align";
 
 try {
   const customer = await align.customers.create({
-    email: 'invalid-email', // Invalid email format
-    first_name: 'John',
-    last_name: 'Doe',
-    type: 'individual',
+    email: "invalid-email", // Invalid email format
+    first_name: "John",
+    last_name: "Doe",
+    type: "individual",
   });
 } catch (error) {
   if (error instanceof AlignValidationError) {
-    console.error('Validation error:', error.message);
-    console.error('Field errors:', error.fieldErrors);
+    console.error("Validation error:", error.message);
+    console.error("Field errors:", error.fieldErrors);
     // Field errors: { email: ['Invalid email'] }
   } else if (error instanceof AlignError) {
-    console.error('API error:', error.message);
-    console.error('Status code:', error.statusCode);
+    console.error("API error:", error.message);
+    console.error("Status code:", error.statusCode);
   } else {
-    console.error('Unexpected error:', error);
+    console.error("Unexpected error:", error);
   }
 }
 ```
-
-
-
-
-
 
 ### Handling API Errors
 
