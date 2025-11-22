@@ -99,9 +99,9 @@ export class Transactions {
    * @example
    * Send ETH on Ethereum
    * ```typescript
-   * const wallet = await sdk.blockchain.wallets.create();
+   * const wallet = await align.blockchain.wallets.create();
    *
-   * const tx = await sdk.blockchain.transactions.sendNativeToken(
+   * const tx = await align.blockchain.transactions.sendNativeToken(
    *   wallet,
    *   "0xRecipient...",
    *   "0.1", // 0.1 ETH
@@ -111,7 +111,7 @@ export class Transactions {
    * console.log(`Transaction sent: ${tx.hash}`);
    *
    * // Wait for confirmation
-   * const receipt = await sdk.blockchain.transactions.waitForConfirmation(
+   * const receipt = await align.blockchain.transactions.waitForConfirmation(
    *   tx.hash,
    *   "ethereum",
    *   1 // Wait for 1 confirmation
@@ -122,7 +122,7 @@ export class Transactions {
    * @example
    * Send MATIC on Polygon
    * ```typescript
-   * const tx = await sdk.blockchain.transactions.sendNativeToken(
+   * const tx = await align.blockchain.transactions.sendNativeToken(
    *   wallet,
    *   "0xRecipient...",
    *   "10.0", // 10 MATIC
@@ -133,13 +133,13 @@ export class Transactions {
    * @example
    * Check balance before sending
    * ```typescript
-   * const balance = await sdk.blockchain.wallets.getBalance(
+   * const balance = await align.blockchain.wallets.getBalance(
    *   wallet.address,
    *   "ethereum"
    * );
    *
    * if (parseFloat(balance) >= 0.1) {
-   *   const tx = await sdk.blockchain.transactions.sendNativeToken(
+   *   const tx = await align.blockchain.transactions.sendNativeToken(
    *     wallet,
    *     "0xRecipient...",
    *     "0.1",
@@ -227,9 +227,9 @@ export class Transactions {
    * @example
    * Send USDC on Polygon
    * ```typescript
-   * const wallet = await sdk.blockchain.wallets.create();
+   * const wallet = await align.blockchain.wallets.create();
    *
-   * const tx = await sdk.blockchain.transactions.sendToken(
+   * const tx = await align.blockchain.transactions.sendToken(
    *   wallet,
    *   "usdc",
    *   "0xRecipient...",
@@ -240,7 +240,7 @@ export class Transactions {
    * console.log(`USDC transfer sent: ${tx.hash}`);
    *
    * // Wait for confirmation
-   * const receipt = await sdk.blockchain.transactions.waitForConfirmation(
+   * const receipt = await align.blockchain.transactions.waitForConfirmation(
    *   tx.hash,
    *   "polygon"
    * );
@@ -249,7 +249,7 @@ export class Transactions {
    * @example
    * Send USDT on Ethereum
    * ```typescript
-   * const tx = await sdk.blockchain.transactions.sendToken(
+   * const tx = await align.blockchain.transactions.sendToken(
    *   wallet,
    *   "usdt",
    *   "0xRecipient...",
@@ -261,14 +261,14 @@ export class Transactions {
    * @example
    * Check token balance before sending
    * ```typescript
-   * const balance = await sdk.blockchain.tokens.getBalance(
+   * const balance = await align.blockchain.tokens.getBalance(
    *   wallet.address,
    *   "usdc",
    *   "polygon"
    * );
    *
    * if (parseFloat(balance) >= 50) {
-   *   const tx = await sdk.blockchain.transactions.sendToken(
+   *   const tx = await align.blockchain.transactions.sendToken(
    *     wallet,
    *     "usdc",
    *     "0xRecipient...",
@@ -372,7 +372,7 @@ export class Transactions {
    * @example
    * Estimate native token transfer
    * ```typescript
-   * const estimate = await sdk.blockchain.transactions.estimateGas(
+   * const estimate = await align.blockchain.transactions.estimateGas(
    *   "0xFrom...",
    *   "0xTo...",
    *   "1.0",
@@ -387,7 +387,7 @@ export class Transactions {
    * @example
    * Show fee to user before transaction
    * ```typescript
-   * const estimate = await sdk.blockchain.transactions.estimateGas(
+   * const estimate = await align.blockchain.transactions.estimateGas(
    *   wallet.address,
    *   recipientAddress,
    *   "0.5",
@@ -399,7 +399,7 @@ export class Transactions {
    * );
    *
    * if (confirmed) {
-   *   const tx = await sdk.blockchain.transactions.sendNativeToken(
+   *   const tx = await align.blockchain.transactions.sendNativeToken(
    *     wallet,
    *     recipientAddress,
    *     "0.5",
@@ -411,7 +411,7 @@ export class Transactions {
    * @example
    * Estimate with contract data
    * ```typescript
-   * const estimate = await sdk.blockchain.transactions.estimateGas(
+   * const estimate = await align.blockchain.transactions.estimateGas(
    *   wallet.address,
    *   contractAddress,
    *   "0",
@@ -504,14 +504,14 @@ export class Transactions {
    * @example
    * Check transaction status
    * ```typescript
-   * const tx = await sdk.blockchain.transactions.sendNativeToken(
+   * const tx = await align.blockchain.transactions.sendNativeToken(
    *   wallet,
    *   "0xRecipient...",
    *   "0.1",
    *   "polygon"
    * );
    *
-   * const status = await sdk.blockchain.transactions.getStatus(
+   * const status = await align.blockchain.transactions.getStatus(
    *   tx.hash,
    *   "polygon"
    * );
@@ -523,7 +523,7 @@ export class Transactions {
    * Poll for status updates
    * ```typescript
    * const checkStatus = async (hash: string) => {
-   *   const status = await sdk.blockchain.transactions.getStatus(hash, "ethereum");
+   *   const status = await align.blockchain.transactions.getStatus(hash, "ethereum");
    *
    *   if (status === "pending") {
    *     console.log("Still pending...");
@@ -541,7 +541,7 @@ export class Transactions {
    * @example
    * Wait for confirmation before proceeding
    * ```typescript
-   * const tx = await sdk.blockchain.transactions.sendToken(
+   * const tx = await align.blockchain.transactions.sendToken(
    *   wallet,
    *   "usdc",
    *   "0xRecipient...",
@@ -552,7 +552,7 @@ export class Transactions {
    * let status = "pending";
    * while (status === "pending") {
    *   await new Promise(resolve => setTimeout(resolve, 3000));
-   *   status = await sdk.blockchain.transactions.getStatus(tx.hash, "polygon");
+   *   status = await align.blockchain.transactions.getStatus(tx.hash, "polygon");
    * }
    *
    * if (status === "confirmed") {
@@ -648,7 +648,7 @@ export class Transactions {
    * @example
    * Wait for 1 confirmation (default)
    * ```typescript
-   * const tx = await sdk.blockchain.transactions.sendNativeToken(
+   * const tx = await align.blockchain.transactions.sendNativeToken(
    *   wallet,
    *   "0xRecipient...",
    *   "0.1",
@@ -657,7 +657,7 @@ export class Transactions {
    *
    * console.log("Transaction sent, waiting for confirmation...");
    *
-   * const receipt = await sdk.blockchain.transactions.waitForConfirmation(
+   * const receipt = await align.blockchain.transactions.waitForConfirmation(
    *   tx.hash,
    *   "ethereum"
    * );
@@ -669,7 +669,7 @@ export class Transactions {
    * @example
    * Wait for multiple confirmations (more secure)
    * ```typescript
-   * const tx = await sdk.blockchain.transactions.sendToken(
+   * const tx = await align.blockchain.transactions.sendToken(
    *   wallet,
    *   "usdc",
    *   "0xRecipient...",
@@ -678,7 +678,7 @@ export class Transactions {
    * );
    *
    * // Wait for 6 confirmations for high-value transfer
-   * const receipt = await sdk.blockchain.transactions.waitForConfirmation(
+   * const receipt = await align.blockchain.transactions.waitForConfirmation(
    *   tx.hash,
    *   "ethereum",
    *   6
@@ -693,7 +693,7 @@ export class Transactions {
    * @example
    * Show progress while waiting
    * ```typescript
-   * const tx = await sdk.blockchain.transactions.sendNativeToken(
+   * const tx = await align.blockchain.transactions.sendNativeToken(
    *   wallet,
    *   "0xRecipient...",
    *   "0.5",
@@ -703,7 +703,7 @@ export class Transactions {
    * console.log("Waiting for confirmation...");
    * const startTime = Date.now();
    *
-   * const receipt = await sdk.blockchain.transactions.waitForConfirmation(
+   * const receipt = await align.blockchain.transactions.waitForConfirmation(
    *   tx.hash,
    *   "polygon",
    *   3

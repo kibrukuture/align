@@ -116,7 +116,7 @@ export class Providers {
    *
    * @example
    * ```typescript
-   * const provider = sdk.blockchain.providers.getProvider("polygon");
+   * const provider = align.blockchain.providers.getProvider("polygon");
    * const feeData = await provider.getFeeData();
    * ```
    */
@@ -156,7 +156,7 @@ export class Providers {
    * @example
    * Using Alchemy
    * ```typescript
-   * sdk.blockchain.providers.setCustomRpc(
+   * align.blockchain.providers.setCustomRpc(
    *   "ethereum",
    *   "https://eth-mainnet.g.alchemy.com/v2/YOUR-API-KEY"
    * );
@@ -178,7 +178,7 @@ export class Providers {
    *
    * @example
    * ```typescript
-   * const config = sdk.blockchain.providers.getNetworkInfo("base");
+   * const config = align.blockchain.providers.getNetworkInfo("base");
    * console.log(`Chain ID: ${config.chainId}`); // 8453
    * ```
    */

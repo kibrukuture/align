@@ -76,7 +76,7 @@ export class Contracts {
    * @example
    * ```typescript
    * // Query ERC-20 token balance
-   * const balance = await sdk.blockchain.contracts.read({
+   * const balance = await align.blockchain.contracts.read({
    *   address: '0x...', // Token contract
    *   abi: ['function balanceOf(address) view returns (uint256)'],
    *   method: 'balanceOf',
@@ -143,7 +143,7 @@ export class Contracts {
    * @example
    * ```typescript
    * // Transfer ERC-20 tokens
-   * const tx = await sdk.blockchain.contracts.write({
+   * const tx = await align.blockchain.contracts.write({
    *   wallet: myWallet,
    *   address: '0x...', // Token contract
    *   abi: ['function transfer(address to, uint256 amount) returns (bool)'],
@@ -218,7 +218,7 @@ export class Contracts {
    * @example
    * ```typescript
    * // Get all Transfer events for a specific recipient
-   * const events = await sdk.blockchain.contracts.getEvents({
+   * const events = await align.blockchain.contracts.getEvents({
    *   address: '0x...', // Token contract
    *   abi: ['event Transfer(address indexed from, address indexed to, uint256 value)'],
    *   eventName: 'Transfer',

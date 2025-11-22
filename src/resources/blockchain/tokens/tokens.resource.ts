@@ -53,7 +53,7 @@ export class Tokens {
    *
    * @example
    * ```typescript
-   * const balance = await sdk.blockchain.tokens.getBalance(
+   * const balance = await align.blockchain.tokens.getBalance(
    *   "0xAddress...",
    *   "usdc",
    *   "polygon"
@@ -99,7 +99,7 @@ export class Tokens {
    *
    * @example
    * ```typescript
-   * const address = sdk.blockchain.tokens.getAddress("usdc", "polygon");
+   * const address = align.blockchain.tokens.getAddress("usdc", "polygon");
    * ```
    */
   public getAddress(token: Token, network: Network): string {
@@ -124,7 +124,7 @@ export class Tokens {
    *
    * @example
    * ```typescript
-   * const formatted = sdk.blockchain.tokens.formatAmount("1000000", 6);
+   * const formatted = align.blockchain.tokens.formatAmount("1000000", 6);
    * ```
    */
   public formatAmount(amount: string, decimals: number): string {
@@ -141,7 +141,7 @@ export class Tokens {
    *
    * @example
    * ```typescript
-   * const raw = sdk.blockchain.tokens.parseAmount("1.0", 6);
+   * const raw = align.blockchain.tokens.parseAmount("1.0", 6);
    * ```
    */
   public parseAmount(amount: string, decimals: number): string {
@@ -159,7 +159,7 @@ export class Tokens {
    * @returns TokenInfo object with full metadata.
    *
    * @example
-   * const info = await sdk.blockchain.tokens.getTokenInfo(
+   * const info = await align.blockchain.tokens.getTokenInfo(
    *   "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
    *   provider,
    *   "polygon"

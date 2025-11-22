@@ -71,7 +71,7 @@ export class NFTs {
    *
    * @example
    * ```typescript
-   * const tx = await sdk.blockchain.nfts.transferERC721(
+   * const tx = await align.blockchain.nfts.transferERC721(
    *   myWallet,
    *   '0x...', // NFT contract address
    *   '0x...', // Recipient address
@@ -142,7 +142,7 @@ export class NFTs {
    *
    * @example
    * ```typescript
-   * const tx = await sdk.blockchain.nfts.transferERC1155(
+   * const tx = await align.blockchain.nfts.transferERC1155(
    *   myWallet,
    *   '0x...', // ERC-1155 contract address
    *   '0x...', // Recipient address
@@ -212,7 +212,7 @@ export class NFTs {
    *
    * @example
    * ```typescript
-   * const owner = await sdk.blockchain.nfts.getOwner(
+   * const owner = await align.blockchain.nfts.getOwner(
    *   '0x...', // NFT contract address
    *   '123',   // Token ID
    *   'polygon'
@@ -269,7 +269,7 @@ export class NFTs {
    *
    * @example
    * ```typescript
-   * const isOwner = await sdk.blockchain.nfts.isOwner(
+   * const isOwner = await align.blockchain.nfts.isOwner(
    *   '0x...', // ERC-1155 contract address
    *   '0x...', // Address to check
    *   '456',   // Token ID

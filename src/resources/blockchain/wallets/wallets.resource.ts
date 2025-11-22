@@ -48,7 +48,7 @@ export class Wallets {
    *
    * @example
    * ```typescript
-   * const wallet = await sdk.blockchain.wallets.create();
+   * const wallet = await align.blockchain.wallets.create();
    * console.log(wallet.address);
    * console.log(wallet.mnemonic); // Save this securely!
    * ```
@@ -71,7 +71,7 @@ export class Wallets {
    * @example
    * ```typescript
    * const mnemonic = "witch collapse practice feed shame open despair creek road again ice least";
-   * const wallet = await sdk.blockchain.wallets.createFromMnemonic(mnemonic);
+   * const wallet = await align.blockchain.wallets.createFromMnemonic(mnemonic);
    * ```
    */
   public async createFromMnemonic(mnemonic: string): Promise<Wallet> {
@@ -99,7 +99,7 @@ export class Wallets {
    *
    * @example
    * ```typescript
-   * const wallet = await sdk.blockchain.wallets.createFromPrivateKey("0x123...");
+   * const wallet = await align.blockchain.wallets.createFromPrivateKey("0x123...");
    * ```
    */
   public async createFromPrivateKey(privateKey: string): Promise<Wallet> {
@@ -129,7 +129,7 @@ export class Wallets {
    *
    * @example
    * ```typescript
-   * const wallet = await sdk.blockchain.wallets.createFromEncrypted(jsonString, "mySecretPass");
+   * const wallet = await align.blockchain.wallets.createFromEncrypted(jsonString, "mySecretPass");
    * ```
    */
   public async createFromEncrypted(
@@ -170,7 +170,7 @@ export class Wallets {
    *
    * @example
    * ```typescript
-   * const balance = await sdk.blockchain.wallets.getBalance(address, "polygon");
+   * const balance = await align.blockchain.wallets.getBalance(address, "polygon");
    * console.log(`Balance: ${balance} MATIC`);
    * ```
    */
@@ -194,7 +194,7 @@ export class Wallets {
    *
    * @example
    * ```typescript
-   * const usdcBalance = await sdk.blockchain.wallets.getTokenBalance(
+   * const usdcBalance = await align.blockchain.wallets.getTokenBalance(
    *   address,
    *   "0x2791...", // USDC Contract
    *   "polygon"
@@ -226,7 +226,7 @@ export class Wallets {
    *
    * @example
    * ```typescript
-   * const tx = await sdk.blockchain.wallets.sendNativeToken(
+   * const tx = await align.blockchain.wallets.sendNativeToken(
    *   wallet,
    *   recipient,
    *   "0.1",
@@ -261,7 +261,7 @@ export class Wallets {
    *
    * @example
    * ```typescript
-   * const tx = await sdk.blockchain.wallets.sendToken(
+   * const tx = await align.blockchain.wallets.sendToken(
    *   wallet,
    *   usdcAddress,
    *   recipient,
@@ -424,8 +424,8 @@ export class Wallets {
    * @example
    * Basic message signing
    * ```typescript
-   * const wallet = await sdk.blockchain.wallets.create();
-   * const signature = await sdk.blockchain.wallets.signMessage(
+   * const wallet = await align.blockchain.wallets.create();
+   * const signature = await align.blockchain.wallets.signMessage(
    *   wallet,
    *   "Hello, World!"
    * );
@@ -437,7 +437,7 @@ export class Wallets {
    * ```typescript
    * // User proves they own an address
    * const message = `I own this address. Timestamp: ${Date.now()}`;
-   * const signature = await sdk.blockchain.wallets.signMessage(wallet, message);
+   * const signature = await align.blockchain.wallets.signMessage(wallet, message);
    *
    * // Send signature to server for verification
    * await fetch('/api/verify', {
@@ -450,7 +450,7 @@ export class Wallets {
    * Sign in with Ethereum (SIWE)
    * ```typescript
    * const siweMessage = `example.com wants you to sign in with your Ethereum account:\n${wallet.address}\n\nSign in to Example App\n\nNonce: ${nonce}`;
-   * const signature = await sdk.blockchain.wallets.signMessage(wallet, siweMessage);
+   * const signature = await align.blockchain.wallets.signMessage(wallet, siweMessage);
    * ```
    */
   public async signMessage(wallet: Wallet, message: string): Promise<string> {
@@ -540,7 +540,7 @@ export class Wallets {
    *   deadline: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
    * };
    *
-   * const signature = await sdk.blockchain.wallets.signTypedData(
+   * const signature = await align.blockchain.wallets.signTypedData(
    *   wallet,
    *   domain,
    *   types,
@@ -575,7 +575,7 @@ export class Wallets {
    *   uri: 'ipfs://...'
    * };
    *
-   * const signature = await sdk.blockchain.wallets.signTypedData(
+   * const signature = await align.blockchain.wallets.signTypedData(
    *   wallet,
    *   domain,
    *   types,
