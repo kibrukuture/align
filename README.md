@@ -2139,162 +2139,21 @@ completeBlockchainWorkflow().catch(console.error);
 
 ## API Reference
 
-Complete reference of all available methods across all resources.
+📚 **[View Complete API Reference →](./docs/API_REFERENCE.md)**
 
-### Customers
+Quick reference of all 75 methods across all resources, organized by category with collapsible sections for easy navigation.
 
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `create()` | `data: CreateCustomerRequest` | `Promise<Customer>` | Create a new customer |
-| `get()` | `customerId: string` | `Promise<Customer>` | Get customer by ID |
-| `update()` | `customerId: string, data: UpdateCustomerRequest` | `Promise<Record<string, never>>` | Update customer details |
-| `list()` | `email?: string` | `Promise<CustomerListResponse>` | List all customers (optionally filter by email) |
-| `createKycSession()` | `customerId: string` | `Promise<KycSessionResponse>` | Create KYC verification session |
-
-### Virtual Accounts
-
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `create()` | `customerId: string, data: CreateVirtualAccountRequest` | `Promise<VirtualAccount>` | Create virtual bank account |
-| `get()` | `customerId: string, virtualAccountId: string` | `Promise<VirtualAccount>` | Get virtual account by ID |
-| `list()` | `customerId: string` | `Promise<VirtualAccountListResponse>` | List all virtual accounts for customer |
-
-### Transfers
-
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `createOfframpQuote()` | `customerId: string, data: CreateOfframpQuoteRequest` | `Promise<QuoteResponse>` | Create crypto-to-fiat quote |
-| `createOnrampQuote()` | `customerId: string, data: CreateOnrampQuoteRequest` | `Promise<QuoteResponse>` | Create fiat-to-crypto quote |
-| `createOfframpTransfer()` | `customerId: string, quoteId: string, data: CreateOfframpTransferRequest` | `Promise<Transfer>` | Create crypto-to-fiat transfer |
-| `completeOfframpTransfer()` | `customerId: string, transferId: string, data: CompleteOfframpTransferRequest` | `Promise<Transfer>` | Complete crypto-to-fiat transfer |
-| `createOnrampTransfer()` | `customerId: string, quoteId: string, data: CreateOnrampTransferRequest` | `Promise<Transfer>` | Create fiat-to-crypto transfer |
-| `getOfframpTransfer()` | `customerId: string, transferId: string` | `Promise<Transfer>` | Get offramp transfer by ID |
-| `getOnrampTransfer()` | `customerId: string, transferId: string` | `Promise<Transfer>` | Get onramp transfer by ID |
-| `listOfframpTransfers()` | `customerId: string` | `Promise<TransferListResponse>` | List all offramp transfers |
-| `listOnrampTransfers()` | `customerId: string` | `Promise<TransferListResponse>` | List all onramp transfers |
-| `simulateOfframpTransfer()` | `customerId: string, data: SimulateOfframpTransferRequest` | `Promise<SimulateTransferResponse>` | Simulate offramp transfer (sandbox only) |
-| `simulateOnrampTransfer()` | `customerId: string, data: SimulateOnrampTransferRequest` | `Promise<SimulateTransferResponse>` | Simulate onramp transfer (sandbox only) |
-
-### Cross-Chain
-
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `createTransfer()` | `customerId: string, data: CreateCrossChainTransferRequest` | `Promise<CrossChainTransfer>` | Create cross-chain transfer |
-| `completeTransfer()` | `customerId: string, transferId: string, data: CompleteCrossChainTransferRequest` | `Promise<CrossChainTransfer>` | Complete cross-chain transfer |
-| `getTransfer()` | `customerId: string, transferId: string` | `Promise<CrossChainTransfer>` | Get cross-chain transfer by ID |
-| `createPermanentRouteAddress()` | `customerId: string, data: CreatePermanentRouteRequest` | `Promise<PermanentRouteAddress>` | Create permanent route address |
-| `getPermanentRouteAddress()` | `customerId: string, addressId: string` | `Promise<PermanentRouteAddress>` | Get permanent route address by ID |
-| `listPermanentRouteAddresses()` | `customerId: string` | `Promise<PermanentRouteListResponse>` | List all permanent route addresses |
-
-### External Accounts
-
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `create()` | `customerId: string, data: CreateExternalAccountRequest` | `Promise<ExternalAccount>` | Link external bank account |
-| `list()` | `customerId: string` | `Promise<ExternalAccountListResponse>` | List all external accounts |
-
-### Wallets
-
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `verifyOwnership()` | `customerId: string, walletAddress: string` | `Promise<WalletVerification>` | Verify wallet ownership |
-
-### Webhooks
-
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `create()` | `data: CreateWebhookRequest` | `Promise<Webhook>` | Create webhook endpoint |
-| `list()` | - | `Promise<WebhookListResponse>` | List all webhooks |
-| `delete()` | `id: string` | `Promise<void>` | Delete webhook |
-| `verifySignature()` | `payload: string, signature: string, secret: string` | `boolean` | Verify webhook signature |
-
-### Files
-
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `upload()` | `file: File | Blob` | `Promise<UploadFileResponse>` | Upload file for KYC |
-
-### Developers
-
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `getFees()` | - | `Promise<DeveloperFeesResponse>` | Get developer fee configuration |
-| `updateFees()` | `request: UpdateDeveloperFeesRequest` | `Promise<DeveloperFeesResponse>` | Update developer fees |
-
-### Blockchain - Wallets
-
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `create()` | - | `Promise<Wallet>` | Create new random wallet |
-| `createFromMnemonic()` | `mnemonic: string` | `Promise<Wallet>` | Restore wallet from mnemonic |
-| `createFromPrivateKey()` | `privateKey: string` | `Promise<Wallet>` | Import wallet from private key |
-| `createFromEncrypted()` | `encrypted: string, password: string` | `Promise<Wallet>` | Decrypt and restore wallet |
-| `getAddress()` | `wallet: Wallet` | `string` | Extract address from wallet |
-| `getBalance()` | `address: string, network: Network` | `Promise<string>` | Get native token balance |
-| `getTokenBalance()` | `address: string, token: string, network: Network` | `Promise<string>` | Get ERC-20 token balance |
-| `sendNativeToken()` | `wallet: Wallet, to: string, amount: string, network: Network` | `Promise<Transaction>` | Send native token |
-| `sendToken()` | `wallet: Wallet, token: string, to: string, amount: string, network: Network` | `Promise<Transaction>` | Send ERC-20 token |
-| `encryptPrivateKey()` | `privateKey: string, password: string` | `Promise<EncryptedWallet>` | Encrypt private key |
-| `decryptPrivateKey()` | `encrypted: EncryptedWallet, password: string` | `Promise<string>` | Decrypt private key |
-| `encryptWallet()` | `wallet: Wallet, password: string` | `Promise<EncryptedWallet>` | Encrypt entire wallet |
-| `decryptWallet()` | `encrypted: EncryptedWallet, password: string` | `Promise<Wallet>` | Decrypt entire wallet |
-| `signMessage()` | `wallet: Wallet, message: string` | `Promise<string>` | Sign message with wallet |
-| `signTypedData()` | `wallet: Wallet, domain: TypedDataDomain, types: Record<string, TypedDataField[]>, value: Record<string, unknown>` | `Promise<string>` | Sign EIP-712 typed data |
-
-### Blockchain - Transactions
-
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `sendNativeToken()` | `wallet: Wallet, to: string, amount: string, network: Network` | `Promise<Transaction>` | Send native token (ETH, MATIC, etc.) |
-| `sendToken()` | `wallet: Wallet, token: Token, to: string, amount: string, network: Network` | `Promise<Transaction>` | Send ERC-20 token |
-| `estimateGas()` | `from: string, to: string, amount: string, network: Network, data?: string` | `Promise<GasEstimate>` | Estimate transaction gas cost |
-| `getStatus()` | `txHash: string, network: Network` | `Promise<TransactionStatus>` | Get transaction status |
-| `waitForConfirmation()` | `txHash: string, network: Network, confirmations?: number` | `Promise<TransactionReceiptData>` | Wait for transaction confirmation |
-
-### Blockchain - Tokens
-
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `getBalance()` | `address: string, token: Token, network: Network` | `Promise<string>` | Get token balance |
-| `getAddress()` | `token: Token, network: Network` | `string` | Get token contract address |
-| `formatAmount()` | `amount: string, decimals: number` | `string` | Format token amount (wei → human) |
-| `parseAmount()` | `amount: string, decimals: number` | `string` | Parse token amount (human → wei) |
-| `getTokenInfo()` | `address: string, network: Network` | `Promise<TokenInfo>` | Get token metadata (name, symbol, decimals) |
-
-### Blockchain - Contracts
-
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `read()` | `params: ContractCall` | `Promise<unknown>` | Call view/pure contract function |
-| `write()` | `params: ContractTransaction` | `Promise<Transaction>` | Execute state-changing contract function |
-| `getEvents()` | `params: ContractEventQuery` | `Promise<ContractEvent[]>` | Query contract events |
-
-### Blockchain - NFTs
-
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `transferERC721()` | `params: NFTTransfer` | `Promise<Transaction>` | Transfer ERC-721 NFT |
-| `transferERC1155()` | `params: NFTTransfer & { amount: string }` | `Promise<Transaction>` | Transfer ERC-1155 NFT |
-| `getOwner()` | `params: { contractAddress: string, tokenId: string, network: Network }` | `Promise<string>` | Get ERC-721 NFT owner |
-| `isOwner()` | `params: { contractAddress: string, tokenId: string, ownerAddress: string, network: Network }` | `Promise<boolean>` | Check if address owns NFT |
-
-### Blockchain - Providers
-
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `getProvider()` | `network: Network` | `JsonRpcProvider` | Get RPC provider for network |
-| `setCustomRpc()` | `network: Network, rpcUrl: string` | `void` | Set custom RPC URL |
-| `getNetworkInfo()` | `network: Network` | `NetworkConfig` | Get network configuration |
-
-### Blockchain - Utils
-
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `isValidAddress()` | `address: string` | `boolean` | Validate Ethereum address |
-| `formatEther()` | `amount: string | bigint` | `string` | Convert wei to ether |
-| `parseEther()` | `amount: string` | `string` | Convert ether to wei |
-| `resolveName()` | `name: string, provider: JsonRpcProvider` | `Promise<string | null>` | Resolve ENS name to address |
-| `lookupAddress()` | `address: string, provider: JsonRpcProvider` | `Promise<string | null>` | Reverse lookup address to ENS name |
+**Highlights:**
+- ✅ Customers (5 methods)
+- ✅ Virtual Accounts (3 methods)
+- ✅ Transfers (11 methods)
+- ✅ Cross-Chain (6 methods)
+- ✅ Blockchain - Wallets (15 methods)
+- ✅ Blockchain - Transactions (5 methods)
+- ✅ Blockchain - Tokens (5 methods)
+- ✅ Blockchain - Contracts (3 methods)
+- ✅ Blockchain - NFTs (4 methods)
+- ✅ And more...
 
 ---
 
