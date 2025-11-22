@@ -2291,14 +2291,8 @@ Complete reference of all available methods across all resources.
 | Method | Parameters | Returns | Description |
 |--------|------------|---------|-------------|
 | `isValidAddress()` | `address: string` | `boolean` | Validate Ethereum address |
-| `toChecksumAddress()` | `address: string` | `string` | Convert to EIP-55 checksum format |
-| `formatAddress()` | `address: string, visibleChars?: number` | `string` | Format address for display (0x1234...abcd) |
-| `isZeroAddress()` | `address: string` | `boolean` | Check if address is zero address |
 | `formatEther()` | `amount: string | bigint` | `string` | Convert wei to ether |
 | `parseEther()` | `amount: string` | `string` | Convert ether to wei |
-| `formatGwei()` | `amount: string | bigint` | `string` | Convert wei to gwei |
-| `parseGwei()` | `amount: string` | `string` | Convert gwei to wei |
-| `formatTransactionHash()` | `txHash: string, visibleChars?: number` | `string` | Format tx hash for display |
 | `resolveName()` | `name: string, provider: JsonRpcProvider` | `Promise<string | null>` | Resolve ENS name to address |
 | `lookupAddress()` | `address: string, provider: JsonRpcProvider` | `Promise<string | null>` | Reverse lookup address to ENS name |
 
