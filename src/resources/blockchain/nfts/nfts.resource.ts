@@ -35,6 +35,8 @@ import type {
  * @example
  * Initialize the resource
  * ```typescript
+ * import Align from '@tolbel/align';
+ *
  * const align = new Align({ apiKey: '...' });
  * const nfts = align.blockchain.nfts;
  * ```

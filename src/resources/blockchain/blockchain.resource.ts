@@ -23,7 +23,7 @@ import { NFTs } from "@/resources/blockchain/nfts/nfts.resource";
  * @example
  * Initialize the SDK
  * ```typescript
- * import Align from '@tobel/align';
+ * import Align from '@tolbel/align';
  *
  * const align = new Align({ apiKey: '...' });
  *

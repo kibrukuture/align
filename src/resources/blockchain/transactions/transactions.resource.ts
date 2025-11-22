@@ -41,6 +41,8 @@ import { getTokenAddress } from "@/resources/blockchain/tokens/handlers/info.han
  * @example
  * Initialize the resource
  * ```typescript
+ * import Align from '@tolbel/align';
+ *
  * const align = new Align({ apiKey: '...' });
  * const transactions = align.blockchain.transactions;
  * ```

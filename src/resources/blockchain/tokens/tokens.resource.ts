@@ -32,6 +32,8 @@ import { parseUnits } from "ethers";
  * @example
  * Initialize the resource
  * ```typescript
+ * import Align from '@tolbel/align';
+ *
  * const align = new Align({ apiKey: '...' });
  * const tokens = align.blockchain.tokens;
  * ```
