@@ -14,6 +14,12 @@ import { z } from "zod/v4";
 import { isAddress } from "ethers";
 import { validateMnemonic } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english.js";
+import { NETWORKS } from "@/resources/blockchain/constants/networks";
+
+/**
+ * Schema for validating blockchain networks
+ */
+export const NetworkSchema = z.enum(NETWORKS);
 
 /**
  * Validates Ethereum-style addresses using ethers.js

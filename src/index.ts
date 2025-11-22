@@ -155,7 +155,11 @@ export type { UploadFileResponse } from "@/resources/files/files.types";
 
 export * from "@/resources/files/files.resource";
 export * from "@/resources/developers/developers.resource";
-export * from '@/resources/blockchain';
+export * from "@/resources/blockchain";
+export * from "@/resources/blockchain/contracts/contracts.resource";
+export * from "@/resources/blockchain/contracts/contracts.types";
+export * from "@/resources/blockchain/nfts/nfts.resource";
+export * from "@/resources/blockchain/nfts/nfts.types";
 
 // Blockchain types
 export type {
@@ -164,22 +168,22 @@ export type {
   EncryptedWallet,
   WalletBalance,
   WalletCreationOptions,
-  
+
   // Transaction types
   Transaction,
   TransactionStatus,
   TransactionReceiptData,
   GasEstimate,
-  
+
   // Token types
   Token,
   TokenBalance,
   TokenInfo,
-  
+
   // Network types
   Network,
   NetworkConfig,
-  
+
   // Config
   BlockchainConfig,
 } from "@/resources/blockchain/blockchain.types";

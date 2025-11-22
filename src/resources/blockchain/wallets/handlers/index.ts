@@ -14,14 +14,14 @@
  */
 
 // Export all wallet creation handlers
-export * from '@/resources/blockchain/wallets/handlers/create.handler';
+export * from "@/resources/blockchain/wallets/handlers/create.handler";
 
 // Export all wallet encryption handlers
-export * from '@/resources/blockchain/wallets/handlers/encrypt.handler';
+export * from "@/resources/blockchain/wallets/handlers/encrypt.handler";
 
 // Export all wallet sending handlers
-export * from '@/resources/blockchain/wallets/handlers/send.handler';
+export * from "@/resources/blockchain/wallets/handlers/send.handler";
 
 // Export all wallet information retrieval handlers
-export * from '@/resources/blockchain/wallets/handlers/get.handler';
-
+export * from "@/resources/blockchain/wallets/handlers/get.handler";
+export * from "@/resources/blockchain/wallets/handlers/sign.handler";

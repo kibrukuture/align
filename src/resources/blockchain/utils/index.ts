@@ -12,8 +12,9 @@
  */
 
 // Export all address utility functions
-export * from '@/resources/blockchain/utils/address';
+export * from "@/resources/blockchain/utils/address";
 
 // Export all formatting utility functions
-export * from '@/resources/blockchain/utils/format';
-
+export * from "@/resources/blockchain/utils/format";
+export * from "@/resources/blockchain/utils/ens";
+export * from "@/resources/blockchain/utils/multicall";

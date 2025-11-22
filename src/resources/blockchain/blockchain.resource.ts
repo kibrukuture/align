@@ -29,6 +29,8 @@ import { Transactions } from "@/resources/blockchain/transactions/transactions.r
 import { Tokens } from "@/resources/blockchain/tokens/tokens.resource";
 import * as Utils from "@/resources/blockchain/utils";
 import type { BlockchainConfig } from "@/resources/blockchain/blockchain.types";
+import { Contracts } from "@/resources/blockchain/contracts/contracts.resource";
+import { NFTs } from "@/resources/blockchain/nfts/nfts.resource";
 
 export class Blockchain {
   /**
@@ -64,6 +66,21 @@ export class Blockchain {
   public readonly tokens: Tokens;
 
   /**
+   * Smart Contract operations
+   * - Read from any contract (view functions)
+   * - Write to any contract (state-changing functions)
+   * - Query past events
+   */
+  public readonly contracts: Contracts;
+
+  /**
+   * NFT operations
+   * - Transfer ERC-721 and ERC-1155 tokens
+   * - Check ownership
+   */
+  public readonly nfts: NFTs;
+
+  /**
    * Utility functions
    * - Address validation and formatting
    * - Amount formatting (wei <-> ether, etc.)
@@ -72,6 +89,8 @@ export class Blockchain {
     isValidAddress: Utils.isValidAddress,
     formatEther: Utils.formatEther,
     parseEther: Utils.parseEther,
+    resolveName: Utils.resolveName,
+    lookupAddress: Utils.lookupAddress,
   };
 
   /**
@@ -101,5 +120,7 @@ export class Blockchain {
     this.wallets = new Wallets(this.providers);
     this.transactions = new Transactions(this.providers);
     this.tokens = new Tokens(this.providers);
+    this.contracts = new Contracts(this.providers);
+    this.nfts = new NFTs(this.providers);
   }
 }

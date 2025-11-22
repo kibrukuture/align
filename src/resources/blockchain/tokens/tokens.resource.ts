@@ -1,3 +1,22 @@
+import { AlignValidationError } from "@/core/errors";
+import { formatZodError } from "@/core/validation";
+import { Providers } from "@/resources/blockchain/providers/providers.resource";
+import * as Handlers from "@/resources/blockchain/tokens/handlers";
+import type {
+  TokenBalance,
+  TokenInfo,
+} from "@/resources/blockchain/tokens/tokens.types";
+import {
+  TokenBalanceRequestSchema,
+  TokenAddressRequestSchema,
+} from "@/resources/blockchain/tokens/tokens.validator";
+import type {
+  Network,
+  Token,
+} from "@/resources/blockchain/wallets/wallets.types";
+import type { JsonRpcProvider } from "ethers";
+import { parseUnits } from "ethers";
+
 /**
  * Tokens
  *
@@ -20,20 +39,6 @@
  * const tokens = sdk.blockchain.tokens;
  * ```
  */
-import { AlignValidationError } from "@/core/errors";
-import { formatZodError } from "@/core/validation";
-import { Providers } from "@/resources/blockchain/providers/providers.resource";
-import * as Handlers from "@/resources/blockchain/tokens/handlers";
-import type { TokenBalance, TokenInfo } from "@/resources/blockchain/tokens/tokens.types";
-import {
-  TokenBalanceRequestSchema,
-  TokenAddressRequestSchema,
-} from "@/resources/blockchain/tokens/tokens.validator";
-import type { Network, Token } from "@/resources/blockchain/wallets/wallets.types";
-import type { JsonRpcProvider } from "ethers";
-import { parseUnits } from "ethers";
-
-
 export class Tokens {
   constructor(private providers: Providers) {}
 
@@ -146,9 +151,7 @@ export class Tokens {
     return parseUnits(amount, decimals).toString();
   }
 
-
-
-    /**
+  /**
    * Retrieves token metadata (name, symbol, decimals, etc.).
    *
    * @param tokenAddress - Contract address of the token.
@@ -174,5 +177,4 @@ export class Tokens {
     // No validation needed here – the handler performs its own checks.
     return Handlers.getTokenInfo(tokenAddress, provider, network, token);
   }
-
 }

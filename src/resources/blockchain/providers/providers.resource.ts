@@ -1,31 +1,6 @@
-/**
- * Providers
- *
- * Manages connections to blockchain networks (RPC providers).
- * This class acts as a singleton-like registry that:
- * 1. Maintains active connections to different chains
- * 2. Handles network configuration
- * 3. Supports custom RPC URLs
- * 4. Caches providers for performance
- *
- * **Key Features:**
- * - Lazy initialization of providers
- * - Connection pooling/caching
- * - Support for all major EVM chains
- * - Custom RPC configuration
- *
- * @example
- * Initialize the resource
- * ```typescript
- * const providers = new Providers({
- *   ethereum: 'https://eth-mainnet.g.alchemy.com/v2/...',
- *   polygon: 'https://polygon-mainnet.g.alchemy.com/v2/...'
- * });
- * ```
- */
 import { JsonRpcProvider } from "ethers";
-import type {NetworkConfig} from "@/resources/blockchain/providers/providers.types"; 
-import type {Network} from "@/resources/blockchain/constants/networks";
+import type { NetworkConfig } from "@/resources/blockchain/providers/providers.types";
+import type { Network } from "@/resources/blockchain/constants/networks";
 
 const DEFAULT_NETWORK_CONFIGS: Record<Network, NetworkConfig> = {
   ethereum: {
@@ -78,7 +53,31 @@ const DEFAULT_NETWORK_CONFIGS: Record<Network, NetworkConfig> = {
     blockExplorer: "https://tronscan.org",
   },
 };
-
+/**
+ * Providers
+ *
+ * Manages connections to blockchain networks (RPC providers).
+ * This class acts as a singleton-like registry that:
+ * 1. Maintains active connections to different chains
+ * 2. Handles network configuration
+ * 3. Supports custom RPC URLs
+ * 4. Caches providers for performance
+ *
+ * **Key Features:**
+ * - Lazy initialization of providers
+ * - Connection pooling/caching
+ * - Support for all major EVM chains
+ * - Custom RPC configuration
+ *
+ * @example
+ * Initialize the resource
+ * ```typescript
+ * const providers = new Providers({
+ *   ethereum: 'https://eth-mainnet.g.alchemy.com/v2/...',
+ *   polygon: 'https://polygon-mainnet.g.alchemy.com/v2/...'
+ * });
+ * ```
+ */
 export class Providers {
   // Cache provider instances (expensive to create)
   private providers: Map<Network, JsonRpcProvider> = new Map();

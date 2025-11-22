@@ -13,7 +13,11 @@
 
 import { z } from "zod/v4";
 import { isAddress, isHexString } from "ethers";
-import { WalletAddressSchema } from "@/resources/blockchain/wallets/wallets.validator";
+import {
+  WalletAddressSchema,
+  NetworkSchema,
+} from "@/resources/blockchain/wallets/wallets.validator";
+
 import { NETWORKS } from "@/resources/blockchain/constants/networks";
 
 /**
@@ -90,15 +94,7 @@ export const TransactionHashSchema = z
  */
 export const TokenSchema = z.enum(["usdc", "usdt", "eurc"]);
 
-/**
- * Schema for validating network identifiers
- *
- * @example
- * ```typescript
- * const network = NetworkSchema.parse('polygon');
- * ```
- */
-export const NetworkSchema = z.enum(NETWORKS);
+export { NetworkSchema };
 
 /**
  * Schema for validating transaction amounts
