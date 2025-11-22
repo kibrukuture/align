@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.6] - 2025-11-22
+
+### Fixed
+
+- **Wallet Mnemonic Generation**: `wallets.create()` now correctly returns the full `Mnemonic` object
+  - Previously only returned `address` and `privateKey`, omitting the mnemonic phrase
+  - Now includes `phrase`, `password`, `wordlist`, and `entropy` fields from ethers.js `Mnemonic` type
+  - Updated `Wallet` type definition to use `mnemonic?: Mnemonic` instead of custom object shape
+  - Both `createWallet()` and `createFromMnemonic()` handlers now return the complete mnemonic data
+
+### Changed
+
+- **Encryption Validation Schema**: Improved `EncryptSchema` to properly validate `EncryptedWallet` objects
+  - Previously validated `encrypted` as a simple string, causing "incorrect format" errors
+  - Now validates as a structured object with required fields: `encrypted`, `iv`, and optional `salt`, `algorithm`
+  - Fixes validation errors when encrypting/decrypting wallets with the SDK's encryption methods
+  - Schema now matches the actual `EncryptedWallet` type definition
+
 ## [1.1.2] - 2025-11-22
 
 ### Documentation
