@@ -34,6 +34,5 @@ export interface BlockchainConfig {
    * Custom RPC URLs for specific networks
    * Overrides default RPC providers
    */
-  customRpcUrls?: Record<Network, string>;
+  customRpcUrls?: Partial<Record<Network, string>>;
 }
-

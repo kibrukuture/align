@@ -162,7 +162,7 @@ export interface AlignConfig {
    * ```
    */
   blockchain?: {
-    customRpcUrls?: Record<Network, string>;
+    customRpcUrls?: Partial<Record<Network, string>>;
   };
 }
 

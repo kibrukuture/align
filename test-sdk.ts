@@ -6,6 +6,11 @@ async function main() {
   const client = new Align({
     apiKey: "test_api_key",
     environment: "sandbox",
+    blockchain: {
+      customRpcUrls: {
+        polygon: "https://polygon-mainnet.g.alchemy.com/v2/KEY",
+      },
+    },
   });
 
   console.log("SDK Initialized successfully.");

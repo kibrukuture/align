@@ -88,7 +88,7 @@ export class Providers {
   // Store custom RPC URLs if user sets them
   private customRpcUrls: Map<Network, string> = new Map();
 
-  constructor(config?: { customRpcUrls?: Record<Network, string> }) {
+  constructor(config?: { customRpcUrls?: Partial<Record<Network, string>> }) {
     // Initialize network configurations
     Object.entries(DEFAULT_NETWORK_CONFIGS).forEach(([network, cfg]) => {
       this.networkConfigs.set(network as Network, cfg);
