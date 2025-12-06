@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.7] - 2025-12-06
+
+### Documentation
+
+- Expanded JSDoc for `AlignConfig.baseUrl` with deep, detailed guidance
+  - Default behavior and environment-based selection explained
+  - Reverse proxy use cases with security recommendations (HTTPS, CORS, header forwarding)
+  - Practical examples for default usage and proxy configuration
+  - References to selection logic and headers in the HTTP client
+  - See `src/core/config.ts:17-80` and `src/core/http-client.ts:16-20`, `src/core/http-client.ts:29-36`
+- Added JSDoc for `ALIGN_API_URLS` mapping and selection behavior
+  - Clear notes on sandbox vs production endpoints
+  - How to override via `baseUrl`
+  - See `src/core/config.ts:114-117`
+
+### Notes
+
+- Package version bumped to `1.1.7` (`package.json:3`)
+- No runtime changes; type checks pass
+
 ## [1.1.6] - 2025-11-22
 
 ### Fixed
