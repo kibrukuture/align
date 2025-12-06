@@ -98,8 +98,68 @@ export interface AlignConfig {
   logLevel?: "error" | "warn" | "info" | "debug";
 
   /**
-   * Optional blockchain configuration
-   * Allows users to provide custom RPC URLs for different networks
+   * Optional blockchain configuration (external provider integration)
+   *
+   * Enables advanced blockchain features via ethers.js by configuring
+   * network RPC endpoints for wallet operations, token transfers, contract
+   * interactions, ENS lookups, and more. This is not part of AlignLab's
+   * hosted API; it is an external provider layer used by the SDK's
+   * `align.blockchain` module.
+   *
+   * Defaults:
+   * - The SDK ships with sensible public RPC defaults for all supported networks.
+   *   See `DEFAULT_NETWORK_CONFIGS` in `src/resources/blockchain/providers/providers.resource.ts:5-55`.
+   *   Examples:
+   *   - ethereum → `https://rpc.ankr.com/eth` (chainId 1)
+   *   - polygon → `https://polygon-rpc.com` (chainId 137)
+   *   - base → `https://mainnet.base.org` (chainId 8453)
+   *   - arbitrum → `https://arb1.arbitrum.io/rpc` (chainId 42161)
+   *   - optimism → `https://mainnet.optimism.io` (chainId 10)
+   *   - solana → `https://api.mainnet-beta.solana.com`
+   *   - tron → `https://api.trongrid.io`
+   *
+   * Override behavior:
+   * - Provide `customRpcUrls` to replace the default RPC URL for specific networks.
+   * - The SDK will use your custom URL when creating providers; otherwise it
+   *   falls back to the default mapping. See provider selection in
+   *   `src/resources/blockchain/providers/providers.resource.ts:134-138`.
+   * - Changing a network’s RPC via `providers.setCustomRpc()` clears the cached
+   *   provider so the next `getProvider()` reconnects to your endpoint.
+   *
+   * Recommended usage:
+   * - Use premium RPC providers (Alchemy, Infura, QuickNode) in production for
+   *   reliability, performance, and higher rate limits.
+   * - Keep RPC API keys on the server side if the URL contains secrets.
+   * - Prefer HTTPS URLs; avoid plain HTTP endpoints in production.
+   *
+   * Example: initialize SDK with custom RPCs
+   * ```typescript
+   * import Align from "@tolbel/align";
+   *
+   * const align = new Align({
+   *   apiKey: process.env.ALIGNLAB_API_KEY!,
+   *   blockchain: {
+   *     customRpcUrls: {
+   *       ethereum: "https://eth-mainnet.g.alchemy.com/v2/KEY",
+   *       polygon: "https://polygon-mainnet.g.alchemy.com/v2/KEY",
+   *       base: "https://mainnet.base.org",
+   *     },
+   *   },
+   * });
+   *
+   * // Later: access a provider
+   * const provider = align.blockchain.providers.getProvider("polygon");
+   * const feeData = await provider.getFeeData();
+   * ```
+   *
+   * Example: override at runtime
+   * ```typescript
+   * // Switch Ethereum RPC at runtime and reconnect on next use
+   * align.blockchain.providers.setCustomRpc(
+   *   "ethereum",
+   *   "https://eth-mainnet.g.alchemy.com/v2/NEW_KEY"
+   * );
+   * ```
    */
   blockchain?: {
     customRpcUrls?: Record<Network, string>;
