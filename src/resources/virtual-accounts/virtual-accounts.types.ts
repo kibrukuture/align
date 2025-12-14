@@ -1,46 +1,52 @@
 /**
  * Source currency for virtual account deposits
  */
-export type SourceCurrency = 'usd' | 'eur' | 'aed';
+export type SourceCurrency = "usd" | "eur" | "aed";
 
 /**
  * Source rails for deposits (optional, only for USD SWIFT)
  */
-export type SourceRails = 'swift';
+export type SourceRails = "swift";
 
 /**
  * Destination token for converted funds
  */
-export type DestinationToken = 'usdc' | 'usdt';
+export type DestinationToken = "usdc" | "usdt";
 
 /**
  * Destination blockchain network
  */
-export type DestinationNetwork = 'polygon' | 'ethereum' | 'solana' | 'base' | 'tron' | 'arbitrum';
+export type DestinationNetwork =
+  | "polygon"
+  | "ethereum"
+  | "solana"
+  | "base"
+  | "tron"
+  | "arbitrum";
 
 /**
  * Virtual account status
  */
-export type VirtualAccountStatus = 'active';
+export type VirtualAccountStatus = "active";
 
 /**
  * Payment rails for deposits
  */
-export type PaymentRails = 'sepa' | 'ach' | 'wire';
+export type PaymentRails = "sepa" | "ach" | "wire";
 
 /**
  * Deposit currency
  */
-export type DepositCurrency = 'eur' | 'usd';
+export type DepositCurrency = "eur" | "usd";
 
 /**
  * IBAN account details for EUR deposits
  */
 export interface IBANAccountDetails {
   /** Available rails for deposits */
-  payment_rails: ['sepa'];
+  payment_rails: ["sepa"];
   /** Currency used for the deposit */
-  currency: 'eur';
+  currency: "eur";
   /** Bank name */
   bank_name: string;
   /** Bank address */
@@ -61,9 +67,9 @@ export interface IBANAccountDetails {
  */
 export interface USAccountDetails {
   /** Available rails for deposits */
-  payment_rails: ('ach' | 'wire')[];
+  payment_rails: ("ach" | "wire")[];
   /** Currency used for the deposit */
-  currency: 'usd';
+  currency: "usd";
   /** Bank name */
   bank_name: string;
   /** Bank address */
@@ -82,9 +88,39 @@ export interface USAccountDetails {
 }
 
 /**
- * Deposit instructions (either IBAN or US account)
+ * International Wire account details for USD SWIFT deposits
  */
-export type DepositInstructions = IBANAccountDetails | USAccountDetails;
+export interface InternationalWireAccountDetails {
+  /** Available rails for deposits */
+  payment_rails: ["swift"];
+  /** Currency used for the deposit */
+  currency: "usd";
+  /** Bank name */
+  bank_name: string;
+  /** Bank address */
+  bank_address: string;
+  /** Account beneficiary name */
+  account_beneficiary_name: string;
+  /** Account beneficiary address */
+  account_beneficiary_address: string;
+  /** International wire details */
+  international_wire: {
+    /** Account number */
+    account_number: string;
+    /** Routing number */
+    routing_number: string;
+    /** BIC/SWIFT code */
+    bic: string;
+  };
+}
+
+/**
+ * Deposit instructions (either IBAN, US account, or International Wire)
+ */
+export type DepositInstructions =
+  | IBANAccountDetails
+  | USAccountDetails
+  | InternationalWireAccountDetails;
 
 /**
  * Request to create a virtual account
@@ -111,7 +147,7 @@ export interface VirtualAccount {
   /** The current status of the virtual account */
   status: VirtualAccountStatus;
   /** The currency to be deposited */
-  destination_token: DestinationToken | 'aed';
+  destination_token: DestinationToken | "aed";
   /** The blockchain network for the destination */
   destination_network: DestinationNetwork;
   /** The blockchain address where the funds will be sent */
