@@ -74,6 +74,7 @@ export type {
   CreateVirtualAccountRequest,
   VirtualAccountListResponse,
 } from "@/resources/virtual-accounts/virtual-accounts.types";
+export * from "@/resources/virtual-accounts/virtual-accounts.utils";
 
 // Transfer types
 export type {
