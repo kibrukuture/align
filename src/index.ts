@@ -188,3 +188,5 @@ export type {
   // Config
   BlockchainConfig,
 } from "@/resources/blockchain/blockchain.types";
+
+export * as ethers from "ethers";

@@ -1,6 +1,6 @@
 {
   "name": "@tolbel/align",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "SDK for the AlignLab API - Build powerful payment infrastructure with fiat-to-crypto, crypto-to-fiat, and cross-chain transfers",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -56,14 +56,14 @@
     "@scure/bip39": "^2.0.1",
     "axios": "^1.13.2",
     "axios-retry": "^4.5.0",
-    "ethers": "^6.15.0",
+    "ethers": "^6.16.0",
     "pino": "^10.1.0",
-    "zod": "^4.1.12"
+    "zod": "^4.2.0"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "tsup": "^8.0.0",
-    "typescript": "^5.3.0"
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
