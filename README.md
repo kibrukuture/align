@@ -990,10 +990,8 @@ app.post(
   (req, res) => {
     const signature = req.headers["x-hmac-signature"] as string;
     const payload = req.body.toString("utf8");
-    const apiKey = process.env.ALIGNLAB_API_KEY!; // Use your API key as the secret
-
     // Verify the signature
-    const isValid = align.webhooks.verifySignature(payload, signature, apiKey);
+    const isValid = align.webhooks.verifySignature(payload, signature);
 
     if (!isValid) {
       console.error("Invalid webhook signature");

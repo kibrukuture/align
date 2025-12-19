@@ -9,7 +9,7 @@ import { WalletsResource } from "@/resources/wallets/wallets.resource";
 import { FilesResource } from "@/resources/files/files.resource";
 import { DevelopersResource } from "@/resources/developers/developers.resource";
 import { CrossChainResource } from "@/resources/cross-chain/cross-chain.resource";
-import { Blockchain } from '@/resources/blockchain/blockchain.resource';
+import { Blockchain } from "@/resources/blockchain/blockchain.resource";
 
 /**
  * Main SDK client for interacting with the AlignLab API.
@@ -93,7 +93,7 @@ export class Align {
     this.customers = new CustomersResource(this.httpClient);
     this.virtualAccounts = new VirtualAccountsResource(this.httpClient);
     this.transfers = new TransfersResource(this.httpClient);
-    this.webhooks = new WebhooksResource(this.httpClient);
+    this.webhooks = new WebhooksResource(this.httpClient, config.apiKey);
     this.externalAccounts = new ExternalAccountsResource(this.httpClient);
     this.wallets = new WalletsResource(this.httpClient);
     this.files = new FilesResource(this.httpClient);
