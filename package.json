@@ -1,6 +1,6 @@
 {
   "name": "@tolbel/align",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "SDK for the AlignLab API - Build powerful payment infrastructure with fiat-to-crypto, crypto-to-fiat, and cross-chain transfers",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
