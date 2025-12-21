@@ -15,4 +15,6 @@ export const CUSTOMER_ENDPOINTS = {
   VIRTUAL_ACCOUNT: (id: string) => `/v0/customers/${id}/virtual-account`,
   WALLET_OWNERSHIP: (id: string) => `/v0/customers/${id}/wallet-ownership`,
   EXTERNAL_ACCOUNT: (id: string) => `/v0/customers/${id}/external-accounts`,
+  /** Endpoint to simulate customer actions */
+  SIMULATE: "/v0/customers/simulate",
 } as const;

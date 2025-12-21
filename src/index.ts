@@ -51,6 +51,8 @@ export type {
   UpdateCustomerRequest,
   CustomerListResponse,
   KycSessionResponse,
+  SimulateCustomerRequest,
+  SimulateCustomerResponse,
   CustomerAddress,
   CustomerKycs,
   KycStatusBreakdown,

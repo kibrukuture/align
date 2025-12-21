@@ -102,3 +102,16 @@ export interface KycSessionResponse {
     kyc_flow_link: string;
   };
 }
+
+/**
+ * Request body for simulating customer actions
+ */
+export interface SimulateCustomerRequest {
+  action: "kyc.status.approve";
+  customer_id: string;
+}
+
+/**
+ * Response from simulating customer actions
+ */
+export type SimulateCustomerResponse = Record<string, never>;
