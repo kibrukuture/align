@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.4] - 2025-12-21
+
+### Added
+
+- Sandbox simulations for customers and virtual accounts:
+  - `CustomersResource.simulateCustomer(action: 'kyc.status.approve')` hooked into `/v0/customers/simulate`
+  - `VirtualAccountsResource.simulate(customerId, action: 'issue_pending_virtual_account')` targeting `/v0/customers/{customerId}/virtual-account/simulate`
+  - Added request/response types, validators, and SDK exports for the new simulation helpers
+
+### Changed
+
+- Documented new simulation helpers as part of the changelog and aligned package metadata for release
+
 ## [1.2.2] - 2025-12-19
 
 ### Changed
