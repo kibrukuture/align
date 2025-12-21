@@ -9,4 +9,7 @@ export const VIRTUAL_ACCOUNT_ENDPOINTS = {
     `/v0/customers/${customerId}/virtual-account/${virtualAccountId}`,
   /** Endpoint to list virtual accounts */
   LIST: (customerId: string) => `/v0/customers/${customerId}/virtual-account`,
+  /** Endpoint to simulate virtual account actions */
+  SIMULATE: (customerId: string) =>
+    `/v0/customers/${customerId}/virtual-account/simulate`,
 } as const;

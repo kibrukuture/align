@@ -1,25 +1,30 @@
-import { HttpClient } from '@/core/http-client';
-import { AlignValidationError } from '@/core/errors';
-import { formatZodError } from '@/core/validation';
-import type { 
-  CreateVirtualAccountRequest, 
+import { HttpClient } from "@/core/http-client";
+import { AlignValidationError } from "@/core/errors";
+import { formatZodError } from "@/core/validation";
+import type {
+  CreateVirtualAccountRequest,
   VirtualAccount,
-  VirtualAccountListResponse 
-} from '@/resources/virtual-accounts/virtual-accounts.types';
-import { CreateVirtualAccountSchema } from '@/resources/virtual-accounts/virtual-accounts.validator';
-import { VIRTUAL_ACCOUNT_ENDPOINTS } from '@/constants';
+  VirtualAccountListResponse,
+  SimulateVirtualAccountRequest,
+  SimulateVirtualAccountResponse,
+} from "@/resources/virtual-accounts/virtual-accounts.types";
+import {
+  CreateVirtualAccountSchema,
+  SimulateVirtualAccountSchema,
+} from "@/resources/virtual-accounts/virtual-accounts.validator";
+import { VIRTUAL_ACCOUNT_ENDPOINTS } from "@/constants";
 
 export class VirtualAccountsResource {
   constructor(private client: HttpClient) {}
 
   /**
    * Create a new virtual account
-   * 
+   *
    * @param customerId - The unique customer identifier
    * @param data - Virtual account creation data
    * @returns Promise resolving to the created virtual account
    * @throws {AlignValidationError} If the virtual account data is invalid
-   * 
+   *
    * @example
    * ```typescript
    * const virtualAccount = await align.virtualAccounts.create(customerId, {
@@ -28,29 +33,38 @@ export class VirtualAccountsResource {
    *   destination_network: 'polygon',
    *   destination_address: '0x742d35...',
    * });
-   * 
+   *
    * // Access deposit instructions
    * if (virtualAccount.deposit_instructions.currency === 'eur') {
    *   console.log(virtualAccount.deposit_instructions.iban.iban_number);
    * }
    * ```
    */
-  public async create(customerId: string, data: CreateVirtualAccountRequest): Promise<VirtualAccount> {
+  public async create(
+    customerId: string,
+    data: CreateVirtualAccountRequest
+  ): Promise<VirtualAccount> {
     const validation = CreateVirtualAccountSchema.safeParse(data);
     if (!validation.success) {
-      throw new AlignValidationError('Invalid virtual account data', formatZodError(validation.error));
+      throw new AlignValidationError(
+        "Invalid virtual account data",
+        formatZodError(validation.error)
+      );
     }
 
-    return this.client.post<VirtualAccount>(VIRTUAL_ACCOUNT_ENDPOINTS.CREATE(customerId), data);
+    return this.client.post<VirtualAccount>(
+      VIRTUAL_ACCOUNT_ENDPOINTS.CREATE(customerId),
+      data
+    );
   }
 
   /**
    * Retrieve a specific virtual account by its unique identifier
-   * 
+   *
    * @param customerId - The unique identifier of the customer
    * @param virtualAccountId - The unique virtual account identifier
    * @returns Promise resolving to the virtual account with deposit instructions
-   * 
+   *
    * @example
    * ```typescript
    * const account = await align.virtualAccounts.get(customerId, virtualAccountId);
@@ -58,16 +72,21 @@ export class VirtualAccountsResource {
    * console.log(account.destination_token); // "usdc"
    * ```
    */
-  public async get(customerId: string, virtualAccountId: string): Promise<VirtualAccount> {
-    return this.client.get<VirtualAccount>(VIRTUAL_ACCOUNT_ENDPOINTS.GET(customerId, virtualAccountId));
+  public async get(
+    customerId: string,
+    virtualAccountId: string
+  ): Promise<VirtualAccount> {
+    return this.client.get<VirtualAccount>(
+      VIRTUAL_ACCOUNT_ENDPOINTS.GET(customerId, virtualAccountId)
+    );
   }
 
   /**
    * List all virtual accounts for a customer
-   * 
+   *
    * @param customerId - The unique identifier of the customer
    * @returns Promise resolving to a list of virtual accounts
-   * 
+   *
    * @example
    * ```typescript
    * const response = await align.virtualAccounts.list(customerId);
@@ -77,6 +96,35 @@ export class VirtualAccountsResource {
    * ```
    */
   public async list(customerId: string): Promise<VirtualAccountListResponse> {
-    return this.client.get<VirtualAccountListResponse>(VIRTUAL_ACCOUNT_ENDPOINTS.LIST(customerId));
+    return this.client.get<VirtualAccountListResponse>(
+      VIRTUAL_ACCOUNT_ENDPOINTS.LIST(customerId)
+    );
+  }
+
+  /**
+   * Simulate a virtual account action (Sandbox environment only)
+   *
+   * @param customerId - The unique customer identifier
+   * @param data - Simulation parameters
+   * @param data.action - Action to simulate (e.g., issue_pending_virtual_account)
+   * @param data.virtual_account_id - virtual account ID for simulation
+   * @returns Promise resolving to the virtual account result
+   */
+  public async simulate(
+    customerId: string,
+    data: SimulateVirtualAccountRequest
+  ): Promise<SimulateVirtualAccountResponse> {
+    const validation = SimulateVirtualAccountSchema.safeParse(data);
+    if (!validation.success) {
+      throw new AlignValidationError(
+        "Invalid simulation data",
+        formatZodError(validation.error)
+      );
+    }
+
+    return this.client.post<SimulateVirtualAccountResponse>(
+      VIRTUAL_ACCOUNT_ENDPOINTS.SIMULATE(customerId),
+      data
+    );
   }
 }

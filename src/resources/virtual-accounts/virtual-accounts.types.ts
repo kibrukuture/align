@@ -163,3 +163,16 @@ export interface VirtualAccountListResponse {
   /** Array of virtual accounts */
   items: VirtualAccount[];
 }
+
+/**
+ * Request body for simulating virtual account actions
+ */
+export interface SimulateVirtualAccountRequest {
+  action: "issue_pending_virtual_account";
+  virtual_account_id: string;
+}
+
+/**
+ * Response from simulating virtual account actions
+ */
+export type SimulateVirtualAccountResponse = VirtualAccount;
