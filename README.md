@@ -940,6 +940,32 @@ interface WebhookEvent {
   entity_type: WebhookEntityType;
   created_at: string;
 }
+
+// Payload body for the `customer.kycs.updated` webhook
+type CustomerKycsUpdatedEventPayload = {
+  kycs: {
+    status: KycStatus;
+    sub_status: KycSubStatus | null;
+    kyc_flow_link: string;
+    status_breakdown: {
+      status: KycStatus;
+      currency: FiatCurrency;
+      payment_rails: PaymentRail;
+    }[];
+  };
+  type: CustomerType;
+  email: string;
+  address: {
+    city: string;
+    country: string;
+    postal_code: string;
+    street_line_1: string;
+  };
+  last_name: string;
+  first_name: string;
+  customer_id: string;
+  company_name: string | null;
+};
 ```
 
 ### Create Webhook

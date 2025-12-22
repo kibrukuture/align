@@ -1,4 +1,9 @@
-import type { WebhookStatus } from "@/types/common";
+import type { CustomerType, KycStatus, WebhookStatus } from "@/types/common";
+import type { KycSubStatus } from "@/resources/customers/customers.types";
+import type {
+  FiatCurrency,
+  PaymentRail,
+} from "@/resources/transfers/transfers.types";
 
 /**
  * Webhook event types
@@ -34,6 +39,31 @@ export interface CreateWebhookRequest {
 export interface WebhookListResponse {
   items: Webhook[];
 }
+
+export type CustomerKycsUpdatedEventPayload = {
+  kycs: {
+    status: KycStatus;
+    sub_status: KycSubStatus | null;
+    kyc_flow_link: string;
+    status_breakdown: {
+      status: KycStatus;
+      currency: FiatCurrency;
+      payment_rails: PaymentRail;
+    }[];
+  };
+  type: CustomerType;
+  email: string;
+  address: {
+    city: string;
+    country: string;
+    postal_code: string;
+    street_line_1: string;
+  };
+  last_name: string;
+  first_name: string;
+  customer_id: string;
+  company_name: string | null;
+};
 
 /**
  * Webhook event payload structure
