@@ -143,7 +143,6 @@ export type {
   WebhookEvent,
   WebhookEventType,
   WebhookEntityType,
-  CustomerKycsUpdatedEventPayload,
   WebhookListResponse,
 } from "@/resources/webhooks/webhooks.types";
 
