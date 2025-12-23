@@ -1,4 +1,4 @@
-export type AlignEnvironment = 'sandbox' | 'production';
+export type AlignEnvironment = "sandbox" | "production";
 
 export interface AlignConfig {
   apiKey: string;
@@ -14,15 +14,14 @@ export interface AlignResponse<T> {
 /**
  * KYC verification status
  */
-export type KycStatus = 'pending' | 'approved' | 'rejected' | 'not_started';
+export type KycStatus = "pending" | "approved" | "rejected" | "not_started";
 
 /**
  * Webhook status
  */
-export type WebhookStatus = 'active' | 'inactive';
+export type WebhookStatus = "active" | "inactive";
 
 /**
  * Customer type
  */
-export type CustomerType = 'individual' | 'corporate';
-
+export type CustomerType = "individual" | "corporate";

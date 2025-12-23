@@ -1,18 +1,34 @@
-import type { IbanDetails, UsDetails, ExternalAccountAddress } from '../external-accounts/external-accounts.types';
+import type {
+  IbanDetails,
+  UsDetails,
+  ExternalAccountAddress,
+} from "../external-accounts/external-accounts.types";
+import type { TransferPurpose } from "./transfers.constants";
 
-export type PaymentRail = 'ach' | 'wire' | 'sepa' | 'swift' | 'uaefts';
-export type FiatCurrency = 'usd' | 'eur' | 'aed';
-export type CryptoToken = 'usdc' | 'usdt' | 'eurc';
-export type BlockchainNetwork = 'polygon' | 'ethereum' | 'solana' | 'base' | 'arbitrum' | 'tron';
-export type TransferStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'refunded';
-export type TransferPurpose = 
-  | 'charity' | 'commercial_investment' | 'corporate_card' | 'credit_card' | 'dividend' 
-  | 'family' | 'financial_services' | 'good_sold' | 'goods_bought' | 'government' 
-  | 'insurance' | 'intergroup_transfer' | 'intra_group_dividends' | 'information_technology' 
-  | 'leasing' | 'loan_charges' | 'merchant_settlement' | 'mobile_wallet' | 'none' 
-  | 'non_resident_transfer_between_accounts' | 'pension' | 'personal_expenses' 
-  | 'prepaid_cards' | 'professional' | 'rental' | 'resident_transfer_between_accounts' 
-  | 'salaries' | 'telecommunications' | 'travel' | 'utility_bill';
+export type PaymentRail = "ach" | "wire" | "sepa" | "swift" | "uaefts";
+export type FiatCurrency = "usd" | "eur" | "aed";
+export type CryptoToken = "usdc" | "usdt" | "eurc";
+export type BlockchainNetwork =
+  | "polygon"
+  | "ethereum"
+  | "solana"
+  | "base"
+  | "arbitrum"
+  | "tron";
+export type TransferStatus =
+  | "pending"
+  | "processing"
+  | "completed"
+  | "failed"
+  | "refunded";
+// export type TransferPurpose =
+//   | 'charity' | 'commercial_investment' | 'corporate_card' | 'credit_card' | 'dividend'
+//   | 'family' | 'financial_services' | 'good_sold' | 'goods_bought' | 'government'
+//   | 'insurance' | 'intergroup_transfer' | 'intra_group_dividends' | 'information_technology'
+//   | 'leasing' | 'loan_charges' | 'merchant_settlement' | 'mobile_wallet' | 'none'
+//   | 'non_resident_transfer_between_accounts' | 'pension' | 'personal_expenses'
+//   | 'prepaid_cards' | 'professional' | 'rental' | 'resident_transfer_between_accounts'
+//   | 'salaries' | 'telecommunications' | 'travel' | 'utility_bill';
 
 export interface CreateOfframpQuoteRequest {
   source_amount?: string;
@@ -54,23 +70,23 @@ export interface QuoteResponse {
 // Destination Bank Account Types for Transfer Creation
 export interface IbanAccountDetails {
   bank_name: string;
-  account_holder_type: 'individual' | 'business';
+  account_holder_type: "individual" | "business";
   account_holder_first_name?: string;
   account_holder_last_name?: string;
   account_holder_business_name?: string;
   account_holder_address: ExternalAccountAddress;
-  account_type: 'iban';
+  account_type: "iban";
   iban: IbanDetails;
 }
 
 export interface UsAccountDetails {
   bank_name: string;
-  account_holder_type: 'individual' | 'business';
+  account_holder_type: "individual" | "business";
   account_holder_first_name?: string;
   account_holder_last_name?: string;
   account_holder_business_name?: string;
   account_holder_address: ExternalAccountAddress;
-  account_type: 'us';
+  account_type: "us";
   us: UsDetails;
 }
 
@@ -86,19 +102,21 @@ export interface CreateOnrampTransferRequest {
   destination_address: string;
 }
 
-export type CreateTransferFromQuoteRequest = CreateOfframpTransferRequest | CreateOnrampTransferRequest;
+export type CreateTransferFromQuoteRequest =
+  | CreateOfframpTransferRequest
+  | CreateOnrampTransferRequest;
 
 export interface CompleteOfframpTransferRequest {
   deposit_transaction_hash: string;
 }
 
 export interface SimulateOfframpTransferRequest {
-  action: 'complete_transfer';
+  action: "complete_transfer";
   transfer_id: string;
 }
 
 export interface SimulateOnrampTransferRequest {
-  action: 'complete_transfer';
+  action: "complete_transfer";
   transfer_id: string;
 }
 
@@ -115,7 +133,7 @@ export interface Transfer {
   destination_network?: string;
   destination_token?: string;
   fee_amount?: string;
-  
+
   // Offramp specific
   source_token?: string;
   source_network?: string;
@@ -123,18 +141,18 @@ export interface Transfer {
   destination_payment_rails?: string;
   transfer_purpose?: string;
   destination_bank_account?: DestinationBankAccount;
-  
+
   // Onramp specific
   source_rails?: string;
   destination_address?: string;
-  
+
   created_at?: string;
   updated_at?: string;
   quote?: {
     // Common
     fee_amount?: string;
     exchange_rate?: string;
-    
+
     // Offramp quote fields
     deposit_network?: string;
     deposit_token?: string;
@@ -143,7 +161,7 @@ export interface Transfer {
     source_amount?: string;
     destination_amount?: string;
     deposit_transaction_hash?: string | null;
-    
+
     // Onramp quote fields
     deposit_rails?: string;
     deposit_currency?: string;

@@ -99,11 +99,14 @@ export type {
   CryptoToken,
   BlockchainNetwork,
   TransferStatus,
-  TransferPurpose,
   IbanAccountDetails,
   UsAccountDetails,
   DestinationBankAccount,
 } from "@/resources/transfers/transfers.types";
+export {
+  type TransferPurpose,
+  TRANSFER_PURPOSES,
+} from "@/resources/transfers/transfers.constants";
 
 // Cross-Chain types
 export type {
