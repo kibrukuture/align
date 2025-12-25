@@ -66,7 +66,7 @@ align.virtualAccounts.create(
 <Tabs>
   <Tab title="TypeScript">
     ```typescript
-    import Align from "@tolbel/align";
+    import Align, { isUSAccountDetails } from "@tolbel/align";
 
     const align = new Align({
       apiKey: process.env.ALIGN_API_KEY!,
@@ -86,10 +86,10 @@ align.virtualAccounts.create(
 
     console.log(`Account ID: ${virtualAccount.id}`);
 
-    // Deposit instructions are nested based on type
-    if ('us' in virtualAccount.deposit_instructions) {
-         console.log(`Routing: ${virtualAccount.deposit_instructions.us.routing_number}`);
-         console.log(`Account: ${virtualAccount.deposit_instructions.us.account_number}`);
+    // Use type-safe helper functions for narrowing
+    if (isUSAccountDetails(virtualAccount.deposit_instructions)) {
+      console.log(`Routing: ${virtualAccount.deposit_instructions.us.routing_number}`);
+      console.log(`Account: ${virtualAccount.deposit_instructions.us.account_number}`);
     }
     ```
 
@@ -118,6 +118,8 @@ align.virtualAccounts.create(
 ### Create EUR Virtual Account (SEPA/IBAN)
 
 ```typescript
+import { isIBANAccountDetails } from "@tolbel/align";
+
 const euroAccount = await align.virtualAccounts.create(customerId, {
   source_currency: "eur",
   destination_token: "usdc",
@@ -125,11 +127,42 @@ const euroAccount = await align.virtualAccounts.create(customerId, {
   destination_address: "0x...",
 });
 
-if ("iban" in euroAccount.deposit_instructions) {
+if (isIBANAccountDetails(euroAccount.deposit_instructions)) {
   console.log(`IBAN: ${euroAccount.deposit_instructions.iban.iban_number}`);
   console.log(`BIC: ${euroAccount.deposit_instructions.iban.bic}`);
 }
 ```
+
+### Create SWIFT Virtual Account (International Wire)
+
+```typescript
+import { isInternationalWireAccountDetails } from "@tolbel/align";
+
+const swiftAccount = await align.virtualAccounts.create(customerId, {
+  source_currency: "usd",
+  source_rails: "swift",
+  destination_token: "usdc",
+  destination_network: "polygon",
+  destination_address: "0x...",
+});
+
+if (isInternationalWireAccountDetails(swiftAccount.deposit_instructions)) {
+  console.log(
+    `SWIFT/BIC: ${swiftAccount.deposit_instructions.international_wire.bic}`
+  );
+  console.log(
+    `Account: ${swiftAccount.deposit_instructions.international_wire.account_number}`
+  );
+}
+```
+
+<Tip>
+  **Type-Safe Instruction Access**: Since `deposit_instructions` is a
+  discriminated union, we recommend using the SDK's built-in type guards to
+  safely narrow the type: - `isUSAccountDetails(instr)`: For USD (ACH/Wire)
+  accounts. - `isIBANAccountDetails(instr)`: For EUR (SEPA) accounts. -
+  `isInternationalWireAccountDetails(instr)`: For USD (SWIFT) accounts.
+</Tip>
 
 ## Deposit Instructions
 
