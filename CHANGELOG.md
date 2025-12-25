@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-12-25
+
+### Documentation
+
+- **Mintlify Documentation**: Migrated to a new, comprehensive documentation site hosted on Mintlify.
+  - Improved structure, navigation, and API reference clarity.
+  - Accessible at: [align.tolbel.com](https://align.tolbel.com)
+  - All `.mdx` files have been cleaned to remove redundant headings and ensure consistency.
+- **README Overhaul**:
+  - Updated simplified and "fake" code snippets to match the actual SDK implementation accurately.
+  - Verified and corrected example flows for Offramp, Wallet Operations, and Webhook Verification.
+  - Added explicit variable definitions (e.g., `customerId`) to make examples copy-paste ready.
+  - Removed outdated content to focus on the new documentation site as the single source of truth.
+
 ## [1.2.5] - 2025-12-22
 
 ### Added
