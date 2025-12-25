@@ -1,0 +1,164 @@
+---
+title: "Sign Typed Data (EIP-712)"
+description: "Sign structured data using the EIP-712 standard"
+icon: "file-signature"
+---
+
+# Sign Typed Data (EIP-712)
+
+Sign structured data following the EIP-712 standard. Used for permits, meta-transactions, and gasless approvals.
+
+## Method Signature
+
+```typescript
+align.blockchain.wallets.signTypedData(
+  wallet: Wallet,
+  domain: TypedDataDomain,
+  types: Record<string, TypedDataField[]>,
+  value: Record<string, unknown>
+): Promise<string>
+```
+
+## Parameters
+
+<ParamField body="wallet" type="Wallet" required>
+  The wallet to sign with
+</ParamField>
+
+<ParamField body="domain" type="TypedDataDomain" required>
+  EIP-712 domain separator (name, version, chainId, verifyingContract)
+</ParamField>
+
+<ParamField body="types" type="Record<string, TypedDataField[]>" required>
+  Type definitions for the data structure
+</ParamField>
+
+<ParamField body="value" type="Record<string, unknown>" required>
+  The actual data to sign
+</ParamField>
+
+## Returns
+
+Returns the signature as a hex string.
+
+## Examples
+
+### ERC-20 Permit (Gasless Approval)
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+    import type { TypedDataDomain, TypedDataField } from "ethers";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const wallet = await align.blockchain.wallets.createFromPrivateKey(
+      process.env.PRIVATE_KEY!
+    );
+
+    // EIP-712 Domain for USDC on Polygon
+    const domain: TypedDataDomain = {
+      name: "USD Coin",
+      version: "1",
+      chainId: 137,
+      verifyingContract: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+    };
+
+    // Permit type structure
+    const types: Record<string, TypedDataField[]> = {
+      Permit: [
+        { name: "owner", type: "address" },
+        { name: "spender", type: "address" },
+        { name: "value", type: "uint256" },
+        { name: "nonce", type: "uint256" },
+        { name: "deadline", type: "uint256" },
+      ],
+    };
+
+    // Permit data
+    const value = {
+      owner: wallet.address,
+      spender: "0xSpenderContract...",
+      value: "1000000000", // 1000 USDC
+      nonce: 0,
+      deadline: Math.floor(Date.now() / 1000) + 3600, // 1 hour
+    };
+
+    const signature = await align.blockchain.wallets.signTypedData(
+      wallet,
+      domain,
+      types,
+      value
+    );
+
+    console.log(`Permit signature: ${signature}`);
+    // Use with permit() function for gasless approval
+    ```
+
+  </Tab>
+</Tabs>
+
+### NFT Minting Signature
+
+```typescript
+const domain = {
+  name: "MyNFT",
+  version: "1",
+  chainId: 1,
+  verifyingContract: NFT_CONTRACT_ADDRESS,
+};
+
+const types = {
+  MintRequest: [
+    { name: "to", type: "address" },
+    { name: "tokenId", type: "uint256" },
+    { name: "uri", type: "string" },
+  ],
+};
+
+const value = {
+  to: wallet.address,
+  tokenId: 123,
+  uri: "ipfs://QmHash...",
+};
+
+const signature = await align.blockchain.wallets.signTypedData(
+  wallet,
+  domain,
+  types,
+  value
+);
+```
+
+<Info>
+  EIP-712 signatures are human-readable in wallet UIs, showing users exactly
+  what they're signing.
+</Info>
+
+<Warning>
+  **Always verify the domain** matches the expected contract. Malicious domains
+  can trick users into signing harmful transactions.
+</Warning>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Sign Message"
+    icon="signature"
+    href="/docs/api/blockchain/wallets/sign-message"
+  >
+    Sign raw messages
+  </Card>
+  <Card
+    title="Create Wallet"
+    icon="wallet"
+    href="/docs/api/blockchain/wallets/create"
+  >
+    Create new wallet
+  </Card>
+</CardGroup>

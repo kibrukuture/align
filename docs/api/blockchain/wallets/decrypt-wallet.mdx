@@ -1,0 +1,102 @@
+---
+title: "Decrypt Wallet"
+description: "Decrypt an encrypted wallet object"
+icon: "lock-open"
+---
+
+# Decrypt Wallet
+
+Decrypt an encrypted wallet object to restore full wallet functionality.
+
+## Method Signature
+
+```typescript
+align.blockchain.wallets.decryptWallet(
+  encrypted: EncryptedWallet,
+  password: string
+): Promise<Wallet>
+```
+
+## Parameters
+
+<ParamField body="encrypted" type="EncryptedWallet" required>
+  The encrypted wallet data object
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  The password used for encryption
+</ParamField>
+
+## Returns
+
+Returns the full `Wallet` object with address, private key, and mnemonic.
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+    import fs from "fs";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    // Load encrypted wallet from storage
+    const encryptedJson = fs.readFileSync("./wallet.json", "utf8");
+    const encrypted = JSON.parse(encryptedJson);
+
+    // Decrypt the wallet
+    const wallet = await align.blockchain.wallets.decryptWallet(
+      encrypted,
+      process.env.WALLET_PASSWORD!
+    );
+
+    console.log(`Decrypted: ${wallet.address}`);
+
+    // Now you can use the wallet normally
+    const tx = await align.blockchain.wallets.sendNativeToken(
+      wallet,
+      recipient,
+      "0.1",
+      "polygon"
+    );
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const wallet = await align.blockchain.wallets.decryptWallet(
+      encrypted,
+      password
+    );
+    console.log("Decrypted:", wallet.address);
+    ```
+  </Tab>
+</Tabs>
+
+<Warning>
+  Decryption will fail if the wrong password is provided. Handle errors
+  appropriately.
+</Warning>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Encrypt Wallet"
+    icon="lock"
+    href="/docs/api/blockchain/wallets/encrypt-wallet"
+  >
+    Encrypt a wallet
+  </Card>
+  <Card
+    title="Create from Encrypted"
+    icon="key"
+    href="/docs/api/blockchain/wallets/create-from-encrypted"
+  >
+    Alternative decryption
+  </Card>
+</CardGroup>

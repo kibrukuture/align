@@ -1,0 +1,125 @@
+---
+title: "Send Token"
+description: "Send ERC-20 tokens (USDC, USDT, etc.)"
+icon: "coins"
+---
+
+# Send Token
+
+Transfer ERC-20 tokens (USDC, USDT, DAI, etc.) from one address to another.
+
+## Method Signature
+
+```typescript
+align.blockchain.transactions.sendToken(
+  wallet: Wallet,
+  token: Token,
+  to: string,
+  amount: string,
+  network: Network
+): Promise<Transaction>
+```
+
+## Parameters
+
+<ParamField body="wallet" type="Wallet" required>
+  The sender's wallet
+</ParamField>
+
+<ParamField body="token" type="Token" required>
+  Token identifier: `"usdc"`, `"usdt"`, `"dai"`, etc.
+</ParamField>
+
+<ParamField body="to" type="string" required>
+  Recipient address
+</ParamField>
+
+<ParamField body="amount" type="string" required>
+  Amount in human-readable format (e.g., `"100.0"`)
+</ParamField>
+
+<ParamField body="network" type="string" required>
+  Network where the token exists
+</ParamField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const wallet = await align.blockchain.wallets.createFromPrivateKey(
+      process.env.PRIVATE_KEY!
+    );
+
+    // Send 100 USDC on Polygon
+    const tx = await align.blockchain.transactions.sendToken(
+      wallet,
+      "usdc",
+      "0xRecipientAddress...",
+      "100.0",
+      "polygon"
+    );
+
+    console.log(`TX Hash: ${tx.hash}`);
+
+    // Wait for confirmation
+    const receipt = await align.blockchain.transactions.waitForConfirmation(
+      tx.hash,
+      "polygon"
+    );
+    console.log(`USDC sent! Block: ${receipt.blockNumber}`);
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const tx = await align.blockchain.transactions.sendToken(
+      wallet,
+      "usdc",
+      recipient,
+      "50.0",
+      "polygon"
+    );
+    console.log("TX Hash:", tx.hash);
+    ```
+  </Tab>
+</Tabs>
+
+### Supported Tokens
+
+| Token  | Networks          |
+| ------ | ----------------- |
+| `usdc` | All               |
+| `usdt` | All               |
+| `dai`  | ethereum, polygon |
+
+<Warning>
+  ERC-20 transfers require native tokens for gas. Ensure your wallet has both
+  the tokens and gas.
+</Warning>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Send Native Token"
+    icon="paper-plane"
+    href="/docs/api/blockchain/transactions/send-native-token"
+  >
+    Send ETH/POL
+  </Card>
+  <Card
+    title="Get Balance"
+    icon="wallet"
+    href="/docs/api/blockchain/tokens/get-balance"
+  >
+    Check token balance
+  </Card>
+</CardGroup>

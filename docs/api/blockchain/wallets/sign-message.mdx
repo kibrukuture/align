@@ -1,0 +1,125 @@
+---
+title: "Sign Message"
+description: "Sign a raw message using the wallet's private key"
+icon: "signature"
+---
+
+# Sign Message
+
+Sign a raw message using the wallet's private key. Creates a cryptographic signature that proves ownership.
+
+## Method Signature
+
+```typescript
+align.blockchain.wallets.signMessage(
+  wallet: Wallet,
+  message: string
+): Promise<string>
+```
+
+## Parameters
+
+<ParamField body="wallet" type="Wallet" required>
+  The wallet to sign with (must have private key)
+</ParamField>
+
+<ParamField body="message" type="string" required>
+  The message to sign
+</ParamField>
+
+## Returns
+
+Returns the signature as a hex string (e.g., `"0x1234..."`).
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const wallet = await align.blockchain.wallets.create();
+
+    // Sign a simple message
+    const signature = await align.blockchain.wallets.signMessage(
+      wallet,
+      "Hello, World!"
+    );
+
+    console.log(`Signature: ${signature}`);
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const signature = await align.blockchain.wallets.signMessage(
+      wallet,
+      "Hello, World!"
+    );
+    console.log("Signature:", signature);
+    ```
+  </Tab>
+</Tabs>
+
+### Proof of Ownership
+
+```typescript
+// Create a timestamped ownership proof
+const message = `I own this address. Timestamp: ${Date.now()}`;
+const signature = await align.blockchain.wallets.signMessage(wallet, message);
+
+// Send to server for verification
+await fetch("/api/verify", {
+  method: "POST",
+  body: JSON.stringify({
+    address: wallet.address,
+    message,
+    signature,
+  }),
+});
+```
+
+### Sign-In with Ethereum (SIWE)
+
+```typescript
+const siweMessage = `example.com wants you to sign in with your Ethereum account:
+${wallet.address}
+
+Sign in to Example App
+
+Nonce: ${nonce}`;
+
+const signature = await align.blockchain.wallets.signMessage(
+  wallet,
+  siweMessage
+);
+```
+
+<Warning>
+  **Never sign messages from untrusted sources!** Signatures can authorize
+  actions - always review what you're signing.
+</Warning>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Sign Typed Data"
+    icon="file-signature"
+    href="/docs/api/blockchain/wallets/sign-typed-data"
+  >
+    Sign EIP-712 data
+  </Card>
+  <Card
+    title="Create Wallet"
+    icon="wallet"
+    href="/docs/api/blockchain/wallets/create"
+  >
+    Create new wallet
+  </Card>
+</CardGroup>

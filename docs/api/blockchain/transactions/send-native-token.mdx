@@ -1,0 +1,130 @@
+---
+title: "Send Native Token"
+description: "Send the native blockchain currency (ETH, POL, etc.)"
+icon: "paper-plane"
+---
+
+# Send Native Token
+
+Send the blockchain's native currency (ETH on Ethereum, POL on Polygon, etc.) from one address to another.
+
+## Method Signature
+
+```typescript
+align.blockchain.transactions.sendNativeToken(
+  wallet: Wallet,
+  to: string,
+  amount: string,
+  network: Network
+): Promise<Transaction>
+```
+
+## Parameters
+
+<ParamField body="wallet" type="Wallet" required>
+  The sender's wallet (must have private key)
+</ParamField>
+
+<ParamField body="to" type="string" required>
+  Recipient address
+</ParamField>
+
+<ParamField body="amount" type="string" required>
+  Amount to send in human-readable format (e.g., `"0.1"`)
+</ParamField>
+
+<ParamField body="network" type="string" required>
+  Network: `ethereum`, `polygon`, `base`, `arbitrum`, `optimism`
+</ParamField>
+
+## Returns
+
+Returns a `Transaction` object with:
+
+<ResponseField name="hash" type="string">
+  The transaction hash
+</ResponseField>
+
+<ResponseField name="from" type="string">
+  Sender address
+</ResponseField>
+
+<ResponseField name="to" type="string">
+  Recipient address
+</ResponseField>
+
+<ResponseField name="value" type="string">
+  Amount sent in wei
+</ResponseField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const wallet = await align.blockchain.wallets.createFromPrivateKey(
+      process.env.PRIVATE_KEY!
+    );
+
+    // Send 0.1 POL on Polygon
+    const tx = await align.blockchain.transactions.sendNativeToken(
+      wallet,
+      "0xRecipientAddress...",
+      "0.1",
+      "polygon"
+    );
+
+    console.log(`TX Hash: ${tx.hash}`);
+
+    // Wait for confirmation
+    const receipt = await align.blockchain.transactions.waitForConfirmation(
+      tx.hash,
+      "polygon"
+    );
+    console.log(`Confirmed in block ${receipt.blockNumber}`);
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const tx = await align.blockchain.transactions.sendNativeToken(
+      wallet,
+      recipient,
+      "0.5",
+      "ethereum"
+    );
+    console.log("TX Hash:", tx.hash);
+    ```
+  </Tab>
+</Tabs>
+
+<Warning>
+  Ensure the wallet has sufficient balance to cover both the amount and gas
+  fees.
+</Warning>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Send Token"
+    icon="coins"
+    href="/docs/api/blockchain/transactions/send-token"
+  >
+    Send ERC-20 tokens
+  </Card>
+  <Card
+    title="Estimate Gas"
+    icon="gauge"
+    href="/docs/api/blockchain/transactions/estimate-gas"
+  >
+    Estimate transaction cost
+  </Card>
+</CardGroup>

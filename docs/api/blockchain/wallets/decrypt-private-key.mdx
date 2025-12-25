@@ -1,0 +1,94 @@
+---
+title: "Decrypt Private Key"
+description: "Decrypt an encrypted private key using a password"
+icon: "lock-open"
+---
+
+# Decrypt Private Key
+
+Decrypt an encrypted private key that was previously secured with a password.
+
+## Method Signature
+
+```typescript
+align.blockchain.wallets.decryptPrivateKey(
+  encrypted: EncryptedWallet,
+  password: string
+): Promise<string>
+```
+
+## Parameters
+
+<ParamField body="encrypted" type="EncryptedWallet" required>
+  The encrypted wallet data object
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  The password used for encryption
+</ParamField>
+
+## Returns
+
+Returns the decrypted private key as a string.
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    // First, encrypt a private key
+    const encrypted = await align.blockchain.wallets.encryptPrivateKey(
+      privateKey,
+      "mySecurePassword123!"
+    );
+
+    // Later, decrypt it
+    const decryptedKey = await align.blockchain.wallets.decryptPrivateKey(
+      encrypted,
+      "mySecurePassword123!"
+    );
+
+    console.log(`Decrypted: ${decryptedKey.slice(0, 10)}...`);
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const decryptedKey = await align.blockchain.wallets.decryptPrivateKey(
+      encrypted,
+      password
+    );
+    ```
+  </Tab>
+</Tabs>
+
+<Warning>
+  Handle decrypted private keys with extreme care. Never log them or expose them
+  in client-side code.
+</Warning>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Encrypt Private Key"
+    icon="lock"
+    href="/docs/api/blockchain/wallets/encrypt-private-key"
+  >
+    Encrypt a private key
+  </Card>
+  <Card
+    title="Decrypt Wallet"
+    icon="lock-open"
+    href="/docs/api/blockchain/wallets/decrypt-wallet"
+  >
+    Decrypt full wallet
+  </Card>
+</CardGroup>

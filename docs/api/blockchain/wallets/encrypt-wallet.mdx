@@ -1,0 +1,107 @@
+---
+title: "Encrypt Wallet"
+description: "Encrypt an entire wallet object for secure storage"
+icon: "lock"
+---
+
+# Encrypt Wallet
+
+Encrypt an entire wallet object (including private key and mnemonic) for secure storage.
+
+## Method Signature
+
+```typescript
+align.blockchain.wallets.encryptWallet(
+  wallet: Wallet,
+  password: string
+): Promise<EncryptedWallet>
+```
+
+## Parameters
+
+<ParamField body="wallet" type="Wallet" required>
+  The wallet object to encrypt
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  Password for encryption (use a strong password!)
+</ParamField>
+
+## Returns
+
+<ResponseField name="encryptedData" type="string">
+  The encrypted wallet data
+</ResponseField>
+
+<ResponseField name="address" type="string">
+  The wallet's public address (unencrypted)
+</ResponseField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+    import fs from "fs";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    // Create a wallet
+    const wallet = await align.blockchain.wallets.create();
+    console.log(`Created: ${wallet.address}`);
+
+    // Encrypt for secure storage
+    const encrypted = await align.blockchain.wallets.encryptWallet(
+      wallet,
+      "mySecurePassword123!"
+    );
+
+    // Save encrypted wallet
+    fs.writeFileSync(
+      `./wallets/${encrypted.address}.json`,
+      JSON.stringify(encrypted)
+    );
+
+    console.log("Wallet encrypted and saved!");
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const wallet = await align.blockchain.wallets.create();
+    const encrypted = await align.blockchain.wallets.encryptWallet(
+      wallet,
+      password
+    );
+    console.log("Encrypted:", encrypted.address);
+    ```
+  </Tab>
+</Tabs>
+
+<Info>
+  The public address is NOT encrypted - only the private key and mnemonic are
+  protected.
+</Info>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Decrypt Wallet"
+    icon="lock-open"
+    href="/docs/api/blockchain/wallets/decrypt-wallet"
+  >
+    Decrypt a wallet
+  </Card>
+  <Card
+    title="Encrypt Private Key"
+    icon="lock"
+    href="/docs/api/blockchain/wallets/encrypt-private-key"
+  >
+    Encrypt just the key
+  </Card>
+</CardGroup>

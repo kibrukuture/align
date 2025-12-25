@@ -118,6 +118,7 @@
                 "pages": [
                   "docs/api/blockchain/wallets/create",
                   "docs/api/blockchain/wallets/get",
+                  "docs/api/blockchain/wallets/get-address",
                   "docs/api/blockchain/wallets/create-from-mnemonic",
                   "docs/api/blockchain/wallets/create-from-private-key",
                   "docs/api/blockchain/wallets/create-from-encrypted",
@@ -125,13 +126,19 @@
                   "docs/api/blockchain/wallets/get-token-balance",
                   "docs/api/blockchain/wallets/send-native-token",
                   "docs/api/blockchain/wallets/send-token",
-                  "docs/api/blockchain/wallets/encrypt-private-key"
+                  "docs/api/blockchain/wallets/encrypt-private-key",
+                  "docs/api/blockchain/wallets/decrypt-private-key",
+                  "docs/api/blockchain/wallets/encrypt-wallet",
+                  "docs/api/blockchain/wallets/decrypt-wallet",
+                  "docs/api/blockchain/wallets/sign-message",
+                  "docs/api/blockchain/wallets/sign-typed-data"
                 ]
               },
               {
                 "group": "Transactions",
                 "pages": [
-                  "docs/api/blockchain/transactions/send",
+                  "docs/api/blockchain/transactions/send-native-token",
+                  "docs/api/blockchain/transactions/send-token",
                   "docs/api/blockchain/transactions/estimate-gas",
                   "docs/api/blockchain/transactions/get-status",
                   "docs/api/blockchain/transactions/wait-for-confirmation"
@@ -150,7 +157,6 @@
               {
                 "group": "Contracts",
                 "pages": [
-                  "docs/api/blockchain/contracts/deploy",
                   "docs/api/blockchain/contracts/read",
                   "docs/api/blockchain/contracts/write",
                   "docs/api/blockchain/contracts/get-events"
@@ -159,7 +165,6 @@
               {
                 "group": "NFTs",
                 "pages": [
-                  "docs/api/blockchain/nfts/mint",
                   "docs/api/blockchain/nfts/transfer-erc721",
                   "docs/api/blockchain/nfts/transfer-erc1155",
                   "docs/api/blockchain/nfts/get-owner",
