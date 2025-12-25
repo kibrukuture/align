@@ -22,9 +22,10 @@ Thrown when the API returns an error response (4xx or 5xx status codes).
 
 ```typescript
 class AlignError extends Error {
-  readonly statusCode?: number; // HTTP status code
+  readonly status: number; // HTTP status code
   readonly code?: string; // Error code from API
-  readonly details?: unknown; // Additional error details
+  readonly requestId?: string; // Request ID for debugging
+  readonly body?: unknown; // Additional error details
 }
 ```
 
@@ -34,12 +35,7 @@ Thrown when request data fails local validation before being sent to the API.
 
 ```typescript
 class AlignValidationError extends Error {
-  readonly errors: ValidationError[]; // Array of validation issues
-}
-
-interface ValidationError {
-  path: string[]; // Path to the invalid field
-  message: string; // Human-readable error message
+  readonly errors: Record<string, string[]>; // Map of field names to error messages
 }
 ```
 
@@ -70,12 +66,13 @@ Always wrap API calls in try-catch blocks:
         if (error instanceof AlignValidationError) {
           // Local validation failed
           console.error("Validation failed:");
-          error.errors.forEach((e) => {
-            console.error(`  ${e.path.join(".")}: ${e.message}`);
+          Object.entries(error.errors).forEach(([field, messages]) => {
+            console.error(`  ${field}: ${messages.join(", ")}`);
           });
         } else if (error instanceof AlignError) {
           // API returned an error
-          console.error(`API Error [${error.statusCode}]: ${error.message}`);
+          console.error(`API Error [${error.status}]: ${error.message}`);
+          console.error(`Request ID: ${error.requestId}`);
         } else {
           // Network or unexpected error
           throw error;
@@ -107,7 +104,7 @@ Always wrap API calls in try-catch blocks:
         if (error instanceof AlignValidationError) {
           console.error("Validation failed:", error.errors);
         } else if (error instanceof AlignError) {
-          console.error(`API Error [${error.statusCode}]: ${error.message}`);
+          console.error(`API Error [${error.status}]: ${error.message}`);
         } else {
           throw error;
         }
@@ -133,7 +130,7 @@ Always wrap API calls in try-catch blocks:
         last_name: "Smith",
       });
     } catch (error) {
-      if (error instanceof AlignError && error.statusCode === 409) {
+      if (error instanceof AlignError && error.status === 409) {
         // Email already exists - find the existing customer
         const existing = await align.customers.list("existing@example.com");
         console.log("Found existing customer:", existing.items[0].customer_id);
@@ -149,7 +146,7 @@ Always wrap API calls in try-catch blocks:
     try {
       await align.customers.list();
     } catch (error) {
-      if (error instanceof AlignError && error.statusCode === 401) {
+      if (error instanceof AlignError && error.status === 401) {
         console.error("Invalid API key. Check your ALIGN_API_KEY environment variable.");
       }
     }
@@ -167,7 +164,7 @@ Always wrap API calls in try-catch blocks:
     try {
       const customer = await align.customers.get("non-existent-id");
     } catch (error) {
-      if (error instanceof AlignError && error.statusCode === 404) {
+      if (error instanceof AlignError && error.status === 404) {
         console.error("Customer not found");
       }
     }
@@ -186,11 +183,11 @@ Always wrap API calls in try-catch blocks:
       });
     } catch (error) {
       if (error instanceof AlignValidationError) {
-        // error.errors = [
-        //   { path: ["email"], message: "Invalid email format" },
-        //   { path: ["first_name"], message: "Required" },
-        //   { path: ["last_name"], message: "Required" }
-        // ]
+        // error.errors = {
+        //   "email": ["Invalid email address"],
+        //   "first_name": ["Required"],
+        //   "last_name": ["Required"]
+        // }
       }
     }
     ```
@@ -203,9 +200,10 @@ Always wrap API calls in try-catch blocks:
     try {
       await align.customers.list();
     } catch (error) {
-      if (error instanceof AlignError && error.statusCode === 429) {
+      if (error instanceof AlignError && error.status === 429) {
         // Wait and retry
-        const retryAfter = parseInt(error.details?.retryAfter || "60");
+        // Check body for specific retry details if available
+        const retryAfter = 60; 
         console.log(`Rate limited. Retry after ${retryAfter} seconds`);
         
         await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000));
@@ -230,8 +228,8 @@ Create a reusable error handler for consistent error management:
 import { AlignError, AlignValidationError } from "@tolbel/align";
 
 type ErrorResult =
-  | { type: "validation"; errors: Array<{ path: string[]; message: string }> }
-  | { type: "api"; statusCode: number; message: string }
+  | { type: "validation"; errors: Record<string, string[]> }
+  | { type: "api"; status: number; message: string }
   | { type: "network"; message: string }
   | { type: "unknown"; error: unknown };
 
@@ -246,7 +244,7 @@ function handleAlignError(error: unknown): ErrorResult {
   if (error instanceof AlignError) {
     return {
       type: "api",
-      statusCode: error.statusCode ?? 500,
+      status: error.status,
       message: error.message,
     };
   }
@@ -303,11 +301,7 @@ async function withRetry<T>(
 
       if (error instanceof AlignError) {
         // Don't retry client errors (4xx) except rate limiting
-        if (
-          error.statusCode &&
-          error.statusCode < 500 &&
-          error.statusCode !== 429
-        ) {
+        if (error.status && error.status < 500 && error.status !== 429) {
           throw error;
         }
       }
