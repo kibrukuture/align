@@ -4,10 +4,6 @@ description: "Verify that webhook requests are genuinely from Align"
 icon: "shield-check"
 ---
 
-# Verify Webhook Signature
-
-Verify that incoming webhook requests are authentic by validating their HMAC-SHA256 signature. This is **critical for security** to prevent malicious actors from spoofing webhook events.
-
 <Warning>
   **Always verify webhook signatures in production!** Failing to do so exposes
   your application to forged webhook attacks.
