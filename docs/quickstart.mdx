@@ -122,16 +122,19 @@ flowchart LR
       customer.customer_id,
       {
         source_currency: "usd",
-        source_rails: "ach",
+        // source_rails: "ach", // Removed: Only 'swift' is supported, other rails are automatic
         destination_token: "usdc",
         destination_network: "polygon",
+        destination_address: "0x742d35Cc6634C0532925a3b844Bc9e7595f0aB42",
       }
     );
 
-    // Get deposit instructions
+    // Get deposit instructions (Type-safe check for US accounts)
     const instructions = virtualAccount.deposit_instructions;
-    console.log(`Account Number: ${instructions.account_number}`);
-    console.log(`Routing Number: ${instructions.routing_number}`);
+    if ("us" in instructions) {
+      console.log(`Account Number: ${instructions.us.account_number}`);
+      console.log(`Routing Number: ${instructions.us.routing_number}`);
+    }
     ```
 
     <Info>
