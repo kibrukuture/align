@@ -98,6 +98,8 @@ console.log("Deposit IBAN:", virtualAccount.deposit_instructions);
 
 ```typescript
 // 1. Create an offramp quote
+const customerId = "123e4567-e89b-12d3-a456-426614174000"; // Replace with actual customer ID
+
 const quote = await align.transfers.createOfframpQuote(customerId, {
   source_amount: "100.00",
   source_token: "usdc",
@@ -119,7 +121,7 @@ const transfer = await align.transfers.createOfframpTransfer(
 // 3. Send crypto to the deposit address, then complete
 const completed = await align.transfers.completeOfframpTransfer(
   customerId,
-  transfer.id,
+  transfer.id, // Use the ID from the created transfer
   { deposit_transaction_hash: "0x..." }
 );
 ```
@@ -130,16 +132,18 @@ const completed = await align.transfers.completeOfframpTransfer(
 // Create a new wallet
 const wallet = await align.blockchain.wallets.create();
 console.log("Address:", wallet.address);
-console.log("Mnemonic:", wallet.mnemonic); // Save securely!
+if (wallet.mnemonic) {
+  console.log("Mnemonic:", wallet.mnemonic.phrase); // Save securely!
+}
 
-// Check balance
+// Check native balance
 const balance = await align.blockchain.wallets.getBalance(
   wallet.address,
   "polygon"
 );
 console.log("POL Balance:", balance);
 
-// Send tokens
+// Send USDC tokens
 const tx = await align.blockchain.transactions.sendToken(
   wallet,
   "usdc",
@@ -165,7 +169,16 @@ app.post("/webhooks", express.raw({ type: "application/json" }), (req, res) => {
   const signature = req.headers["x-hmac-signature"] as string;
   const payload = req.body.toString("utf8");
 
-  const isValid = align.webhooks.verifySignature(payload, signature);
+  // In a real app, you would have the align instance initialized with your API key
+  // const align = new Align({ apiKey: process.env.ALIGN_API_KEY });
+  // const isValid = align.webhooks.verifySignature(payload, signature);
+
+  // Or verify statically if you have the key
+  const isValid = align.webhooks.verifySignature(
+    payload,
+    signature,
+    process.env.ALIGN_API_KEY
+  );
 
   if (!isValid) {
     return res.status(401).send("Invalid signature");
