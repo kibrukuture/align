@@ -120,20 +120,16 @@ document.getElementById("kyc-frame").src = kycUrl;
 ```mermaid
 flowchart TD
     A[Create KYC Session] --> B[pending]
-    B --> C{User Submits}
-    C --> D[under_review]
-    D --> E{Decision}
-    E --> F[approved]
-    E --> G[rejected]
+    B --> C{Verification}
+    C --> F[approved]
+    C --> G[rejected]
 ```
 
-| Status     | Sub-Status                        | Description                 |
-| ---------- | --------------------------------- | --------------------------- |
-| `pending`  | `kyc_form_submission_pending`     | Waiting for user to submit  |
-| `pending`  | `kyc_form_submission_in_progress` | User is completing the form |
-| `pending`  | `under_review`                    | Submitted, being reviewed   |
-| `approved` | `kyc_form_submission_accepted`    | Verification successful     |
-| `rejected` | `kyc_form_submission_rejected`    | Verification failed         |
+| Status     | Sub-Status                       | Description                        |
+| ---------- | -------------------------------- | ---------------------------------- |
+| `pending`  | `kyc_form_submission_started`    | User has started the verification  |
+| `approved` | `kyc_form_submission_accepted`   | Verification successful            |
+| `rejected` | `kyc_form_resubmission_required` | Verification requires more details |
 
 <Warning>
   KYC links expire after a certain period. If the link expires, call this method

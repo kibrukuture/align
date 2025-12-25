@@ -42,11 +42,11 @@ align.customers.get(customerId: string): Promise<Customer>
   KYC verification status and details
   <Expandable title="KYC Object Properties">
     <ResponseField name="kycs.status" type="string">
-      Overall KYC status: `pending`, `approved`, `rejected`
+      Overall KYC status: `pending`, `approved`, `rejected`, `not_started`
     </ResponseField>
     <ResponseField name="kycs.sub_status" type="string">
-      Detailed status: `kyc_form_submission_pending`,
-      `kyc_form_submission_accepted`, etc.
+      Detailed status: `kyc_form_submission_started`,
+      `kyc_form_submission_accepted`, `kyc_form_resubmission_required`
     </ResponseField>
     <ResponseField name="kycs.kyc_flow_link" type="string">
       URL for the customer to complete KYC verification
