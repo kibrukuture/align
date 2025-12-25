@@ -166,10 +166,10 @@ app.post(
       const customer = await align.customers.get(customerId);
 
       // 3. Handle the status change
-      if (customer.kycs?.status === "status_accepted") {
+      if (customer.kycs?.status === "approved") {
         console.log(`✅ KYC Approved for customer ${customerId}`);
         // TODO: Enable feature access for user
-      } else if (customer.kycs?.status === "status_rejected") {
+      } else if (customer.kycs?.status === "rejected") {
         console.log(`❌ KYC Rejected for customer ${customerId}`);
         // TODO: Notify user to retry
       }
@@ -215,8 +215,8 @@ async function waitForKycApproval(customerId: string) {
   while (attempts < 20) {
     const customer = await align.customers.get(customerId);
 
-    if (customer.kycs?.status === "status_accepted") return true;
-    if (customer.kycs?.status === "status_rejected") return false;
+    if (customer.kycs?.status === "approved") return true;
+    if (customer.kycs?.status === "rejected") return false;
 
     await new Promise((r) => setTimeout(r, 5000)); // Wait 5s
     attempts++;
