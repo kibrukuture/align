@@ -22,24 +22,24 @@ align.transfers.get(transferId: string): Promise<Transfer>
 
 ## Returns
 
-<ResponseField name="transfer_id" type="string">
+<ResponseField name="id" type="string">
   Unique transfer identifier
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  Current status: `pending`, `processing`, `completed`, `failed`, `cancelled`
+  Current status: `pending`, `processing`, `completed`, `failed`, `refunded`
 </ResponseField>
 
-<ResponseField name="type" type="'onramp' | 'offramp'">
-  Transfer direction
+<ResponseField name="amount" type="string">
+  Transfer amount
 </ResponseField>
 
-<ResponseField name="source_amount" type="string">
-  Amount sent
+<ResponseField name="source_currency" type="string">
+  Currency/Token sent (e.g., "COMP" or "USD")
 </ResponseField>
 
-<ResponseField name="destination_amount" type="string">
-  Amount received
+<ResponseField name="destination_token" type="string">
+  Token received (e.g., "USDC")
 </ResponseField>
 
 ## Examples
@@ -59,8 +59,7 @@ align.transfers.get(transferId: string): Promise<Transfer>
     );
 
     console.log(`Status: ${transfer.status}`);
-    console.log(`Type: ${transfer.type}`);
-    console.log(`Amount: ${transfer.source_amount} → ${transfer.destination_amount}`);
+    console.log(`Amount: ${transfer.amount}`);
     ```
 
   </Tab>
@@ -71,6 +70,7 @@ align.transfers.get(transferId: string): Promise<Transfer>
     );
 
     console.log("Status:", transfer.status);
+    console.log("Amount:", transfer.amount);
     ```
 
   </Tab>
@@ -92,7 +92,7 @@ async function waitForTransfer(
     }
 
     if (transfer.status === "failed") {
-      throw new Error(`Transfer failed: ${transfer.transfer_id}`);
+      throw new Error(`Transfer failed: ${transfer.id}`);
     }
 
     // Wait 10 seconds

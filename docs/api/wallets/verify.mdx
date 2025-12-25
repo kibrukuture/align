@@ -11,9 +11,9 @@ Verify that a customer owns a specific wallet address. Required for compliance b
 ## Method Signature
 
 ```typescript
-align.wallets.verify(
+align.wallets.verifyOwnership(
   customerId: string,
-  data: VerifyWalletRequest
+  walletAddress: string
 ): Promise<WalletVerification>
 ```
 
@@ -23,21 +23,15 @@ align.wallets.verify(
   Customer identifier
 </ParamField>
 
-<ParamField body="wallet_address" type="string" required>
+<ParamField path="walletAddress" type="string" required>
   Blockchain wallet address to verify
 </ParamField>
 
-<ParamField body="network" type="string" required>
-  Blockchain network: `ethereum`, `polygon`, `solana`, etc.
-</ParamField>
+## Returns
 
-<ParamField body="signature" type="string" required>
-  Signed message proving wallet ownership
-</ParamField>
-
-<ParamField body="message" type="string" required>
-  Message that was signed
-</ParamField>
+<ResponseField name="verification_flow_link" type="string">
+  URL where the user can sign a message to prove ownership
+</ResponseField>
 
 ## Example
 
@@ -45,43 +39,30 @@ align.wallets.verify(
   <Tab title="TypeScript">
     ```typescript
     import Align from "@tolbel/align";
-    import { ethers } from "ethers";
 
     const align = new Align({
       apiKey: process.env.ALIGN_API_KEY!,
       environment: "sandbox",
     });
 
-    // Step 1: Create message to sign
-    const message = `Verify wallet ownership for Align\nTimestamp: ${Date.now()}`;
+    const verification = await align.wallets.verifyOwnership(
+      "customerId_123",
+      "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
+    );
 
-    // Step 2: Sign with user's wallet (frontend)
-    const signer = await provider.getSigner();
-    const signature = await signer.signMessage(message);
-    const address = await signer.getAddress();
-
-    // Step 3: Verify with Align
-    const verification = await align.wallets.verify(customerId, {
-      wallet_address: address,
-      network: "ethereum",
-      signature,
-      message,
-    });
-
-    console.log(`Verified: ${verification.verified}`);
+    console.log(`Verification Link: ${verification.verification_flow_link}`);
+    // Redirect user to this link
     ```
 
   </Tab>
   <Tab title="JavaScript">
     ```javascript
-    const verification = await align.wallets.verify(customerId, {
-      wallet_address: "0x...",
-      network: "ethereum",
-      signature: "0x...",
-      message: "Verify wallet ownership...",
-    });
+    const verification = await align.wallets.verifyOwnership(
+      "customerId_123",
+      "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
+    );
 
-    console.log("Verified:", verification.verified);
+    console.log("Verification Link:", verification.verification_flow_link);
     ```
 
   </Tab>

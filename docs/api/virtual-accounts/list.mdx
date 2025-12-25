@@ -44,8 +44,9 @@ align.virtualAccounts.list(customerId: string): Promise<VirtualAccountListRespon
 
     console.log(`Total accounts: ${response.items.length}`);
 
+    // Iterate through accounts
     for (const account of response.items) {
-      console.log(`${account.id}: ${account.source_currency} → ${account.destination_token}`);
+      console.log(`${account.id}: ${account.destination_token} on ${account.destination_network}`);
     }
     ```
 
@@ -57,7 +58,7 @@ align.virtualAccounts.list(customerId: string): Promise<VirtualAccountListRespon
     );
 
     response.items.forEach((account) => {
-      console.log(`${account.id}: ${account.source_currency} → ${account.destination_token}`);
+      console.log(`${account.id}: ${account.destination_token} on ${account.destination_network}`);
     });
     ```
 

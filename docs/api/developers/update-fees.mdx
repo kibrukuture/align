@@ -18,33 +18,29 @@ align.developers.updateFees(
 
 ## Parameters
 
-<ParamField
-  body="service_type"
-  type="'onramp' | 'offramp' | 'cross_chain'"
-  required
->
-  Service type to configure
-</ParamField>
-
-<ParamField body="fee_percent" type="string" required>
-  Fee percentage (e.g., "0.5" for 0.5%)
-</ParamField>
-
-<ParamField
-  body="accrual_basis"
-  type="'source_amount' | 'destination_amount'"
-  required
->
-  Calculate fee based on source or destination amount
+<ParamField body="developer_receivable_fees" type="object" required>
+  <Expandable title="Fee Properties">
+    <ParamField body="onramp" type="number">
+      Fee for onramp transactions
+    </ParamField>
+    <ParamField body="offramp" type="number">
+      Fee for offramp transactions
+    </ParamField>
+    <ParamField body="cross_chain_transfer" type="number">
+      Fee for cross-chain transfers
+    </ParamField>
+  </Expandable>
 </ParamField>
 
 ## Example
 
 ```typescript
-const fees = await align.developers.updateFees({
-  service_type: "offramp",
-  fee_percent: "0.5",
-  accrual_basis: "source_amount",
+const response = await align.developers.updateFees({
+  developer_receivable_fees: {
+    onramp: 1.0,
+    offramp: 0.5,
+    cross_chain_transfer: 0.5,
+  },
 });
 
 console.log("Fees updated!");

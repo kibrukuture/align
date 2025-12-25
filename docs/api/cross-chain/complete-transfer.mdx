@@ -10,8 +10,11 @@ Complete a cross-chain transfer by providing the blockchain transaction hash aft
 
 ## Method Signature
 
+## Method Signature
+
 ```typescript
 align.crossChain.completeTransfer(
+  customerId: string,
   transferId: string,
   data: CompleteCrossChainTransferRequest
 ): Promise<CrossChainTransfer>
@@ -19,11 +22,15 @@ align.crossChain.completeTransfer(
 
 ## Parameters
 
+<ParamField path="customerId" type="string" required>
+  Customer identifier
+</ParamField>
+
 <ParamField path="transferId" type="string" required>
   The cross-chain transfer ID
 </ParamField>
 
-<ParamField body="source_tx_hash" type="string" required>
+<ParamField body="deposit_transaction_hash" type="string" required>
   Transaction hash from the source blockchain
 </ParamField>
 
@@ -31,9 +38,10 @@ align.crossChain.completeTransfer(
 
 ```typescript
 const completed = await align.crossChain.completeTransfer(
+  customerId,
   "xc_123e4567-e89b-12d3-a456-426614174000",
   {
-    source_tx_hash: "0xabcdef1234567890...",
+    deposit_transaction_hash: "0xabcdef1234567890...",
   }
 );
 

@@ -33,12 +33,6 @@ align.customers.createKycSession(customerId: string): Promise<KycSessionResponse
     <ResponseField name="kycs.kyc_flow_link" type="string">
       URL for the customer to complete KYC verification
     </ResponseField>
-    <ResponseField name="kycs.status" type="string">
-      Current KYC status
-    </ResponseField>
-    <ResponseField name="kycs.sub_status" type="string">
-      Detailed KYC status
-    </ResponseField>
   </Expandable>
 </ResponseField>
 
@@ -120,9 +114,7 @@ document.getElementById("kyc-frame").src = kycUrl;
 ```json
 {
   "kycs": {
-    "kyc_flow_link": "https://kyc.alignlabs.dev/flow/abc123def456",
-    "status": "pending",
-    "sub_status": "kyc_form_submission_pending"
+    "kyc_flow_link": "https://kyc.alignlabs.dev/flow/abc123def456"
   }
 }
 ```

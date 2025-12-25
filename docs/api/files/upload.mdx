@@ -10,68 +10,32 @@ Upload files such as identity documents and proof of address for KYC verificatio
 
 ## Method Signature
 
+## Method Signature
+
 ```typescript
-align.files.upload(data: UploadFileRequest): Promise<UploadFileResponse>
+align.files.upload(file: File | Blob): Promise<UploadFileResponse>
 ```
 
 ## Parameters
 
-<ParamField body="file" type="Buffer | Blob" required>
-  File content to upload
-</ParamField>
-
-<ParamField body="filename" type="string" required>
-  Original filename with extension
-</ParamField>
-
-<ParamField body="contentType" type="string" required>
-  MIME type: `image/jpeg`, `image/png`, `application/pdf`
+<ParamField body="file" type="File | Blob" required>
+  File object to upload (from input element or Node.js Buffer)
 </ParamField>
 
 ## Example
 
 <Tabs>
-  <Tab title="TypeScript (Node.js)">
+  <Tab title="TypeScript">
     ```typescript
     import Align from "@tolbel/align";
-    import { readFileSync } from "fs";
 
-    const align = new Align({
-      apiKey: process.env.ALIGN_API_KEY!,
-      environment: "sandbox",
-    });
-
-    // Read file from disk
-    const fileBuffer = readFileSync("./drivers-license.jpg");
-
-    // Upload to Align
-    const result = await align.files.upload({
-      file: fileBuffer,
-      filename: "drivers-license.jpg",
-      contentType: "image/jpeg",
-    });
-
-    console.log(`File ID: ${result.file_id}`);
-    // Use this file_id in customer.update()
-    ```
-
-  </Tab>
-  <Tab title="JavaScript (Browser)">
-    ```javascript
-    // With file input element
-    const fileInput = document.getElementById("file-upload");
+    // In a browser environment with a file input
+    const fileInput = document.querySelector('input[type="file"]');
     const file = fileInput.files[0];
 
-    // Read as ArrayBuffer
-    const buffer = await file.arrayBuffer();
+    const result = await align.files.upload(file);
 
-    const result = await align.files.upload({
-      file: Buffer.from(buffer),
-      filename: file.name,
-      contentType: file.type,
-    });
-
-    console.log("File ID:", result.file_id);
+    console.log(`File ID: ${result.id}`);
     ```
 
   </Tab>

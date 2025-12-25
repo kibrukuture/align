@@ -22,8 +22,7 @@ align.externalAccounts.list(
 const response = await align.externalAccounts.list(customerId);
 
 for (const account of response.items) {
-  console.log(`${account.external_account_id}: ${account.type}`);
-  console.log(`  Holder: ${account.account_holder_name}`);
+  console.log(`${account.id}: ${account.bank_name} (${account.account_type})`);
 }
 ```
 

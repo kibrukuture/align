@@ -169,9 +169,9 @@ try {
   });
 } catch (error) {
   if (error instanceof AlignError) {
-    if (error.statusCode === 404) {
+    if (error.status === 404) {
       console.error("Customer not found");
-    } else if (error.statusCode === 400) {
+    } else if (error.status === 400) {
       console.error("Invalid action or customer state");
     }
   }

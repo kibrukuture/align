@@ -10,8 +10,10 @@ Create a permanent cross-chain route for automatic asset bridging. When funds ar
 
 ## Method Signature
 
+## Method Signature
+
 ```typescript
-align.crossChain.createPermanentRoute(
+align.crossChain.createPermanentRouteAddress(
   customerId: string,
   data: CreatePermanentRouteRequest
 ): Promise<PermanentRouteAddress>
@@ -23,14 +25,6 @@ align.crossChain.createPermanentRoute(
   Customer identifier
 </ParamField>
 
-<ParamField body="source_network" type="string" required>
-  Source blockchain network
-</ParamField>
-
-<ParamField body="source_token" type="string" required>
-  Token to receive on source chain
-</ParamField>
-
 <ParamField body="destination_network" type="string" required>
   Destination blockchain network
 </ParamField>
@@ -39,24 +33,24 @@ align.crossChain.createPermanentRoute(
   Token to send on destination chain
 </ParamField>
 
-<ParamField body="destination_wallet_address" type="string" required>
+<ParamField body="destination_address" type="string" required>
   Wallet address to receive funds on destination chain
 </ParamField>
 
 ## Example
 
 ```typescript
-// Create a route: anything sent to this address on Ethereum
+// Create a route: anything sent to the generated addresses
 // will be bridged to Polygon automatically
-const route = await align.crossChain.createPermanentRoute(customerId, {
-  source_network: "ethereum",
-  source_token: "usdc",
+const route = await align.crossChain.createPermanentRouteAddress(customerId, {
   destination_network: "polygon",
   destination_token: "usdc",
-  destination_wallet_address: "0x...",
+  destination_address: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
 });
 
-console.log(`Deposit Address: ${route.deposit_address}`);
+console.log(
+  `Ethereum Deposit Address: ${route.route_chain_addresses.ethereum?.address}`
+);
 // Send funds to this address to trigger automatic bridging
 ```
 

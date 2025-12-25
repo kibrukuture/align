@@ -43,11 +43,7 @@ align.crossChain.createTransfer(
   Amount to transfer
 </ParamField>
 
-<ParamField body="source_wallet_address" type="string" required>
-  Wallet address on source chain
-</ParamField>
-
-<ParamField body="destination_wallet_address" type="string" required>
+<ParamField body="destination_address" type="string" required>
   Wallet address on destination chain
 </ParamField>
 
@@ -70,11 +66,10 @@ align.crossChain.createTransfer(
       destination_network: "polygon",
       destination_token: "usdc",
       amount: "100.00",
-      source_wallet_address: "0x...",
-      destination_wallet_address: "0x...",
+      destination_address: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
     });
 
-    console.log(`Transfer ID: ${transfer.transfer_id}`);
+    console.log(`Transfer ID: ${transfer.id}`);
     console.log(`Status: ${transfer.status}`);
     ```
 
@@ -87,11 +82,10 @@ align.crossChain.createTransfer(
       destination_network: "polygon",
       destination_token: "usdc",
       amount: "100.00",
-      source_wallet_address: "0x...",
-      destination_wallet_address: "0x...",
+      destination_address: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
     });
 
-    console.log("Transfer ID:", transfer.transfer_id);
+    console.log("Transfer ID:", transfer.id);
     ```
 
   </Tab>

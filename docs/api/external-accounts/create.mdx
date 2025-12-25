@@ -23,40 +23,63 @@ align.externalAccounts.create(
   Customer identifier
 </ParamField>
 
-<ParamField body="type" type="'us' | 'iban'" required>
-  Account type: US domestic or international IBAN
+<ParamField body="account_type" type="'us' | 'iban'" required>
+  Account type
 </ParamField>
 
-### US Account Fields
-
-<ParamField body="account_holder_name" type="string" required>
-  Name on the bank account
+<ParamField body="bank_name" type="string" required>
+  Name of the bank
 </ParamField>
 
-<ParamField body="routing_number" type="string" required>
-  9-digit ABA routing number
+<ParamField
+  body="account_holder_type"
+  type="'individual' | 'business'"
+  required
+>
+  Type of account holder
 </ParamField>
 
-<ParamField body="account_number" type="string" required>
-  Bank account number
+<ParamField body="account_holder_address" type="object" required>
+  <Expandable title="Address Properties">
+    <ParamField body="country" type="string" required>
+      ISO 2-letter country code
+    </ParamField>
+    <ParamField body="city" type="string" required>
+      City
+    </ParamField>
+    <ParamField body="street_line_1" type="string" required>
+      Street address
+    </ParamField>
+    <ParamField body="postal_code" type="string" required>
+      Postal code
+    </ParamField>
+  </Expandable>
 </ParamField>
 
-<ParamField body="account_type" type="'checking' | 'savings'" required>
-  Type of bank account
+### US Account Fields (required if account_type is 'us')
+
+<ParamField body="us" type="object">
+  <Expandable title="US Account Properties">
+    <ParamField body="account_number" type="string" required>
+      Bank account number
+    </ParamField>
+    <ParamField body="routing_number" type="string" required>
+      9-digit ABA routing number
+    </ParamField>
+  </Expandable>
 </ParamField>
 
-### IBAN Account Fields
+### IBAN Account Fields (required if account_type is 'iban')
 
-<ParamField body="account_holder_name" type="string" required>
-  Name on the bank account
-</ParamField>
-
-<ParamField body="iban" type="string" required>
-  International Bank Account Number
-</ParamField>
-
-<ParamField body="bic" type="string" required>
-  Bank Identifier Code (SWIFT code)
+<ParamField body="iban" type="object">
+  <Expandable title="IBAN Properties">
+    <ParamField body="iban_number" type="string" required>
+      International Bank Account Number
+    </ParamField>
+    <ParamField body="bic" type="string" required>
+      Bank Identifier Code
+    </ParamField>
+  </Expandable>
 </ParamField>
 
 ## Examples
@@ -74,27 +97,26 @@ align.externalAccounts.create(
     });
 
     const account = await align.externalAccounts.create(customerId, {
-      type: "us",
-      account_holder_name: "Alice Smith",
-      routing_number: "021000021",
-      account_number: "123456789",
-      account_type: "checking",
+      account_type: "us",
+      bank_name: "Chase Bank",
+      account_holder_type: "individual",
+      account_holder_first_name: "Alice",
+      account_holder_last_name: "Smith",
+      account_holder_address: {
+        country: "US",
+        city: "San Francisco",
+        street_line_1: "123 Market St",
+        postal_code: "94105"
+      },
+      us: {
+        routing_number: "021000021",
+        account_number: "123456789"
+      }
     });
 
-    console.log(`Account ID: ${account.external_account_id}`);
+    console.log(`Account ID: ${account.id}`);
     ```
 
-  </Tab>
-  <Tab title="JavaScript">
-    ```javascript
-    const account = await align.externalAccounts.create(customerId, {
-      type: "us",
-      account_holder_name: "Alice Smith",
-      routing_number: "021000021",
-      account_number: "123456789",
-      account_type: "checking",
-    });
-    ```
   </Tab>
 </Tabs>
 
@@ -102,13 +124,24 @@ align.externalAccounts.create(
 
 ```typescript
 const account = await align.externalAccounts.create(customerId, {
-  type: "iban",
-  account_holder_name: "Alice Schmidt",
-  iban: "DE89370400440532013000",
-  bic: "COBADEFFXXX",
+  account_type: "iban",
+  bank_name: "Deutsche Bank",
+  account_holder_type: "individual",
+  account_holder_first_name: "Hans",
+  account_holder_last_name: "Mueller",
+  account_holder_address: {
+    country: "DE",
+    city: "Berlin",
+    street_line_1: "Unter den Linden 1",
+    postal_code: "10117",
+  },
+  iban: {
+    iban_number: "DE89370400440532013000",
+    bic: "COBADEFFXXX",
+  },
 });
 
-console.log(`Account ID: ${account.external_account_id}`);
+console.log(`Account ID: ${account.id}`);
 ```
 
 <Info>

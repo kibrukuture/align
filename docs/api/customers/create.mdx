@@ -172,7 +172,7 @@ try {
     console.error("Validation errors:", error.errors);
     // [{ path: ["email"], message: "Invalid email format" }]
   } else if (error instanceof AlignError) {
-    if (error.statusCode === 409) {
+    if (error.status === 409) {
       console.error("Email already exists");
     } else {
       console.error(`API Error: ${error.message}`);
