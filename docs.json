@@ -58,10 +58,8 @@
             "pages": [
               "docs/api/transfers/create-quote",
               "docs/api/transfers/create-transfer",
-              "docs/api/transfers/get-transfer",
               "docs/api/transfers/get-offramp-transfer",
               "docs/api/transfers/get-onramp-transfer",
-              "docs/api/transfers/list-transfers",
               "docs/api/transfers/list-offramp-transfers",
               "docs/api/transfers/list-onramp-transfers",
               "docs/api/transfers/complete-transfer",
