@@ -267,16 +267,15 @@ Set up webhooks to receive real-time notifications:
 // Register a webhook endpoint
 const webhook = await align.webhooks.create({
   url: "https://your-app.com/webhooks/align",
-  events: ["transfer.completed", "transfer.failed", "virtual_account.credit"],
 });
 
-console.log(`Webhook Secret: ${webhook.secret}`);
+console.log(`Webhook ID: ${webhook.id}`);
 ```
 
-<Warning>
-  Store the webhook secret securely. You'll need it to verify incoming webhook
-  signatures.
-</Warning>
+<Note>
+  Webhook signatures are signed using your **API Key**. See the [Webhook
+  Verification](/docs/api/webhooks/create#webhook-handler-example) guide.
+</Note>
 
 ## Next Steps
 
