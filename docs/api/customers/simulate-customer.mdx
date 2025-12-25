@@ -112,18 +112,18 @@ async function testCustomerOnboarding() {
     first_name: "Test",
     last_name: "User",
   });
-  console.log("✅ Customer created:", customer.customer_id);
+  console.log("Customer created:", customer.customer_id);
 
   // 2. Create KYC session
   const kyc = await align.customers.createKycSession(customer.customer_id);
-  console.log("✅ KYC session created");
+  console.log("KYC session created");
 
   // 3. Simulate KYC approval
   await align.customers.simulateCustomer({
     customer_id: customer.customer_id,
     action: "kyc.status.approve",
   });
-  console.log("✅ KYC approved");
+  console.log("KYC approved");
 
   // 4. Create virtual account (now possible after KYC)
   const account = await align.virtualAccounts.create(customer.customer_id, {
@@ -132,15 +132,15 @@ async function testCustomerOnboarding() {
     destination_token: "usdc",
     destination_network: "polygon",
   });
-  console.log("✅ Virtual account created:", account.id);
+  console.log("Virtual account created:", account.id);
 
   // 5. Simulate deposit
   await align.virtualAccounts.simulate(account.id, {
     amount: "100.00",
   });
-  console.log("✅ Deposit simulated");
+  console.log("Deposit simulated");
 
-  console.log("\n🎉 Full onboarding flow completed!");
+  console.log("\nFull onboarding flow completed!");
 }
 
 testCustomerOnboarding().catch(console.error);

@@ -149,12 +149,12 @@ async function waitForKycApproval(
     const customer = await align.customers.get(customerId);
 
     if (customer.kycs?.sub_status === "kyc_form_submission_accepted") {
-      console.log("✅ KYC approved!");
+      console.log("KYC approved!");
       return true;
     }
 
     if (customer.kycs?.sub_status === "kyc_form_submission_rejected") {
-      console.log("❌ KYC rejected");
+      console.log("KYC rejected");
       return false;
     }
 
@@ -162,7 +162,7 @@ async function waitForKycApproval(
     await new Promise((resolve) => setTimeout(resolve, 5000));
   }
 
-  console.log("⏱️ Timeout waiting for KYC");
+  console.log("Timeout waiting for KYC");
   return false;
 }
 ```

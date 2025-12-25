@@ -87,7 +87,7 @@ async function waitForTransfer(
     const transfer = await align.transfers.get(transferId);
 
     if (transfer.status === "completed") {
-      console.log("✅ Transfer completed!");
+      console.log("Transfer completed!");
       return transfer;
     }
 

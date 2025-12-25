@@ -87,13 +87,13 @@ async function testVirtualAccountDeposit() {
     destination_token: "usdc",
     destination_network: "polygon",
   });
-  console.log("✅ Virtual account created");
+  console.log("Virtual account created");
 
   // 3. Simulate deposit
   await align.virtualAccounts.simulate(account.id, {
     amount: "250.00",
   });
-  console.log("✅ $250 deposit simulated");
+  console.log("$250 deposit simulated");
 
   // 4. Check updated account
   const updated = await align.virtualAccounts.get(account.id);

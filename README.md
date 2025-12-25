@@ -14,13 +14,13 @@
 
 ## Features
 
-- 🔐 **Type-Safe**: Full TypeScript support with comprehensive type definitions
-- 🚀 **Modern**: Built with ES modules and async/await
-- ✅ **Validated**: Request validation with Zod schemas
-- 🔒 **Secure**: HMAC-SHA256 webhook signature verification
-- ⛓️ **Blockchain**: Complete wallet, transaction, and smart contract support
-- 📦 **Lightweight**: Minimal dependencies
-- 🌍 **Multi-Environment**: Sandbox and production environments
+- **Type-Safe**: Full TypeScript support with comprehensive type definitions
+- **Modern**: Built with ES modules and async/await
+- **Validated**: Request validation with Zod schemas
+- **Secure**: HMAC-SHA256 webhook signature verification
+- **Blockchain**: Complete wallet, transaction, and smart contract support
+- **Lightweight**: Minimal dependencies
+- **Multi-Environment**: Sandbox and production environments
 
 ## Installation
 

@@ -115,10 +115,10 @@ const align = new Align({
 async function test() {
   try {
     const customers = await align.customers.list();
-    console.log("✅ SDK connected successfully!");
+    console.log("SDK connected successfully!");
     console.log(`Found ${customers.items.length} customers`);
   } catch (error) {
-    console.error("❌ Connection failed:", error);
+    console.error("Connection failed:", error);
   }
 }
 

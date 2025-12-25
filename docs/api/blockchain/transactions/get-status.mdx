@@ -91,7 +91,7 @@ async function pollStatus(txHash: string, network: string) {
     );
 
     if (status.status === "confirmed") {
-      console.log("✅ Transaction confirmed!");
+      console.log("Transaction confirmed!");
       return status;
     }
 

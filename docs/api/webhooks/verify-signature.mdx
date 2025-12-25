@@ -231,10 +231,10 @@ sequenceDiagram
     You must use the **raw request body** exactly as received. Parsing the JSON first and re-stringifying it may change the byte order, causing verification to fail.
     
     ```typescript
-    // ✅ Correct - use raw body
+    // Correct - use raw body
     app.post("/webhooks", express.raw({ type: "application/json" }), ...);
     
-    // ❌ Wrong - JSON parsed first
+    // Wrong - JSON parsed first
     app.post("/webhooks", express.json(), (req, res) => {
       const payload = JSON.stringify(req.body); // May differ from original!
     });

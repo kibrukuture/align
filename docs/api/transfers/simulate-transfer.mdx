@@ -132,7 +132,7 @@ async function testOfframpFlow(customerId: string) {
 
   // 4. Verify
   const completed = await align.transfers.get(transfer.transfer_id);
-  console.log(`✅ Transfer ${completed.status}`);
+  console.log(`Transfer ${completed.status}`);
 }
 ```
 
