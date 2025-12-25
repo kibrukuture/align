@@ -47,7 +47,7 @@ align.transfers.listOfframpTransfers(
     console.log(`Total offramp transfers: ${response.items.length}`);
 
     for (const transfer of response.items) {
-      console.log(`${transfer.transfer_id}: ${transfer.status}`);
+      console.log(`${transfer.id}: ${transfer.status}`);
       console.log(`  ${transfer.source_amount} USDC → $${transfer.destination_amount} USD`);
     }
     ```
@@ -60,7 +60,7 @@ align.transfers.listOfframpTransfers(
     );
 
     response.items.forEach((transfer) => {
-      console.log(`${transfer.transfer_id}: ${transfer.status}`);
+      console.log(`${transfer.id}: ${transfer.status}`);
     });
     ```
 

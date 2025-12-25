@@ -11,12 +11,19 @@ Retrieve detailed information about a specific virtual account, including its st
 ## Method Signature
 
 ```typescript
-align.virtualAccounts.get(accountId: string): Promise<VirtualAccount>
+align.virtualAccounts.get(
+  customerId: string,
+  virtualAccountId: string
+): Promise<VirtualAccount>
 ```
 
 ## Parameters
 
-<ParamField path="accountId" type="string" required>
+<ParamField path="customerId" type="string" required>
+  The unique customer identifier
+</ParamField>
+
+<ParamField path="virtualAccountId" type="string" required>
   The unique virtual account identifier
 </ParamField>
 
@@ -26,102 +33,39 @@ align.virtualAccounts.get(accountId: string): Promise<VirtualAccount>
   Unique identifier for the virtual account
 </ResponseField>
 
-<ResponseField name="customer_id" type="string">
-  Associated customer identifier
-</ResponseField>
-
 <ResponseField name="status" type="string">
-  Account status: `active`, `pending`, `inactive`
+  Account status: `active`
 </ResponseField>
 
-<ResponseField name="source_currency" type="string">
-  Fiat currency for deposits
-</ResponseField>
-
-<ResponseField name="source_rails" type="string">
-  Payment rails type
-</ResponseField>
-
-<ResponseField name="destination_token" type="string">
-  Cryptocurrency token
-</ResponseField>
-
-<ResponseField name="destination_network" type="string">
-  Blockchain network
+<ResponseField name="destination_address" type="string">
+  Wallet address where funds will be sent
 </ResponseField>
 
 <ResponseField name="deposit_instructions" type="object">
-  Bank account details for deposits
+  Bank account details. Properties vary by account type.
+  <Expandable title="Properties">
+    <ResponseField name="us" type="object">
+      For USD accounts: `{(account_number, routing_number)}`
+    </ResponseField>
+    <ResponseField name="iban" type="object">
+      For EUR accounts: `{(iban_number, bic)}`
+    </ResponseField>
+    <ResponseField name="bank_name" type="string">
+      Bank Name
+    </ResponseField>
+  </Expandable>
 </ResponseField>
 
 ## Examples
 
-<Tabs>
-  <Tab title="TypeScript">
-    ```typescript
-    import Align from "@tolbel/align";
-
-    const align = new Align({
-      apiKey: process.env.ALIGN_API_KEY!,
-      environment: "sandbox",
-    });
-
-    const virtualAccount = await align.virtualAccounts.get(
-      "va_123e4567-e89b-12d3-a456-426614174000"
-    );
-
-    console.log(`Status: ${virtualAccount.status}`);
-    console.log(`Currency: ${virtualAccount.source_currency}`);
-    console.log(`Deposit to: ${virtualAccount.deposit_instructions.account_number}`);
-    ```
-
-  </Tab>
-  <Tab title="JavaScript">
-    ```javascript
-    const virtualAccount = await align.virtualAccounts.get(
-      "va_123e4567-e89b-12d3-a456-426614174000"
-    );
-
-    console.log("Status:", virtualAccount.status);
-    console.log("Account Number:", virtualAccount.deposit_instructions.account_number);
-    ```
-
-  </Tab>
-</Tabs>
-
-### Full Response Example
-
-```json
-{
-  "id": "va_123e4567-e89b-12d3-a456-426614174000",
-  "customer_id": "123e4567-e89b-12d3-a456-426614174000",
-  "status": "active",
-  "source_currency": "usd",
-  "source_rails": "ach",
-  "destination_token": "usdc",
-  "destination_network": "polygon",
-  "destination_wallet_address": "0x742d35Cc6634C0532925a3b844Bc9e7595f0aB42",
-  "deposit_instructions": {
-    "account_number": "123456789",
-    "routing_number": "021000021",
-    "account_type": "checking",
-    "bank_name": "Example Bank",
-    "beneficiary_name": "Align Labs Inc."
-  }
-}
-```
-
-## Error Handling
-
 ```typescript
-import { AlignError } from "@tolbel/align";
+const account = await align.virtualAccounts.get(customerId, "va_123");
 
-try {
-  const account = await align.virtualAccounts.get("invalid-id");
-} catch (error) {
-  if (error instanceof AlignError && error.statusCode === 404) {
-    console.error("Virtual account not found");
-  }
+// Check the structure before accessing
+if ("us" in account.deposit_instructions) {
+  console.log(`US Account: ${account.deposit_instructions.us.account_number}`);
+} else if ("iban" in account.deposit_instructions) {
+  console.log(`IBAN: ${account.deposit_instructions.iban.iban_number}`);
 }
 ```
 

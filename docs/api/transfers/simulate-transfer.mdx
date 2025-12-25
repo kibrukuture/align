@@ -18,6 +18,7 @@ Simulate transfer actions for testing purposes. This method is **only available 
 
 ```typescript
 align.transfers.simulateOfframpTransfer(
+  customerId: string,
   data: SimulateOfframpTransferRequest
 ): Promise<SimulateTransferResponse>
 ```
@@ -26,18 +27,23 @@ align.transfers.simulateOfframpTransfer(
 
 ```typescript
 align.transfers.simulateOnrampTransfer(
+  customerId: string,
   data: SimulateOnrampTransferRequest
 ): Promise<SimulateTransferResponse>
 ```
 
 ## Parameters
 
+<ParamField path="customerId" type="string" required>
+  The unique customer identifier
+</ParamField>
+
 <ParamField body="transfer_id" type="string" required>
   The transfer ID to simulate
 </ParamField>
 
 <ParamField body="action" type="string" required>
-  Simulation action: `complete`, `fail`
+  Simulation action: `complete_transfer`
 </ParamField>
 
 ## Examples
@@ -55,23 +61,20 @@ align.transfers.simulateOnrampTransfer(
     });
 
     // Complete an offramp transfer
-    await align.transfers.simulateOfframpTransfer({
+    await align.transfers.simulateOfframpTransfer(customerId, {
       transfer_id: "tr_123e4567-e89b-12d3-a456-426614174000",
-      action: "complete",
+      action: "complete_transfer",
     });
 
-    // Verify completion
-    const transfer = await align.transfers.get("tr_123...");
-    console.log(`Status: ${transfer.status}`);
-    // Status: completed
+    console.log("Transfer completion simulated");
     ```
 
   </Tab>
   <Tab title="JavaScript">
     ```javascript
-    await align.transfers.simulateOfframpTransfer({
+    await align.transfers.simulateOfframpTransfer(customerId, {
       transfer_id: "tr_123e4567-e89b-12d3-a456-426614174000",
-      action: "complete",
+      action: "complete_transfer",
     });
 
     console.log("Transfer completed!");
@@ -83,25 +86,10 @@ align.transfers.simulateOnrampTransfer(
 ### Simulate Onramp Completion
 
 ```typescript
-await align.transfers.simulateOnrampTransfer({
+await align.transfers.simulateOnrampTransfer(customerId, {
   transfer_id: "tr_456...",
-  action: "complete",
+  action: "complete_transfer",
 });
-```
-
-### Simulate Failure
-
-Test error handling by simulating a failed transfer:
-
-```typescript
-await align.transfers.simulateOfframpTransfer({
-  transfer_id: "tr_123...",
-  action: "fail",
-});
-
-const transfer = await align.transfers.get("tr_123...");
-console.log(`Status: ${transfer.status}`);
-// Status: failed
 ```
 
 ## Complete Test Workflow
@@ -118,20 +106,26 @@ async function testOfframpFlow(customerId: string) {
   });
 
   // 2. Create transfer
-  const transfer = await align.transfers.createOfframpTransfer(customerId, {
-    quote_id: quote.quote_id,
-    external_account_id: "ext_123",
-    source_wallet_address: "0x...",
-  });
+  const transfer = await align.transfers.createOfframpTransfer(
+    customerId,
+    quote.quote_id,
+    {
+      destination_external_account_id: "ext_123",
+      transfer_purpose: "personal_expenses",
+    }
+  );
 
   // 3. Simulate completion
-  await align.transfers.simulateOfframpTransfer({
-    transfer_id: transfer.transfer_id,
-    action: "complete",
+  await align.transfers.simulateOfframpTransfer(customerId, {
+    transfer_id: transfer.id,
+    action: "complete_transfer",
   });
 
   // 4. Verify
-  const completed = await align.transfers.get(transfer.transfer_id);
+  const completed = await align.transfers.getOfframpTransfer(
+    customerId,
+    transfer.id
+  );
   console.log(`Transfer ${completed.status}`);
 }
 ```

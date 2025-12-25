@@ -17,6 +17,7 @@ Convert cryptocurrency to fiat and send to a bank account.
 ```typescript
 align.transfers.createOfframpTransfer(
   customerId: string,
+  quoteId: string,
   data: CreateOfframpTransferRequest
 ): Promise<Transfer>
 ```
@@ -27,20 +28,21 @@ align.transfers.createOfframpTransfer(
   The unique customer identifier (UUID format)
 </ParamField>
 
-<ParamField body="quote_id" type="string" required>
+<ParamField path="quoteId" type="string" required>
   Quote ID from a previous `createOfframpQuote` call
 </ParamField>
 
-<ParamField body="external_account_id" type="string" required>
-  Bank account ID to receive the fiat funds
+<ParamField body="transfer_purpose" type="string" required>
+  Transfer purpose code (e.g., `personal_expenses`, `business_payment`)
 </ParamField>
 
-<ParamField body="source_wallet_address" type="string" required>
-  Wallet address sending the cryptocurrency
+<ParamField body="destination_external_account_id" type="string">
+  Bank account ID to receive the fiat funds. Required if
+  `destination_bank_account` is not provided.
 </ParamField>
 
-<ParamField body="purpose" type="string">
-  Transfer purpose code for compliance (see supported values below)
+<ParamField body="destination_bank_account" type="object">
+  Inline bank account details (alternative to `destination_external_account_id`)
 </ParamField>
 
 ### Example
@@ -65,16 +67,17 @@ align.transfers.createOfframpTransfer(
     });
 
     // Step 2: Execute the transfer
-    const transfer = await align.transfers.createOfframpTransfer(customerId, {
-      quote_id: quote.quote_id,
-      external_account_id: "ext_123",
-      source_wallet_address: "0x742d35Cc6634C0532925a3b844Bc9e7595f0aB42",
-      purpose: "personal_expenses",
-    });
+    const transfer = await align.transfers.createOfframpTransfer(
+      customerId,
+      quote.quote_id,
+      {
+        destination_external_account_id: "ext_123",
+        transfer_purpose: "personal_expenses",
+      }
+    );
 
-    console.log(`Transfer ID: ${transfer.transfer_id}`);
+    console.log(`Transfer ID: ${transfer.id}`);
     console.log(`Status: ${transfer.status}`);
-    // Status: pending
     ```
 
   </Tab>
@@ -88,13 +91,16 @@ align.transfers.createOfframpTransfer(
       destination_payment_rails: "ach",
     });
 
-    const transfer = await align.transfers.createOfframpTransfer(customerId, {
-      quote_id: quote.quote_id,
-      external_account_id: "ext_123",
-      source_wallet_address: "0x...",
-    });
+    const transfer = await align.transfers.createOfframpTransfer(
+      customerId,
+      quote.quote_id,
+      {
+        destination_external_account_id: "ext_123",
+        transfer_purpose: "personal_expenses",
+      }
+    );
 
-    console.log("Transfer ID:", transfer.transfer_id);
+    console.log("Transfer ID:", transfer.id);
     ```
 
   </Tab>
@@ -111,6 +117,7 @@ Convert fiat to cryptocurrency and send to a wallet.
 ```typescript
 align.transfers.createOnrampTransfer(
   customerId: string,
+  quoteId: string,
   data: CreateOnrampTransferRequest
 ): Promise<Transfer>
 ```
@@ -121,16 +128,12 @@ align.transfers.createOnrampTransfer(
   The unique customer identifier (UUID format)
 </ParamField>
 
-<ParamField body="quote_id" type="string" required>
+<ParamField path="quoteId" type="string" required>
   Quote ID from a previous `createOnrampQuote` call
 </ParamField>
 
-<ParamField body="destination_wallet_address" type="string" required>
+<ParamField body="destination_address" type="string" required>
   Wallet address to receive the cryptocurrency
-</ParamField>
-
-<ParamField body="purpose" type="string">
-  Transfer purpose code for compliance
 </ParamField>
 
 ### Example
@@ -146,13 +149,15 @@ const quote = await align.transfers.createOnrampQuote(customerId, {
 });
 
 // Step 2: Execute the transfer
-const transfer = await align.transfers.createOnrampTransfer(customerId, {
-  quote_id: quote.quote_id,
-  destination_wallet_address: "0x742d35Cc6634C0532925a3b844Bc9e7595f0aB42",
-  purpose: "crypto_purchase",
-});
+const transfer = await align.transfers.createOnrampTransfer(
+  customerId,
+  quote.quote_id,
+  {
+    destination_address: "0x742d35Cc6634C0532925a3b844Bc9e7595f0aB42",
+  }
+);
 
-console.log(`Transfer ID: ${transfer.transfer_id}`);
+console.log(`Transfer ID: ${transfer.id}`);
 // Funds will be sent to the wallet once fiat is deposited
 ```
 
@@ -160,20 +165,7 @@ console.log(`Transfer ID: ${transfer.transfer_id}`);
 
 ## Transfer Response
 
-```json
-{
-  "transfer_id": "tr_123e4567-e89b-12d3-a456-426614174000",
-  "status": "pending",
-  "type": "offramp",
-  "source_amount": "100.00",
-  "source_token": "usdc",
-  "source_network": "polygon",
-  "destination_amount": "98.50",
-  "destination_currency": "usd",
-  "fee_amount": "1.50",
-  "created_at": "2024-01-15T10:30:00Z"
-}
-```
+Calls return a `Transfer` object containing status and amounts.
 
 ## Transfer Statuses
 
@@ -183,23 +175,7 @@ console.log(`Transfer ID: ${transfer.transfer_id}`);
 | `processing` | Transfer is being processed           |
 | `completed`  | Transfer completed successfully       |
 | `failed`     | Transfer failed                       |
-| `cancelled`  | Transfer was cancelled                |
-
-## Transfer Purpose Codes
-
-<Info>
-  Purpose codes are required for regulatory compliance in certain jurisdictions.
-</Info>
-
-| Code                | Description            |
-| ------------------- | ---------------------- |
-| `personal_expenses` | Personal spending      |
-| `crypto_purchase`   | Buying cryptocurrency  |
-| `crypto_sale`       | Selling cryptocurrency |
-| `investment`        | Investment purposes    |
-| `business_payment`  | Business transaction   |
-| `salary`            | Salary payment         |
-| `gift`              | Gift transfer          |
+| `refunded`   | Transfer was refunded                 |
 
 ## Error Handling
 
@@ -207,11 +183,14 @@ console.log(`Transfer ID: ${transfer.transfer_id}`);
 import { AlignError, AlignValidationError } from "@tolbel/align";
 
 try {
-  const transfer = await align.transfers.createOfframpTransfer(customerId, {
-    quote_id: quote.quote_id,
-    external_account_id: "ext_123",
-    source_wallet_address: "0x...",
-  });
+  const transfer = await align.transfers.createOfframpTransfer(
+    customerId,
+    quote.quote_id,
+    {
+      destination_external_account_id: "ext_123",
+      transfer_purpose: "personal_expenses",
+    }
+  );
 } catch (error) {
   if (error instanceof AlignError) {
     if (error.statusCode === 400) {
@@ -238,7 +217,11 @@ try {
   >
     Get a quote first
   </Card>
-  <Card title="Get Transfer" icon="eye" href="/docs/api/transfers/get-transfer">
+  <Card
+    title="Get Offramp Transfer"
+    icon="eye"
+    href="/docs/api/transfers/get-offramp-transfer"
+  >
     Track transfer status
   </Card>
   <Card

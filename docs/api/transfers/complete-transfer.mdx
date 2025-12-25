@@ -17,6 +17,7 @@ Complete an offramp transfer by providing the blockchain transaction hash after 
 
 ```typescript
 align.transfers.completeOfframpTransfer(
+  customerId: string,
   transferId: string,
   data: CompleteOfframpTransferRequest
 ): Promise<Transfer>
@@ -24,11 +25,15 @@ align.transfers.completeOfframpTransfer(
 
 ## Parameters
 
+<ParamField path="customerId" type="string" required>
+  The unique customer identifier
+</ParamField>
+
 <ParamField path="transferId" type="string" required>
   The unique transfer identifier
 </ParamField>
 
-<ParamField body="source_tx_hash" type="string" required>
+<ParamField body="deposit_transaction_hash" type="string" required>
   Blockchain transaction hash of the crypto transfer
 </ParamField>
 
@@ -46,9 +51,10 @@ align.transfers.completeOfframpTransfer(
 
     // After sending crypto to the platform's address
     const completed = await align.transfers.completeOfframpTransfer(
+      "123e4567-e89b-12d3-a456-426614174000",
       "tr_123e4567-e89b-12d3-a456-426614174000",
       {
-        source_tx_hash: "0x1234567890abcdef...",
+        deposit_transaction_hash: "0x1234567890abcdef...",
       }
     );
 
@@ -60,9 +66,10 @@ align.transfers.completeOfframpTransfer(
   <Tab title="JavaScript">
     ```javascript
     const completed = await align.transfers.completeOfframpTransfer(
+      "123e4567-e89b-12d3-a456-426614174000",
       "tr_123e4567-e89b-12d3-a456-426614174000",
       {
-        source_tx_hash: "0x1234567890abcdef...",
+        deposit_transaction_hash: "0x1234567890abcdef...",
       }
     );
 
@@ -103,7 +110,11 @@ flowchart LR
   >
     Create the transfer first
   </Card>
-  <Card title="Get Transfer" icon="eye" href="/docs/api/transfers/get-transfer">
+  <Card
+    title="Get Offramp Transfer"
+    icon="eye"
+    href="/docs/api/transfers/get-offramp-transfer"
+  >
     Track completion status
   </Card>
 </CardGroup>

@@ -1,12 +1,12 @@
 ---
-title: "Simulate Virtual Account"
-description: "Simulate deposits to a virtual account in sandbox"
+title: "Simulate Account Issuance"
+description: "Simulate the issuance of a pending virtual account in sandbox"
 icon: "flask"
 ---
 
-# Simulate Virtual Account
+# Simulate Account Issuance
 
-Simulate a deposit to a virtual account for testing purposes. This method is **only available in the sandbox environment**.
+Simulate the successful issuance of a virtual account. This is used in the sandbox to transition a virtual account from `pending` to `active`.
 
 <Warning>
   This method is for **testing only** and will not work in production.
@@ -16,133 +16,55 @@ Simulate a deposit to a virtual account for testing purposes. This method is **o
 
 ```typescript
 align.virtualAccounts.simulate(
-  accountId: string,
+  customerId: string,
   data: SimulateVirtualAccountRequest
-): Promise<SimulateVirtualAccountResponse>
+): Promise<VirtualAccount>
 ```
 
 ## Parameters
 
-<ParamField path="accountId" type="string" required>
-  The unique virtual account identifier
+<ParamField path="customerId" type="string" required>
+  The unique customer identifier
 </ParamField>
 
-<ParamField body="amount" type="string" required>
-  Amount to deposit in the source currency (e.g., "100.00" for $100)
+<ParamField body="virtual_account_id" type="string" required>
+  The ID of the virtual account to simulate issuance for
+</ParamField>
+
+<ParamField body="action" type="string" required>
+  Action to perform: `issue_pending_virtual_account`
 </ParamField>
 
 ## Returns
 
-Returns simulation result with deposit and conversion details.
+Returns the updated `VirtualAccount` object with `status: "active"` and populated `deposit_instructions`.
 
-## Examples
-
-### Simulate a $100 Deposit
-
-<Tabs>
-  <Tab title="TypeScript">
-    ```typescript
-    import Align from "@tolbel/align";
-
-    const align = new Align({
-      apiKey: process.env.ALIGN_API_KEY!,
-      environment: "sandbox",
-    });
-
-    // Simulate depositing $100
-    const result = await align.virtualAccounts.simulate(
-      "va_123e4567-e89b-12d3-a456-426614174000",
-      {
-        amount: "100.00",
-      }
-    );
-
-    console.log("Deposit simulated successfully!");
-    ```
-
-  </Tab>
-  <Tab title="JavaScript">
-    ```javascript
-    const result = await align.virtualAccounts.simulate(
-      "va_123e4567-e89b-12d3-a456-426614174000",
-      { amount: "100.00" }
-    );
-
-    console.log("Deposit simulated!");
-    ```
-
-  </Tab>
-</Tabs>
-
-### Complete Test Flow
+## Example
 
 ```typescript
-async function testVirtualAccountDeposit() {
-  // 1. Create customer and complete KYC (see previous examples)
+const activeAccount = await align.virtualAccounts.simulate(customerId, {
+  virtual_account_id: "va_123e4567...",
+  action: "issue_pending_virtual_account",
+});
 
-  // 2. Create virtual account
-  const account = await align.virtualAccounts.create(customerId, {
-    source_currency: "usd",
-    source_rails: "ach",
-    destination_token: "usdc",
-    destination_network: "polygon",
-  });
-  console.log("Virtual account created");
+console.log(`Status: ${activeAccount.status}`); // "active"
 
-  // 3. Simulate deposit
-  await align.virtualAccounts.simulate(account.id, {
-    amount: "250.00",
-  });
-  console.log("$250 deposit simulated");
-
-  // 4. Check updated account
-  const updated = await align.virtualAccounts.get(account.id);
-  console.log(`Account status: ${updated.status}`);
+if ("us" in activeAccount.deposit_instructions) {
+  console.log(
+    `Account Number: ${activeAccount.deposit_instructions.us.account_number}`
+  );
 }
 ```
-
-<Info>
-  In sandbox, simulated deposits trigger the full conversion flow. Use webhooks
-  to track the transfer completion.
-</Info>
 
 ## Error Handling
 
 ```typescript
-import { AlignError, AlignValidationError } from "@tolbel/align";
-
 try {
-  await align.virtualAccounts.simulate(accountId, {
-    amount: "100.00",
+  await align.virtualAccounts.simulate(customerId, {
+    virtual_account_id: "va_123",
+    action: "issue_pending_virtual_account",
   });
 } catch (error) {
-  if (error instanceof AlignValidationError) {
-    console.error("Invalid amount:", error.errors);
-  } else if (error instanceof AlignError) {
-    if (error.statusCode === 404) {
-      console.error("Virtual account not found");
-    } else if (error.statusCode === 400) {
-      console.error("Cannot simulate in production environment");
-    }
-  }
+  console.error("Simulation failed:", error);
 }
 ```
-
-## Related Methods
-
-<CardGroup cols={2}>
-  <Card
-    title="Create Virtual Account"
-    icon="plus"
-    href="/docs/api/virtual-accounts/create"
-  >
-    Create account first
-  </Card>
-  <Card
-    title="Simulate Transfer"
-    icon="flask"
-    href="/docs/api/transfers/simulate-transfer"
-  >
-    Simulate direct transfers
-  </Card>
-</CardGroup>

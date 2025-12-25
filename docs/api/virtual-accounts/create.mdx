@@ -32,15 +32,11 @@ align.virtualAccounts.create(
   Fiat currency for deposits
 </ParamField>
 
-<ParamField
-  body="source_rails"
-  type="'ach' | 'wire' | 'sepa' | 'swift' | 'uaefts'"
-  required
->
-  Payment rails for receiving deposits
+<ParamField body="source_rails" type="'swift'">
+  Optional payment rails. Currently only `swift` is supported (for USD).
 </ParamField>
 
-<ParamField body="destination_token" type="'usdc' | 'usdt' | 'eurc'" required>
+<ParamField body="destination_token" type="'usdc' | 'usdt'" required>
   Cryptocurrency token to receive
 </ParamField>
 
@@ -49,9 +45,8 @@ align.virtualAccounts.create(
   `tron`
 </ParamField>
 
-<ParamField body="destination_wallet_address" type="string">
-  Wallet address to receive converted crypto. If not provided, a managed wallet
-  is created.
+<ParamField body="destination_address" type="string" required>
+  Wallet address to receive converted crypto.
 </ParamField>
 
 ## Returns
@@ -61,16 +56,16 @@ align.virtualAccounts.create(
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  Account status: `active`, `pending`, `inactive`
+  Account status: `active`
 </ResponseField>
 
 <ResponseField name="deposit_instructions" type="object">
-  Bank account details for depositing funds
+  Bank account details for depositing funds. Structure varies by currency/type.
 </ResponseField>
 
 ## Examples
 
-### Create USD Virtual Account (ACH)
+### Create USD Virtual Account
 
 <Tabs>
   <Tab title="TypeScript">
@@ -86,19 +81,20 @@ align.virtualAccounts.create(
       "123e4567-e89b-12d3-a456-426614174000",
       {
         source_currency: "usd",
-        source_rails: "ach",
+        source_rails: "swift", // Optional, strictly for SWIFT
         destination_token: "usdc",
         destination_network: "polygon",
+        destination_address: "0x742d35Cc6634C0532925a3b844Bc9e7595f0aB42"
       }
     );
 
     console.log(`Account ID: ${virtualAccount.id}`);
-    console.log(`Status: ${virtualAccount.status}`);
 
-    // Get deposit instructions
-    const instructions = virtualAccount.deposit_instructions;
-    console.log(`Account Number: ${instructions.account_number}`);
-    console.log(`Routing Number: ${instructions.routing_number}`);
+    // Deposit instructions are nested based on type
+    if ('us' in virtualAccount.deposit_instructions) {
+         console.log(`Routing: ${virtualAccount.deposit_instructions.us.routing_number}`);
+         console.log(`Account: ${virtualAccount.deposit_instructions.us.account_number}`);
+    }
     ```
 
   </Tab>
@@ -108,16 +104,18 @@ align.virtualAccounts.create(
       "123e4567-e89b-12d3-a456-426614174000",
       {
         source_currency: "usd",
-        source_rails: "ach",
         destination_token: "usdc",
         destination_network: "polygon",
+        destination_address: "0x742d35Cc6634C0532925a3b844Bc9e7595f0aB42"
       }
     );
-
-    console.log("Account Number:", virtualAccount.deposit_instructions.account_number);
-    console.log("Routing Number:", virtualAccount.deposit_instructions.routing_number);
+    
+    // Access nested properties
+    const instructions = virtualAccount.deposit_instructions;
+    if (instructions.us) {
+      console.log("Routing:", instructions.us.routing_number);
+    }
     ```
-
   </Tab>
 </Tabs>
 
@@ -126,44 +124,31 @@ align.virtualAccounts.create(
 ```typescript
 const euroAccount = await align.virtualAccounts.create(customerId, {
   source_currency: "eur",
-  source_rails: "sepa",
   destination_token: "usdc",
   destination_network: "polygon",
+  destination_address: "0x...",
 });
 
-// IBAN accounts have different deposit instructions
-const instructions = euroAccount.deposit_instructions;
-console.log(`IBAN: ${instructions.iban}`);
-console.log(`BIC: ${instructions.bic}`);
-```
-
-### With Custom Wallet Address
-
-Specify your own wallet to receive the converted crypto:
-
-```typescript
-const virtualAccount = await align.virtualAccounts.create(customerId, {
-  source_currency: "usd",
-  source_rails: "ach",
-  destination_token: "usdc",
-  destination_network: "polygon",
-  destination_wallet_address: "0x742d35Cc6634C0532925a3b844Bc9e7595f0aB42",
-});
+if ("iban" in euroAccount.deposit_instructions) {
+  console.log(`IBAN: ${euroAccount.deposit_instructions.iban.iban_number}`);
+  console.log(`BIC: ${euroAccount.deposit_instructions.iban.bic}`);
+}
 ```
 
 ## Deposit Instructions
 
-The `deposit_instructions` field contains the banking details customers need for deposits:
+The `deposit_instructions` field contains the banking details. It is a union type:
 
 ### US Account (ACH/Wire)
 
 ```json
 {
-  "account_number": "123456789",
-  "routing_number": "021000021",
-  "account_type": "checking",
+  "currency": "usd",
   "bank_name": "Example Bank",
-  "beneficiary_name": "Align Labs Inc."
+  "us": {
+    "account_number": "123456789",
+    "routing_number": "021000021"
+  }
 }
 ```
 
@@ -171,35 +156,22 @@ The `deposit_instructions` field contains the banking details customers need for
 
 ```json
 {
-  "iban": "DE89370400440532013000",
-  "bic": "COBADEFFXXX",
+  "currency": "eur",
   "bank_name": "Commerzbank",
-  "beneficiary_name": "Align Labs Inc."
+  "iban": {
+    "iban_number": "DE89370400440532013000",
+    "bic": "COBADEFFXXX"
+  }
 }
 ```
-
-<Tip>
-Use the SDK's type guards to handle different deposit instruction types:
-
-```typescript
-import { isUSAccountDetails, isIBANAccountDetails } from "@tolbel/align";
-
-if (isUSAccountDetails(virtualAccount.deposit_instructions)) {
-  console.log("Routing:", virtualAccount.deposit_instructions.routing_number);
-} else if (isIBANAccountDetails(virtualAccount.deposit_instructions)) {
-  console.log("IBAN:", virtualAccount.deposit_instructions.iban);
-}
-```
-
-</Tip>
 
 ## Supported Configurations
 
-| Source Currency | Source Rails | Destination Token | Destination Networks                      |
-| --------------- | ------------ | ----------------- | ----------------------------------------- |
-| USD             | ACH, Wire    | USDC, USDT        | Polygon, Ethereum, Base, Arbitrum, Solana |
-| EUR             | SEPA, SWIFT  | USDC, EURC        | Polygon, Ethereum, Base                   |
-| AED             | UAEFTS       | USDC              | Polygon, Ethereum                         |
+| Source Currency | Destination Token | Destination Networks                      |
+| --------------- | ----------------- | ----------------------------------------- |
+| USD             | USDC, USDT        | Polygon, Ethereum, Base, Arbitrum, Solana |
+| EUR             | USDC              | Polygon, Ethereum, Base                   |
+| AED             | USDC              | Polygon, Ethereum                         |
 
 ## Error Handling
 
@@ -209,9 +181,9 @@ import { AlignError, AlignValidationError } from "@tolbel/align";
 try {
   const account = await align.virtualAccounts.create(customerId, {
     source_currency: "usd",
-    source_rails: "ach",
     destination_token: "usdc",
     destination_network: "polygon",
+    destination_address: "0x...",
   });
 } catch (error) {
   if (error instanceof AlignValidationError) {
@@ -219,8 +191,6 @@ try {
   } else if (error instanceof AlignError) {
     if (error.statusCode === 403) {
       console.error("KYC verification required");
-    } else {
-      console.error(`API Error: ${error.message}`);
     }
   }
 }

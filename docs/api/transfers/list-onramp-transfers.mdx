@@ -47,7 +47,7 @@ align.transfers.listOnrampTransfers(
     console.log(`Total onramp transfers: ${response.items.length}`);
 
     for (const transfer of response.items) {
-      console.log(`${transfer.transfer_id}: ${transfer.status}`);
+      console.log(`${transfer.id}: ${transfer.status}`);
       console.log(`  $${transfer.source_amount} USD → ${transfer.destination_amount} USDC`);
     }
     ```
@@ -60,7 +60,7 @@ align.transfers.listOnrampTransfers(
     );
 
     response.items.forEach((transfer) => {
-      console.log(`${transfer.transfer_id}: ${transfer.status}`);
+      console.log(`${transfer.id}: ${transfer.status}`);
     });
     ```
 
