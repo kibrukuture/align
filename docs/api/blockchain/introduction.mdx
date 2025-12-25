@@ -1,0 +1,63 @@
+---
+title: "Introduction"
+description: "Direct blockchain interaction using the Align SDK"
+icon: "cube"
+---
+
+<Warning>
+  **Important Note**: The Blockchain module is an addition to the Align SDK and
+  is not part of the core AlignLab API. These utilities are provided to simplify
+  blockchain interactions (wallets, transactions, smart contracts) alongside
+  your Align integration.
+</Warning>
+
+## Overview
+
+The Blockchain module provides a set of tools to interact directly with supported blockchain networks. While Align handles the fiat-to-crypto and cross-chain logic, this module allows you to:
+
+<CardGroup cols={3}>
+  <Card
+    title="Wallets"
+    icon="wallet"
+    href="/docs/api/blockchain/wallets/create"
+  >
+    Manage keys, sign messages, and check balances.
+  </Card>
+  <Card
+    title="Transactions"
+    icon="bolt"
+    href="/docs/api/blockchain/transactions/send-token"
+  >
+    Send native and ERC-20 tokens with ease.
+  </Card>
+  <Card
+    title="Contracts"
+    icon="file-contract"
+    href="/docs/api/blockchain/contracts/read"
+  >
+    Interact with any smart contract using standard ABIs.
+  </Card>
+</CardGroup>
+
+## Getting Started
+
+To use the blockchain module, you don't need any additional configuration if you've already initialized the `Align` client. The blockchain resources are available under the `blockchain` property.
+
+```typescript
+import Align from "@tolbel/align";
+
+const align = new Align({
+  apiKey: "your_api_key",
+  environment: "sandbox",
+});
+
+// Access blockchain features
+const balance = await align.blockchain.wallets.getBalance("0x...");
+```
+
+## Features
+
+- **Wallet Management**: Create random wallets, import from mnemonics or private keys, and encrypt/decrypt local wallets.
+- **Smart Contracts**: Full support for reading, writing, and listening to events on generic smart contracts.
+- **Token Utilities**: Fetch token info, format/parse amounts, and manage ERC-20 tokens.
+- **Provider Access**: Use Align's default RPCs or configure your own custom providers for specialized needs.
