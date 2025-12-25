@@ -84,14 +84,14 @@ Returns `true` if the signature is valid, `false` otherwise.
 
         // Handle different event types
         switch (event.event_type) {
-          case "transfer.completed":
-            handleTransferCompleted(event.data);
+          case "offramp_transfer.status.updated":
+            handleTransferStatusUpdate(event.data);
             break;
-          case "virtual_account.credit":
-            handleDeposit(event.data);
+          case "virtual_account.created":
+            handleAccountCreated(event.data);
             break;
-          case "customer.kyc.approved":
-            handleKycApproved(event.data);
+          case "customer.kycs.updated":
+            handleKycUpdate(event.data);
             break;
         }
 
