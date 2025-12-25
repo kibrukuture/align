@@ -126,12 +126,16 @@ Returns an empty object `{}` on success.
 
 ## Document Purposes
 
-| Purpose             | Description                                           | Accepted Formats |
-| ------------------- | ----------------------------------------------------- | ---------------- |
-| `id_document`       | Government-issued ID (passport, driver's license)     | JPEG, PNG, PDF   |
-| `proof_of_address`  | Utility bill, bank statement (less than 3 months old) | JPEG, PNG, PDF   |
-| `selfie`            | Photo of customer holding their ID                    | JPEG, PNG        |
-| `incorporation_doc` | Business incorporation documents (for corporates)     | PDF              |
+| Purpose                       | Description                                           | Accepted Formats |
+| ----------------------------- | ----------------------------------------------------- | ---------------- |
+| `id_document`                 | Government-issued ID (passport, driver's license)     | JPEG, PNG, PDF   |
+| `proof_of_address`            | Utility bill, bank statement (less than 3 months old) | JPEG, PNG, PDF   |
+| `proof_of_source_of_funds`    | Bank statements, payslips, or tax returns             | JPEG, PNG, PDF   |
+| `business_formation`          | Certificate of incorporation, articles of association | PDF              |
+| `directors_registry`          | List of company directors                             | PDF              |
+| `shareholder_registry`        | List of company shareholders                          | PDF              |
+| `proof_of_nature_of_business` | Business plan, website, or invoices                   | PDF              |
+| `other`                       | Any other supporting documentation                    | JPEG, PNG, PDF   |
 
 ## Error Handling
 
