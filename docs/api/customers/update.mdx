@@ -1,0 +1,176 @@
+---
+title: "Update Customer"
+description: "Update a customer's information with documents for KYC verification"
+icon: "pen"
+---
+
+# Update Customer
+
+Upload documents to a customer's profile for KYC verification. This is typically used to submit identity documents and proof of address.
+
+<Warning>
+  Document upload requires that files be uploaded first using the [Files
+  API](/docs/api/files/upload). Use the returned `file_id` in this request.
+</Warning>
+
+## Method Signature
+
+```typescript
+align.customers.update(
+  customerId: string,
+  data: UpdateCustomerRequest
+): Promise<Record<string, never>>
+```
+
+## Parameters
+
+<ParamField path="customerId" type="string" required>
+  The unique customer identifier (UUID format)
+</ParamField>
+
+<ParamField body="documents" type="array" required>
+  Array of document objects to upload
+  <Expandable title="Document Object Properties">
+    <ParamField body="documents[].file_id" type="string" required>
+      File ID from a previous file upload
+    </ParamField>
+    <ParamField body="documents[].purpose" type="string" required>
+      Document purpose: `id_document`, `proof_of_address`, `selfie`, etc.
+    </ParamField>
+    <ParamField body="documents[].description" type="string">
+      Optional description of the document
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Returns
+
+Returns an empty object `{}` on success.
+
+## Examples
+
+### Upload ID Document and Proof of Address
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    // Step 1: Upload files first
+    const idDocument = await align.files.upload({
+      file: idDocumentBuffer,
+      filename: "drivers-license.jpg",
+      contentType: "image/jpeg",
+    });
+
+    const proofOfAddress = await align.files.upload({
+      file: proofOfAddressBuffer,
+      filename: "utility-bill.pdf",
+      contentType: "application/pdf",
+    });
+
+    // Step 2: Update customer with documents
+    await align.customers.update("123e4567-e89b-12d3-a456-426614174000", {
+      documents: [
+        {
+          file_id: idDocument.file_id,
+          purpose: "id_document",
+          description: "Driver's license - front",
+        },
+        {
+          file_id: proofOfAddress.file_id,
+          purpose: "proof_of_address",
+          description: "Electric bill - January 2024",
+        },
+      ],
+    });
+
+    console.log("Documents uploaded successfully");
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    // Step 1: Upload files first
+    const idDocument = await align.files.upload({
+      file: idDocumentBuffer,
+      filename: "drivers-license.jpg",
+      contentType: "image/jpeg",
+    });
+
+    const proofOfAddress = await align.files.upload({
+      file: proofOfAddressBuffer,
+      filename: "utility-bill.pdf",
+      contentType: "application/pdf",
+    });
+
+    // Step 2: Update customer with documents
+    await align.customers.update("123e4567-e89b-12d3-a456-426614174000", {
+      documents: [
+        {
+          file_id: idDocument.file_id,
+          purpose: "id_document",
+          description: "Driver's license - front",
+        },
+        {
+          file_id: proofOfAddress.file_id,
+          purpose: "proof_of_address",
+        },
+      ],
+    });
+    ```
+
+  </Tab>
+</Tabs>
+
+## Document Purposes
+
+| Purpose             | Description                                           | Accepted Formats |
+| ------------------- | ----------------------------------------------------- | ---------------- |
+| `id_document`       | Government-issued ID (passport, driver's license)     | JPEG, PNG, PDF   |
+| `proof_of_address`  | Utility bill, bank statement (less than 3 months old) | JPEG, PNG, PDF   |
+| `selfie`            | Photo of customer holding their ID                    | JPEG, PNG        |
+| `incorporation_doc` | Business incorporation documents (for corporates)     | PDF              |
+
+## Error Handling
+
+```typescript
+import { AlignError, AlignValidationError } from "@tolbel/align";
+
+try {
+  await align.customers.update(customerId, {
+    documents: [{ file_id: "invalid-file-id", purpose: "id_document" }],
+  });
+} catch (error) {
+  if (error instanceof AlignValidationError) {
+    console.error("Invalid document data:", error.errors);
+  } else if (error instanceof AlignError) {
+    if (error.statusCode === 404) {
+      console.error("Customer or file not found");
+    } else {
+      console.error(`API Error: ${error.message}`);
+    }
+  }
+}
+```
+
+<Info>
+  After uploading documents, the KYC verification process will automatically
+  continue. Use [webhooks](/docs/api/webhooks/create) to receive status updates.
+</Info>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card title="Upload File" icon="upload" href="/docs/api/files/upload">
+    Upload files before attaching to customer
+  </Card>
+  <Card title="Get Customer" icon="user" href="/docs/api/customers/get">
+    Check document and KYC status
+  </Card>
+</CardGroup>

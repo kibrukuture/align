@@ -1,0 +1,134 @@
+---
+title: "Get Token Info"
+description: "Retrieve token metadata (name, symbol, decimals)"
+icon: "circle-info"
+---
+
+# Get Token Info
+
+Retrieve metadata for any ERC-20 token, including name, symbol, and decimals.
+
+## Method Signature
+
+```typescript
+align.blockchain.tokens.getTokenInfo(
+  tokenAddress: string,
+  provider: JsonRpcProvider,
+  network: Network,
+  token?: Token
+): Promise<TokenInfo>
+```
+
+## Parameters
+
+<ParamField body="tokenAddress" type="string" required>
+  Token contract address
+</ParamField>
+
+<ParamField body="provider" type="JsonRpcProvider" required>
+  Connected ethers.js provider
+</ParamField>
+
+<ParamField body="network" type="string" required>
+  Network identifier
+</ParamField>
+
+<ParamField body="token" type="string">
+  Optional known token identifier for caching
+</ParamField>
+
+## Returns
+
+<ResponseField name="name" type="string">
+  Token name (e.g., "USD Coin")
+</ResponseField>
+
+<ResponseField name="symbol" type="string">
+  Token symbol (e.g., "USDC")
+</ResponseField>
+
+<ResponseField name="decimals" type="number">
+  Token decimals (e.g., 6)
+</ResponseField>
+
+<ResponseField name="address" type="string">
+  Contract address
+</ResponseField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const provider = align.blockchain.providers.getProvider("polygon");
+
+    const info = await align.blockchain.tokens.getTokenInfo(
+      "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+      provider,
+      "polygon"
+    );
+
+    console.log(`Name: ${info.name}`);       // USD Coin
+    console.log(`Symbol: ${info.symbol}`);   // USDC
+    console.log(`Decimals: ${info.decimals}`); // 6
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const provider = align.blockchain.providers.getProvider("polygon");
+    const info = await align.blockchain.tokens.getTokenInfo(
+      tokenAddress, provider, "polygon"
+    );
+    console.log(info.symbol, info.decimals);
+    ```
+  </Tab>
+</Tabs>
+
+### Display Token with Correct Formatting
+
+```typescript
+const info = await align.blockchain.tokens.getTokenInfo(
+  tokenAddress,
+  provider,
+  "polygon"
+);
+
+// Get raw balance
+const rawBalance = await getContractBalance(address, tokenAddress);
+
+// Format with correct decimals
+const formatted = align.blockchain.tokens.formatAmount(
+  rawBalance,
+  info.decimals
+);
+
+console.log(`${formatted} ${info.symbol}`);
+// 1,234.56 USDC
+```
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Get Token Address"
+    icon="map-pin"
+    href="/docs/api/blockchain/tokens/get-address"
+  >
+    Get known token address
+  </Card>
+  <Card
+    title="Format Amount"
+    icon="arrows-to-dot"
+    href="/docs/api/blockchain/tokens/format-amount"
+  >
+    Format raw amounts
+  </Card>
+</CardGroup>

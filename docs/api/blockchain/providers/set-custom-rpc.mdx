@@ -1,0 +1,106 @@
+---
+title: "Set Custom RPC"
+description: "Override the default RPC URL for a network"
+icon: "gear"
+---
+
+# Set Custom RPC
+
+Override the default RPC URL for a specific network. Useful for using premium providers like Alchemy or Infura.
+
+## Method Signature
+
+```typescript
+align.blockchain.providers.setCustomRpc(
+  network: Network,
+  rpcUrl: string
+): void
+```
+
+## Parameters
+
+<ParamField body="network" type="string" required>
+  Network to configure
+</ParamField>
+
+<ParamField body="rpcUrl" type="string" required>
+  Custom RPC URL
+</ParamField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    // Use Alchemy for Ethereum
+    align.blockchain.providers.setCustomRpc(
+      "ethereum",
+      "https://eth-mainnet.g.alchemy.com/v2/YOUR-API-KEY"
+    );
+
+    // Use Infura for Polygon
+    align.blockchain.providers.setCustomRpc(
+      "polygon",
+      "https://polygon-mainnet.infura.io/v3/YOUR-PROJECT-ID"
+    );
+
+    // Now getProvider uses the custom URLs
+    const provider = align.blockchain.providers.getProvider("ethereum");
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    align.blockchain.providers.setCustomRpc(
+      "polygon",
+      process.env.ALCHEMY_POLYGON_URL
+    );
+    ```
+  </Tab>
+</Tabs>
+
+### Configure at Initialization
+
+```typescript
+const align = new Align({
+  apiKey: process.env.ALIGN_API_KEY!,
+  environment: "production",
+  blockchain: {
+    customRpcUrls: {
+      ethereum: "https://eth-mainnet.g.alchemy.com/v2/KEY",
+      polygon: "https://polygon-mainnet.g.alchemy.com/v2/KEY",
+    },
+  },
+});
+```
+
+<Tip>
+  Premium RPC providers offer higher rate limits, better uptime, and additional
+  features like archive data access.
+</Tip>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Get Provider"
+    icon="server"
+    href="/docs/api/blockchain/providers/get-provider"
+  >
+    Get provider instance
+  </Card>
+  <Card
+    title="Get Network Info"
+    icon="circle-info"
+    href="/docs/api/blockchain/providers/get-network-info"
+  >
+    Get network config
+  </Card>
+</CardGroup>

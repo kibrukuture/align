@@ -1,0 +1,101 @@
+---
+title: "Get Provider"
+description: "Get an RPC provider for a specific blockchain network"
+icon: "server"
+---
+
+# Get Provider
+
+Get an active JSON-RPC provider for interacting with a specific blockchain network.
+
+## Method Signature
+
+```typescript
+align.blockchain.providers.getProvider(
+  network: Network
+): JsonRpcProvider
+```
+
+## Parameters
+
+<ParamField body="network" type="string" required>
+  Network: `ethereum`, `polygon`, `base`, `arbitrum`, `optimism`
+</ParamField>
+
+## Returns
+
+Returns an ethers.js `JsonRpcProvider` instance.
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const provider = align.blockchain.providers.getProvider("polygon");
+
+    // Get current block number
+    const blockNumber = await provider.getBlockNumber();
+    console.log(`Current block: ${blockNumber}`);
+
+    // Get gas price
+    const feeData = await provider.getFeeData();
+    console.log(`Gas price: ${feeData.gasPrice?.toString()}`);
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const provider = align.blockchain.providers.getProvider("polygon");
+    const block = await provider.getBlockNumber();
+    console.log("Block:", block);
+    ```
+  </Tab>
+</Tabs>
+
+### Direct Contract Interaction
+
+```typescript
+import { Contract } from "ethers";
+
+const provider = align.blockchain.providers.getProvider("polygon");
+
+const contract = new Contract(
+  "0xContractAddress...",
+  ["function totalSupply() view returns (uint256)"],
+  provider
+);
+
+const supply = await contract.totalSupply();
+console.log(`Total supply: ${supply}`);
+```
+
+<Info>
+  Providers are cached internally. Multiple calls to `getProvider()` with the
+  same network return the same instance.
+</Info>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Set Custom RPC"
+    icon="gear"
+    href="/docs/api/blockchain/providers/set-custom-rpc"
+  >
+    Use premium RPC
+  </Card>
+  <Card
+    title="Get Network Info"
+    icon="circle-info"
+    href="/docs/api/blockchain/providers/get-network-info"
+  >
+    Get network config
+  </Card>
+</CardGroup>

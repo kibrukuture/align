@@ -1,0 +1,131 @@
+---
+title: "Get Transaction Status"
+description: "Check the current status of a blockchain transaction"
+icon: "clock"
+---
+
+# Get Transaction Status
+
+Check whether a transaction has been confirmed, is still pending, or has failed.
+
+## Method Signature
+
+```typescript
+align.blockchain.transactions.getStatus(
+  txHash: string,
+  network: Network
+): Promise<TransactionStatus>
+```
+
+## Parameters
+
+<ParamField body="txHash" type="string" required>
+  Transaction hash to check
+</ParamField>
+
+<ParamField body="network" type="string" required>
+  Network where the transaction was sent
+</ParamField>
+
+## Returns
+
+<ResponseField name="status" type="string">
+  Status: `pending`, `confirmed`, `failed`
+</ResponseField>
+
+<ResponseField name="confirmations" type="number">
+  Number of block confirmations
+</ResponseField>
+
+<ResponseField name="blockNumber" type="number">
+  Block number (if confirmed)
+</ResponseField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const status = await align.blockchain.transactions.getStatus(
+      "0x123abc...",
+      "polygon"
+    );
+
+    console.log(`Status: ${status.status}`);
+    console.log(`Confirmations: ${status.confirmations}`);
+
+    if (status.status === "confirmed") {
+      console.log(`Confirmed in block ${status.blockNumber}`);
+    }
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const status = await align.blockchain.transactions.getStatus(
+      txHash,
+      "polygon"
+    );
+    console.log("Status:", status.status);
+    ```
+  </Tab>
+</Tabs>
+
+### Polling for Confirmation
+
+```typescript
+async function pollStatus(txHash: string, network: string) {
+  const maxAttempts = 30;
+
+  for (let i = 0; i < maxAttempts; i++) {
+    const status = await align.blockchain.transactions.getStatus(
+      txHash,
+      network
+    );
+
+    if (status.status === "confirmed") {
+      console.log("✅ Transaction confirmed!");
+      return status;
+    }
+
+    if (status.status === "failed") {
+      throw new Error("Transaction failed");
+    }
+
+    console.log(`Pending... (attempt ${i + 1}/${maxAttempts})`);
+    await new Promise((r) => setTimeout(r, 2000)); // Wait 2 seconds
+  }
+
+  throw new Error("Transaction not confirmed in time");
+}
+```
+
+<Tip>
+  For simpler code, use `waitForConfirmation()` instead of polling manually.
+</Tip>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Wait for Confirmation"
+    icon="hourglass"
+    href="/docs/api/blockchain/transactions/wait-for-confirmation"
+  >
+    Wait until confirmed
+  </Card>
+  <Card
+    title="Send Native Token"
+    icon="paper-plane"
+    href="/docs/api/blockchain/wallets/send-native-token"
+  >
+    Send transaction
+  </Card>
+</CardGroup>

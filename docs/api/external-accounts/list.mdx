@@ -1,0 +1,40 @@
+---
+title: "List External Accounts"
+description: "Retrieve all linked bank accounts for a customer"
+icon: "list"
+---
+
+# List External Accounts
+
+Retrieve all external bank accounts linked to a customer's profile.
+
+## Method Signature
+
+```typescript
+align.externalAccounts.list(
+  customerId: string
+): Promise<ExternalAccountListResponse>
+```
+
+## Example
+
+```typescript
+const response = await align.externalAccounts.list(customerId);
+
+for (const account of response.items) {
+  console.log(`${account.external_account_id}: ${account.type}`);
+  console.log(`  Holder: ${account.account_holder_name}`);
+}
+```
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Create Account"
+    icon="building"
+    href="/docs/api/external-accounts/create"
+  >
+    Link a new bank account
+  </Card>
+</CardGroup>

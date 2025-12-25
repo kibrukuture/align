@@ -1,0 +1,296 @@
+---
+title: "Create Quote"
+description: "Get a quote for onramp or offramp transfers with exchange rates and fees"
+icon: "calculator"
+---
+
+# Create Quote
+
+Create quotes for fiat-to-crypto (onramp) or crypto-to-fiat (offramp) transfers. Quotes provide exchange rates, fees, and estimated amounts before executing the transfer.
+
+<Info>
+  Quotes are valid for a limited time. Execute the transfer promptly after
+  receiving a quote to lock in the rate.
+</Info>
+
+## Offramp Quote (Crypto → Fiat)
+
+Get a quote for converting cryptocurrency to fiat currency and withdrawing to a bank account.
+
+### Method Signature
+
+```typescript
+align.transfers.createOfframpQuote(
+  customerId: string,
+  data: CreateOfframpQuoteRequest
+): Promise<QuoteResponse>
+```
+
+### Parameters
+
+<ParamField path="customerId" type="string" required>
+  The unique customer identifier (UUID format)
+</ParamField>
+
+<ParamField body="source_amount" type="string">
+  Amount of crypto to send. Specify **either** `source_amount` or
+  `destination_amount`.
+</ParamField>
+
+<ParamField body="destination_amount" type="string">
+  Amount of fiat to receive. Specify **either** `source_amount` or
+  `destination_amount`.
+</ParamField>
+
+<ParamField body="source_token" type="'usdc' | 'usdt' | 'eurc'" required>
+  Cryptocurrency token to convert
+</ParamField>
+
+<ParamField body="source_network" type="string" required>
+  Blockchain network: `polygon`, `ethereum`, `solana`, `base`, `arbitrum`,
+  `tron`
+</ParamField>
+
+<ParamField body="destination_currency" type="'usd' | 'eur' | 'aed'" required>
+  Fiat currency to receive
+</ParamField>
+
+<ParamField
+  body="destination_payment_rails"
+  type="'ach' | 'wire' | 'sepa' | 'swift' | 'uaefts'"
+  required
+>
+  Payment method for fiat withdrawal
+</ParamField>
+
+<ParamField body="developer_fee_percent" type="string">
+  Optional developer fee as a percentage (e.g., `"0.5"` for 0.5%)
+</ParamField>
+
+### Example
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    // Quote for selling 100 USDC
+    const quote = await align.transfers.createOfframpQuote(
+      "123e4567-e89b-12d3-a456-426614174000",
+      {
+        source_amount: "100.00",
+        source_token: "usdc",
+        source_network: "polygon",
+        destination_currency: "usd",
+        destination_payment_rails: "ach",
+      }
+    );
+
+    console.log(`Send: ${quote.source_amount} USDC`);
+    console.log(`Receive: $${quote.destination_amount} USD`);
+    console.log(`Exchange Rate: ${quote.exchange_rate}`);
+    console.log(`Fee: $${quote.fee_amount}`);
+    console.log(`Quote ID: ${quote.quote_id}`);
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const quote = await align.transfers.createOfframpQuote(
+      "123e4567-e89b-12d3-a456-426614174000",
+      {
+        source_amount: "100.00",
+        source_token: "usdc",
+        source_network: "polygon",
+        destination_currency: "usd",
+        destination_payment_rails: "ach",
+      }
+    );
+
+    console.log("Send:", quote.source_amount, "USDC");
+    console.log("Receive:", quote.destination_amount, "USD");
+    ```
+
+  </Tab>
+</Tabs>
+
+---
+
+## Onramp Quote (Fiat → Crypto)
+
+Get a quote for converting fiat currency to cryptocurrency.
+
+### Method Signature
+
+```typescript
+align.transfers.createOnrampQuote(
+  customerId: string,
+  data: CreateOnrampQuoteRequest
+): Promise<QuoteResponse>
+```
+
+### Parameters
+
+<ParamField path="customerId" type="string" required>
+  The unique customer identifier (UUID format)
+</ParamField>
+
+<ParamField body="source_amount" type="string">
+  Amount of fiat to send. Specify **either** `source_amount` or
+  `destination_amount`.
+</ParamField>
+
+<ParamField body="destination_amount" type="string">
+  Amount of crypto to receive. Specify **either** `source_amount` or
+  `destination_amount`.
+</ParamField>
+
+<ParamField body="source_currency" type="'usd' | 'eur' | 'aed'" required>
+  Fiat currency to convert
+</ParamField>
+
+<ParamField
+  body="source_payment_rails"
+  type="'ach' | 'wire' | 'sepa' | 'swift' | 'uaefts'"
+  required
+>
+  Payment method for fiat deposit
+</ParamField>
+
+<ParamField body="destination_token" type="'usdc' | 'usdt' | 'eurc'" required>
+  Cryptocurrency token to receive
+</ParamField>
+
+<ParamField body="destination_network" type="string" required>
+  Blockchain network: `polygon`, `ethereum`, `solana`, `base`, `arbitrum`,
+  `tron`
+</ParamField>
+
+<ParamField body="developer_fee_percent" type="string">
+  Optional developer fee as a percentage
+</ParamField>
+
+### Example
+
+```typescript
+// Quote for buying USDC with $100
+const quote = await align.transfers.createOnrampQuote(customerId, {
+  source_amount: "100.00",
+  source_currency: "usd",
+  source_payment_rails: "ach",
+  destination_token: "usdc",
+  destination_network: "polygon",
+});
+
+console.log(`Send: $${quote.source_amount} USD`);
+console.log(`Receive: ${quote.destination_amount} USDC`);
+```
+
+---
+
+## Quote Response
+
+Both methods return a `QuoteResponse` object:
+
+```json
+{
+  "quote_id": "qt_123e4567-e89b-12d3-a456-426614174000",
+  "source_amount": "100.00",
+  "destination_amount": "98.50",
+  "exchange_rate": "0.985",
+  "fee_amount": "1.50",
+  "developer_fee_amount": "0.00",
+  "expires_at": "2024-01-15T12:30:00Z"
+}
+```
+
+| Field                  | Description                                         |
+| ---------------------- | --------------------------------------------------- |
+| `quote_id`             | Unique identifier to use when creating the transfer |
+| `source_amount`        | Amount to send                                      |
+| `destination_amount`   | Amount to receive after fees                        |
+| `exchange_rate`        | Conversion rate applied                             |
+| `fee_amount`           | Platform fee                                        |
+| `developer_fee_amount` | Your custom fee (if applicable)                     |
+| `expires_at`           | Quote expiration timestamp                          |
+
+## Usage Patterns
+
+### Calculate by Source Amount
+
+When you know how much the user wants to send:
+
+```typescript
+const quote = await align.transfers.createOfframpQuote(customerId, {
+  source_amount: "100.00", // User sends 100 USDC
+  source_token: "usdc",
+  source_network: "polygon",
+  destination_currency: "usd",
+  destination_payment_rails: "ach",
+});
+
+console.log(`User receives: $${quote.destination_amount}`);
+```
+
+### Calculate by Destination Amount
+
+When you know how much the user wants to receive:
+
+```typescript
+const quote = await align.transfers.createOfframpQuote(customerId, {
+  destination_amount: "100.00", // User receives $100
+  source_token: "usdc",
+  source_network: "polygon",
+  destination_currency: "usd",
+  destination_payment_rails: "ach",
+});
+
+console.log(`User sends: ${quote.source_amount} USDC`);
+```
+
+<Warning>
+  Specify **either** `source_amount` or `destination_amount`, not both. The API
+  will calculate the other amount based on exchange rates and fees.
+</Warning>
+
+## Error Handling
+
+```typescript
+import { AlignError, AlignValidationError } from "@tolbel/align";
+
+try {
+  const quote = await align.transfers.createOfframpQuote(customerId, {
+    source_amount: "100.00",
+    source_token: "usdc",
+    source_network: "polygon",
+    destination_currency: "usd",
+    destination_payment_rails: "ach",
+  });
+} catch (error) {
+  if (error instanceof AlignValidationError) {
+    console.error("Invalid quote request:", error.errors);
+  } else if (error instanceof AlignError) {
+    console.error(`API Error: ${error.message}`);
+  }
+}
+```
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Create Transfer"
+    icon="paper-plane"
+    href="/docs/api/transfers/create-transfer"
+  >
+    Execute the quoted transfer
+  </Card>
+  <Card title="Get Transfer" icon="eye" href="/docs/api/transfers/get-transfer">
+    Track transfer status
+  </Card>
+</CardGroup>

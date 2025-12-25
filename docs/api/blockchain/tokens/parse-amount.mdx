@@ -1,0 +1,99 @@
+---
+title: "Parse Token Amount"
+description: "Convert human-readable amounts to raw token units"
+icon: "keyboard"
+---
+
+# Parse Token Amount
+
+Convert a human-readable token amount to raw units (smallest denomination) for blockchain transactions.
+
+## Method Signature
+
+```typescript
+align.blockchain.tokens.parseAmount(
+  amount: string,
+  decimals: number
+): string
+```
+
+## Parameters
+
+<ParamField body="amount" type="string" required>
+  Human-readable amount (e.g., `"100.50"`)
+</ParamField>
+
+<ParamField body="decimals" type="number" required>
+  Token decimals (e.g., 6 for USDC, 18 for ETH)
+</ParamField>
+
+## Returns
+
+Returns the raw amount as a string (e.g., `"100500000"`).
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    // Convert 100 USDC to raw units
+    const rawUsdc = align.blockchain.tokens.parseAmount("100", 6);
+    console.log(rawUsdc); // "100000000"
+
+    // Convert 1.5 ETH to wei
+    const rawEth = align.blockchain.tokens.parseAmount("1.5", 18);
+    console.log(rawEth); // "1500000000000000000"
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const raw = align.blockchain.tokens.parseAmount("50.25", 6);
+    console.log(raw); // "50250000"
+    ```
+  </Tab>
+</Tabs>
+
+### Use in Contract Calls
+
+```typescript
+// Prepare raw amount for approve() call
+const approveAmount = align.blockchain.tokens.parseAmount("1000", 6);
+
+const tx = await align.blockchain.contracts.write({
+  contractAddress: USDC_ADDRESS,
+  abi: ERC20_ABI,
+  method: "approve",
+  args: [spenderAddress, approveAmount],
+  wallet: myWallet,
+  network: "polygon",
+});
+```
+
+<Info>This is a synchronous method - no network calls are made.</Info>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Format Amount"
+    icon="arrows-to-dot"
+    href="/docs/api/blockchain/tokens/format-amount"
+  >
+    Convert to readable
+  </Card>
+  <Card
+    title="Get Token Info"
+    icon="circle-info"
+    href="/docs/api/blockchain/tokens/get-token-info"
+  >
+    Get token decimals
+  </Card>
+</CardGroup>

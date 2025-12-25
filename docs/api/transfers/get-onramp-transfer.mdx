@@ -1,0 +1,123 @@
+---
+title: "Get Onramp Transfer"
+description: "Retrieve the details and status of an onramp (fiat-to-crypto) transfer"
+icon: "arrow-up"
+---
+
+# Get Onramp Transfer
+
+Retrieve detailed information about a specific onramp transfer (fiat → crypto), including its current status.
+
+## Method Signature
+
+```typescript
+align.transfers.getOnrampTransfer(
+  customerId: string,
+  transferId: string
+): Promise<Transfer>
+```
+
+## Parameters
+
+<ParamField path="customerId" type="string" required>
+  The unique customer identifier (UUID format)
+</ParamField>
+
+<ParamField path="transferId" type="string" required>
+  The unique onramp transfer identifier
+</ParamField>
+
+## Returns
+
+<ResponseField name="transfer_id" type="string">
+  Unique transfer identifier
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Current status: `pending`, `processing`, `completed`, `failed`
+</ResponseField>
+
+<ResponseField name="type" type="string">
+  Transfer type: `onramp`
+</ResponseField>
+
+<ResponseField name="source_amount" type="string">
+  Amount of fiat sent
+</ResponseField>
+
+<ResponseField name="destination_amount" type="string">
+  Amount of cryptocurrency received
+</ResponseField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const transfer = await align.transfers.getOnrampTransfer(
+      "123e4567-e89b-12d3-a456-426614174000",
+      "tr_onramp_xyz789"
+    );
+
+    console.log(`Status: ${transfer.status}`);
+    console.log(`Sent: $${transfer.source_amount} USD`);
+    console.log(`Received: ${transfer.destination_amount} USDC`);
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const transfer = await align.transfers.getOnrampTransfer(
+      "123e4567-e89b-12d3-a456-426614174000",
+      "tr_onramp_xyz789"
+    );
+
+    console.log("Status:", transfer.status);
+    ```
+
+  </Tab>
+</Tabs>
+
+### Full Response Example
+
+```json
+{
+  "transfer_id": "tr_onramp_xyz789",
+  "status": "completed",
+  "type": "onramp",
+  "source_amount": "100.00",
+  "source_currency": "usd",
+  "destination_amount": "98.50",
+  "destination_token": "usdc",
+  "destination_network": "polygon",
+  "fee_amount": "1.50",
+  "created_at": "2024-01-15T10:30:00Z",
+  "completed_at": "2024-01-15T10:45:00Z"
+}
+```
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Get Offramp Transfer"
+    icon="arrow-down"
+    href="/docs/api/transfers/get-offramp-transfer"
+  >
+    Get crypto-to-fiat transfer
+  </Card>
+  <Card
+    title="List Onramp Transfers"
+    icon="list"
+    href="/docs/api/transfers/list-onramp-transfers"
+  >
+    List all onramp transfers
+  </Card>
+</CardGroup>

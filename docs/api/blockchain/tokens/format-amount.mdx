@@ -1,0 +1,97 @@
+---
+title: "Format Token Amount"
+description: "Convert raw token amounts to human-readable strings"
+icon: "arrows-to-dot"
+---
+
+# Format Token Amount
+
+Convert a raw token amount (in smallest units) to a human-readable string with proper decimal places.
+
+## Method Signature
+
+```typescript
+align.blockchain.tokens.formatAmount(
+  amount: string,
+  decimals: number
+): string
+```
+
+## Parameters
+
+<ParamField body="amount" type="string" required>
+  Raw amount in smallest units (e.g., wei, satoshi)
+</ParamField>
+
+<ParamField body="decimals" type="number" required>
+  Token decimals (e.g., 6 for USDC, 18 for ETH)
+</ParamField>
+
+## Returns
+
+Returns the formatted amount as a string (e.g., `"100.50"`).
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    // USDC has 6 decimals
+    // Raw: 100000000 = 100.00 USDC
+    const usdcAmount = align.blockchain.tokens.formatAmount("100000000", 6);
+    console.log(`${usdcAmount} USDC`); // 100.00 USDC
+
+    // ETH has 18 decimals
+    // Raw: 1500000000000000000 = 1.5 ETH
+    const ethAmount = align.blockchain.tokens.formatAmount(
+      "1500000000000000000",
+      18
+    );
+    console.log(`${ethAmount} ETH`); // 1.5 ETH
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const formatted = align.blockchain.tokens.formatAmount("1000000", 6);
+    console.log(formatted, "USDC"); // 1.00 USDC
+    ```
+  </Tab>
+</Tabs>
+
+### Common Token Decimals
+
+| Token     | Decimals |
+| --------- | -------- |
+| USDC      | 6        |
+| USDT      | 6        |
+| ETH/MATIC | 18       |
+| WBTC      | 8        |
+
+<Tip>Use `parseAmount()` for the reverse operation (human-readable → raw).</Tip>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Parse Amount"
+    icon="keyboard"
+    href="/docs/api/blockchain/tokens/parse-amount"
+  >
+    Convert to raw units
+  </Card>
+  <Card
+    title="Get Token Info"
+    icon="circle-info"
+    href="/docs/api/blockchain/tokens/get-token-info"
+  >
+    Get token decimals
+  </Card>
+</CardGroup>

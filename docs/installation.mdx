@@ -1,0 +1,175 @@
+---
+title: "Installation"
+description: "Install the Align SDK and configure your development environment"
+icon: "download"
+---
+
+# Installation
+
+Get started with the Align SDK in your TypeScript or JavaScript project.
+
+## Requirements
+
+<Info>
+  The Align SDK requires **Node.js 18.0.0 or higher** and works with any modern
+  JavaScript runtime including Bun and Deno.
+</Info>
+
+| Requirement | Version                            |
+| ----------- | ---------------------------------- |
+| Node.js     | ≥ 18.0.0                           |
+| TypeScript  | ≥ 5.0.0 (optional but recommended) |
+
+## Package Installation
+
+Install the SDK using your preferred package manager:
+
+<Tabs>
+  <Tab title="npm">```bash npm install @tolbel/align ```</Tab>
+  <Tab title="yarn">```bash yarn add @tolbel/align ```</Tab>
+  <Tab title="pnpm">```bash pnpm add @tolbel/align ```</Tab>
+  <Tab title="bun">```bash bun add @tolbel/align ```</Tab>
+</Tabs>
+
+## TypeScript Configuration
+
+<Note>
+  TypeScript is **optional** but highly recommended. The SDK provides full type
+  definitions out of the box.
+</Note>
+
+For the best development experience, ensure your `tsconfig.json` includes:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  }
+}
+```
+
+## Environment Setup
+
+### Getting Your API Key
+
+<Warning>
+  **API Access is Gated** — The Align API is not publicly available. You must
+  contact the Align team to request API access and obtain your credentials.
+</Warning>
+
+<Steps>
+  <Step title="Contact Align">
+    Reach out to the [Align team](https://alignlabs.dev) or their sales
+    department to request API access. API keys are provisioned on a case-by-case
+    basis.
+  </Step>
+  <Step title="Get Sandbox Key">
+    Once approved, navigate to **Settings → API Keys** in your dashboard and
+    copy your sandbox API key
+  </Step>
+  <Step title="Store Securely">
+    Add your API key to environment variables (never commit to version control!)
+  </Step>
+</Steps>
+
+### Environment Variables
+
+<Warning>
+**Production Security Best Practice** — For production environments, always store API keys in a secure secrets manager like **AWS Secrets Manager**, **GCP Secret Manager**, **HashiCorp Vault**, or your cloud provider's equivalent. Never hard-code secrets in your application.
+
+For **local development only**, you may use a `.env` file.
+
+</Warning>
+
+Create a `.env` file in your project root for local development:
+
+```bash
+# .env (LOCAL DEVELOPMENT ONLY)
+ALIGN_API_KEY=your_sandbox_api_key_here
+ALIGN_ENVIRONMENT=sandbox
+```
+
+<Tip>
+  Add `.env` to your `.gitignore` file to prevent accidentally committing
+  secrets to version control.
+</Tip>
+
+## Verify Installation
+
+Create a test file to verify the SDK is working:
+
+```typescript
+import Align from "@tolbel/align";
+
+const align = new Align({
+  apiKey: process.env.ALIGN_API_KEY!,
+  environment: "sandbox",
+});
+
+// Test the connection by listing customers
+async function test() {
+  try {
+    const customers = await align.customers.list();
+    console.log("✅ SDK connected successfully!");
+    console.log(`Found ${customers.items.length} customers`);
+  } catch (error) {
+    console.error("❌ Connection failed:", error);
+  }
+}
+
+test();
+```
+
+Run the test:
+
+<Tabs>
+  <Tab title="Node.js">```bash npx tsx test.ts ```</Tab>
+  <Tab title="Bun">```bash bun run test.ts ```</Tab>
+</Tabs>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Module not found errors">
+    Ensure you have the correct `moduleResolution` in your TypeScript config:
+    
+    ```json
+    {
+      "compilerOptions": {
+        "moduleResolution": "bundler"
+      }
+    }
+    ```
+    
+    For CommonJS projects, use `"moduleResolution": "node"` instead.
+  </Accordion>
+  
+  <Accordion title="Type errors with strict mode">
+    The SDK is designed for TypeScript strict mode. If you see type errors, ensure your `tsconfig.json` has:
+    
+    ```json
+    {
+      "compilerOptions": {
+        "strict": true
+      }
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="API key not working">
+    1. Verify you're using the correct environment (`sandbox` vs `production`)
+    2. Check that your API key is correctly formatted (no extra spaces)
+    3. Ensure your account has API access enabled
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<Card title="Quick Start Guide" icon="arrow-right" href="/docs/quickstart">
+  Learn how to create your first customer and process payments
+</Card>

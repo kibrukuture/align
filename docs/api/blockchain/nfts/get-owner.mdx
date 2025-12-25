@@ -1,0 +1,109 @@
+---
+title: "Get NFT Owner"
+description: "Get the current owner of an ERC-721 NFT"
+icon: "user"
+---
+
+# Get NFT Owner
+
+Query the blockchain to find who currently owns a specific ERC-721 NFT.
+
+## Method Signature
+
+```typescript
+align.blockchain.nfts.getOwner(
+  contractAddress: string,
+  tokenId: string,
+  network: Network
+): Promise<string>
+```
+
+## Parameters
+
+<ParamField body="contractAddress" type="string" required>
+  ERC-721 contract address
+</ParamField>
+
+<ParamField body="tokenId" type="string" required>
+  Token ID to query
+</ParamField>
+
+<ParamField body="network" type="string" required>
+  Network where the NFT exists
+</ParamField>
+
+## Returns
+
+Returns the owner's wallet address as a string.
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const owner = await align.blockchain.nfts.getOwner(
+      "0xNFTContractAddress...",
+      "123",
+      "polygon"
+    );
+
+    console.log(`Token #123 is owned by: ${owner}`);
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const owner = await align.blockchain.nfts.getOwner(
+      nftContract,
+      tokenId,
+      "polygon"
+    );
+    console.log("Owner:", owner);
+    ```
+  </Tab>
+</Tabs>
+
+### Verify Ownership
+
+```typescript
+const owner = await align.blockchain.nfts.getOwner(
+  nftContract,
+  tokenId,
+  "polygon"
+);
+
+const myAddress = wallet.address.toLowerCase();
+const isOwner = owner.toLowerCase() === myAddress;
+
+if (isOwner) {
+  console.log("You own this NFT!");
+} else {
+  console.log(`NFT is owned by ${owner}`);
+}
+```
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Check ERC-1155 Ownership"
+    icon="user"
+    href="/docs/api/blockchain/nfts/is-owner"
+  >
+    Check multi-token ownership
+  </Card>
+  <Card
+    title="Transfer NFT"
+    icon="paper-plane"
+    href="/docs/api/blockchain/nfts/transfer-erc721"
+  >
+    Transfer the NFT
+  </Card>
+</CardGroup>

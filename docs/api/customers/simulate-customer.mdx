@@ -1,0 +1,206 @@
+---
+title: "Simulate Customer"
+description: "Simulate customer actions in the sandbox environment"
+icon: "flask"
+---
+
+# Simulate Customer
+
+Simulate customer actions for testing purposes. This method is **only available in the sandbox environment**.
+
+<Warning>
+  This method is for **testing only** and will not work in production. Always
+  test your integration thoroughly before going live.
+</Warning>
+
+## Method Signature
+
+```typescript
+align.customers.simulateCustomer(
+  data: SimulateCustomerRequest
+): Promise<SimulateCustomerResponse>
+```
+
+## Parameters
+
+<ParamField body="customer_id" type="string" required>
+  The unique customer identifier (UUID format)
+</ParamField>
+
+<ParamField body="action" type="string" required>
+  The simulation action to perform. Currently supported: - `kyc.status.approve`
+  - Approve the customer's KYC verification
+</ParamField>
+
+## Returns
+
+Returns an empty object `{}` on success.
+
+## Examples
+
+### Simulate KYC Approval
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox", // Must be sandbox!
+    });
+
+    // Create a customer
+    const customer = await align.customers.create({
+      email: "test@example.com",
+      type: "individual",
+      first_name: "Test",
+      last_name: "User",
+    });
+
+    // Initiate KYC session
+    await align.customers.createKycSession(customer.customer_id);
+
+    // Simulate KYC approval
+    await align.customers.simulateCustomer({
+      customer_id: customer.customer_id,
+      action: "kyc.status.approve",
+    });
+
+    // Verify the customer is now approved
+    const updated = await align.customers.get(customer.customer_id);
+    console.log(`KYC Status: ${updated.kycs?.sub_status}`);
+    // KYC Status: kyc_form_submission_accepted
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    // Create a customer
+    const customer = await align.customers.create({
+      email: "test@example.com",
+      type: "individual",
+      first_name: "Test",
+      last_name: "User",
+    });
+
+    // Initiate KYC session
+    await align.customers.createKycSession(customer.customer_id);
+
+    // Simulate KYC approval
+    await align.customers.simulateCustomer({
+      customer_id: customer.customer_id,
+      action: "kyc.status.approve",
+    });
+
+    console.log("KYC approved!");
+    ```
+
+  </Tab>
+</Tabs>
+
+### Complete Test Workflow
+
+Here's a complete example of testing the full customer onboarding flow:
+
+```typescript
+async function testCustomerOnboarding() {
+  // 1. Create customer
+  const customer = await align.customers.create({
+    email: `test-${Date.now()}@example.com`,
+    type: "individual",
+    first_name: "Test",
+    last_name: "User",
+  });
+  console.log("✅ Customer created:", customer.customer_id);
+
+  // 2. Create KYC session
+  const kyc = await align.customers.createKycSession(customer.customer_id);
+  console.log("✅ KYC session created");
+
+  // 3. Simulate KYC approval
+  await align.customers.simulateCustomer({
+    customer_id: customer.customer_id,
+    action: "kyc.status.approve",
+  });
+  console.log("✅ KYC approved");
+
+  // 4. Create virtual account (now possible after KYC)
+  const account = await align.virtualAccounts.create(customer.customer_id, {
+    source_currency: "usd",
+    source_rails: "ach",
+    destination_token: "usdc",
+    destination_network: "polygon",
+  });
+  console.log("✅ Virtual account created:", account.id);
+
+  // 5. Simulate deposit
+  await align.virtualAccounts.simulate(account.id, {
+    amount: "100.00",
+  });
+  console.log("✅ Deposit simulated");
+
+  console.log("\n🎉 Full onboarding flow completed!");
+}
+
+testCustomerOnboarding().catch(console.error);
+```
+
+## Supported Actions
+
+| Action               | Description                                       |
+| -------------------- | ------------------------------------------------- |
+| `kyc.status.approve` | Approve the customer's KYC verification instantly |
+
+<Info>
+  More simulation actions may be added in the future. Check the
+  [changelog](/docs/changelog) for updates.
+</Info>
+
+## Error Handling
+
+```typescript
+import { AlignError } from "@tolbel/align";
+
+try {
+  await align.customers.simulateCustomer({
+    customer_id: "123e4567-e89b-12d3-a456-426614174000",
+    action: "kyc.status.approve",
+  });
+} catch (error) {
+  if (error instanceof AlignError) {
+    if (error.statusCode === 404) {
+      console.error("Customer not found");
+    } else if (error.statusCode === 400) {
+      console.error("Invalid action or customer state");
+    }
+  }
+}
+```
+
+<Warning>
+  KYC simulation only works if the customer has an active KYC session. Call
+  `createKycSession` first.
+</Warning>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Create KYC Session"
+    icon="id-card"
+    href="/docs/api/customers/create-kyc-session"
+  >
+    Initiate KYC verification
+  </Card>
+  <Card title="Get Customer" icon="user" href="/docs/api/customers/get">
+    Check KYC status after simulation
+  </Card>
+  <Card
+    title="Simulate Virtual Account"
+    icon="building-columns"
+    href="/docs/api/virtual-accounts/simulate"
+  >
+    Simulate deposits
+  </Card>
+</CardGroup>

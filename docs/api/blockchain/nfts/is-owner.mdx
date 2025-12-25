@@ -1,0 +1,120 @@
+---
+title: "Check ERC-1155 Ownership"
+description: "Check if an address owns an ERC-1155 token"
+icon: "shield-check"
+---
+
+# Check ERC-1155 Ownership
+
+Check whether an address owns any amount of a specific ERC-1155 token ID.
+
+## Method Signature
+
+```typescript
+align.blockchain.nfts.isOwner(
+  contractAddress: string,
+  owner: string,
+  tokenId: string,
+  network: Network
+): Promise<boolean>
+```
+
+## Parameters
+
+<ParamField body="contractAddress" type="string" required>
+  ERC-1155 contract address
+</ParamField>
+
+<ParamField body="owner" type="string" required>
+  Address to check
+</ParamField>
+
+<ParamField body="tokenId" type="string" required>
+  Token ID to check
+</ParamField>
+
+<ParamField body="network" type="string" required>
+  Network
+</ParamField>
+
+## Returns
+
+Returns `true` if the address owns at least 1 of the token, `false` otherwise.
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const owns = await align.blockchain.nfts.isOwner(
+      "0xERC1155Contract...",
+      "0xWalletAddress...",
+      "42", // Token ID
+      "polygon"
+    );
+
+    if (owns) {
+      console.log("User owns token #42!");
+    } else {
+      console.log("User does not own token #42");
+    }
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const owns = await align.blockchain.nfts.isOwner(
+      contract,
+      walletAddress,
+      tokenId,
+      "polygon"
+    );
+    console.log("Owns token:", owns);
+    ```
+  </Tab>
+</Tabs>
+
+### Gate Access Based on NFT Ownership
+
+```typescript
+async function checkAccess(userAddress: string): Promise<boolean> {
+  // Check if user owns the "premium" token (ID 1)
+  return align.blockchain.nfts.isOwner(
+    MEMBERSHIP_CONTRACT,
+    userAddress,
+    "1", // Premium membership token ID
+    "polygon"
+  );
+}
+
+const hasAccess = await checkAccess(userWallet);
+if (!hasAccess) {
+  throw new Error("Premium membership required");
+}
+```
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Get ERC-721 Owner"
+    icon="user"
+    href="/docs/api/blockchain/nfts/get-owner"
+  >
+    Check unique NFT owner
+  </Card>
+  <Card
+    title="Transfer ERC-1155"
+    icon="paper-plane"
+    href="/docs/api/blockchain/nfts/transfer-erc1155"
+  >
+    Transfer tokens
+  </Card>
+</CardGroup>

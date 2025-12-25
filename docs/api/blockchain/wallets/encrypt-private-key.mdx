@@ -1,0 +1,146 @@
+---
+title: "Encrypt Private Key"
+description: "Encrypt a private key for secure storage"
+icon: "lock"
+---
+
+# Encrypt Private Key
+
+Encrypt a wallet's private key using a password for secure storage. The encrypted output follows the standard Ethereum keystore format (Web3 Secret Storage).
+
+## Method Signature
+
+```typescript
+align.blockchain.wallets.encryptPrivateKey(
+  privateKey: string,
+  password: string
+): Promise<EncryptedWallet>
+```
+
+## Parameters
+
+<ParamField body="privateKey" type="string" required>
+  The private key to encrypt
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  Password for encryption (use a strong password!)
+</ParamField>
+
+## Returns
+
+<ResponseField name="address" type="string">
+  The wallet's public address
+</ResponseField>
+
+<ResponseField name="encryptedJson" type="string">
+  The encrypted keystore JSON string
+</ResponseField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+    import fs from "fs";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    // Create a wallet
+    const wallet = await align.blockchain.wallets.create();
+
+    // Encrypt for storage
+    const encrypted = await align.blockchain.wallets.encryptPrivateKey(
+      wallet.privateKey,
+      "mySecurePassword123!"
+    );
+
+    console.log(`Address: ${encrypted.address}`);
+
+    // Save to file
+    fs.writeFileSync(
+      `./keystore/${encrypted.address}.json`,
+      encrypted.encryptedJson
+    );
+
+    console.log("Wallet encrypted and saved!");
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const wallet = await align.blockchain.wallets.create();
+
+    const encrypted = await align.blockchain.wallets.encryptPrivateKey(
+      wallet.privateKey,
+      "mySecurePassword123!"
+    );
+
+    console.log("Encrypted JSON:", encrypted.encryptedJson);
+    ```
+
+  </Tab>
+</Tabs>
+
+### Complete Encryption/Decryption Flow
+
+```typescript
+// 1. Create wallet
+const wallet = await align.blockchain.wallets.create();
+console.log(`Created: ${wallet.address}`);
+
+// 2. Encrypt
+const encrypted = await align.blockchain.wallets.encryptPrivateKey(
+  wallet.privateKey,
+  password
+);
+
+// 3. Store encrypted JSON (in database, file, etc.)
+await saveToDatabase(encrypted.address, encrypted.encryptedJson);
+
+// ... Later ...
+
+// 4. Retrieve and decrypt
+const storedJson = await loadFromDatabase(wallet.address);
+const restored = await align.blockchain.wallets.createFromEncrypted(
+  storedJson,
+  password
+);
+
+console.log(`Restored: ${restored.address}`);
+// Addresses match!
+```
+
+<Info>
+  Encryption uses scrypt key derivation, which is deliberately slow (~3-5
+  seconds) to resist brute-force attacks.
+</Info>
+
+<Warning>
+  **Password Requirements:** - Use a strong, unique password - Never store
+  passwords alongside encrypted wallets - Consider using a key management
+  service for production
+</Warning>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="From Encrypted"
+    icon="lock-open"
+    href="/docs/api/blockchain/wallets/create-from-encrypted"
+  >
+    Decrypt a wallet
+  </Card>
+  <Card
+    title="Create Wallet"
+    icon="wallet"
+    href="/docs/api/blockchain/wallets/create"
+  >
+    Create new wallet
+  </Card>
+</CardGroup>

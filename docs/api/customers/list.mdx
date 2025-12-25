@@ -1,0 +1,154 @@
+---
+title: "List Customers"
+description: "Retrieve a list of all customers with optional email filtering"
+icon: "users"
+---
+
+# List Customers
+
+Retrieve all customers in your account, with optional filtering by email address.
+
+## Method Signature
+
+```typescript
+align.customers.list(email?: string): Promise<CustomerListResponse>
+```
+
+## Parameters
+
+<ParamField query="email" type="string">
+  Optional email address to filter results. Use for exact-match lookups.
+</ParamField>
+
+## Returns
+
+<ResponseField name="items" type="Customer[]">
+  Array of customer objects matching the query
+</ResponseField>
+
+## Examples
+
+### List All Customers
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const response = await align.customers.list();
+
+    console.log(`Total customers: ${response.items.length}`);
+
+    // Iterate through customers
+    for (const customer of response.items) {
+      console.log(`${customer.email} - ${customer.type}`);
+    }
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const response = await align.customers.list();
+
+    console.log("Total customers:", response.items.length);
+
+    response.items.forEach((customer) => {
+      console.log(`${customer.email} - ${customer.type}`);
+    });
+    ```
+
+  </Tab>
+</Tabs>
+
+### Find Customer by Email
+
+Use the email filter to find a specific customer:
+
+```typescript
+const response = await align.customers.list("alice@example.com");
+
+if (response.items.length > 0) {
+  const customer = response.items[0];
+  console.log(`Found: ${customer.customer_id}`);
+} else {
+  console.log("Customer not found");
+}
+```
+
+### Check if Customer Exists
+
+Useful for preventing duplicate registrations:
+
+```typescript
+async function customerExists(email: string): Promise<boolean> {
+  const response = await align.customers.list(email);
+  return response.items.length > 0;
+}
+
+// Usage
+const email = "alice@example.com";
+
+if (await customerExists(email)) {
+  console.log("Customer already registered");
+} else {
+  const customer = await align.customers.create({
+    email,
+    type: "individual",
+    first_name: "Alice",
+    last_name: "Smith",
+  });
+}
+```
+
+### Response Example
+
+```json
+{
+  "items": [
+    {
+      "customer_id": "123e4567-e89b-12d3-a456-426614174000",
+      "email": "alice@example.com",
+      "type": "individual",
+      "first_name": "Alice",
+      "last_name": "Smith",
+      "kycs": {
+        "status": "approved",
+        "sub_status": "kyc_form_submission_accepted"
+      }
+    },
+    {
+      "customer_id": "223e4567-e89b-12d3-a456-426614174001",
+      "email": "bob@example.com",
+      "type": "individual",
+      "first_name": "Bob",
+      "last_name": "Johnson",
+      "kycs": null
+    }
+  ]
+}
+```
+
+<Tip>
+  The email filter performs an **exact match**. For partial matches, retrieve
+  all customers and filter client-side.
+</Tip>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Create Customer"
+    icon="user-plus"
+    href="/docs/api/customers/create"
+  >
+    Create a new customer
+  </Card>
+  <Card title="Get Customer" icon="user" href="/docs/api/customers/get">
+    Get a specific customer by ID
+  </Card>
+</CardGroup>

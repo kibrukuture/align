@@ -1,0 +1,10 @@
+# Exclude files that aren't documentation
+NBE-StableBirr-Proposal.md
+sbirr.md
+README.md
+CHANGELOG.md
+test-sdk.ts
+test-webhook.ts
+src/
+dist/
+node_modules/

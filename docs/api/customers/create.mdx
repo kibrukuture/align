@@ -1,0 +1,250 @@
+---
+title: "Create Customer"
+description: "Create a new customer account for individual or corporate use"
+icon: "user-plus"
+---
+
+# Create Customer
+
+Create a new customer account to onboard users for payments, KYC verification, and virtual accounts.
+
+<Info>
+  This is typically the first step in integrating with the Align API. After
+  creating a customer, you'll need to complete KYC verification before they can
+  transact.
+</Info>
+
+## Method Signature
+
+```typescript
+align.customers.create(data: CreateCustomerRequest): Promise<Customer>
+```
+
+## Parameters
+
+<ParamField body="email" type="string" required>
+  Customer's email address. Must be unique across all customers.
+</ParamField>
+
+<ParamField body="type" type="'individual' | 'corporate'" required>
+  Customer type. Determines which additional fields are required.
+</ParamField>
+
+<ParamField body="first_name" type="string">
+  Customer's first name. **Required** for individual customers.
+</ParamField>
+
+<ParamField body="last_name" type="string">
+  Customer's last name. **Required** for individual customers.
+</ParamField>
+
+<ParamField body="company_name" type="string">
+  Company name. **Required** for corporate customers.
+</ParamField>
+
+## Returns
+
+<ResponseField name="customer_id" type="string">
+  Unique identifier for the customer (UUID format)
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  Customer's email address
+</ResponseField>
+
+<ResponseField name="type" type="'individual' | 'corporate'">
+  Customer type
+</ResponseField>
+
+<ResponseField name="first_name" type="string">
+  Customer's first name (for individuals)
+</ResponseField>
+
+<ResponseField name="last_name" type="string">
+  Customer's last name (for individuals)
+</ResponseField>
+
+<ResponseField name="company_name" type="string">
+  Company name (for corporates)
+</ResponseField>
+
+<ResponseField name="kycs" type="object">
+  KYC status information (null until KYC is initiated)
+</ResponseField>
+
+## Examples
+
+### Individual Customer
+
+Create a customer account for an individual user:
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const customer = await align.customers.create({
+      email: "alice@example.com",
+      type: "individual",
+      first_name: "Alice",
+      last_name: "Smith",
+    });
+
+    console.log(`Customer ID: ${customer.customer_id}`);
+    // Customer ID: 123e4567-e89b-12d3-a456-426614174000
+
+    console.log(`Email: ${customer.email}`);
+    // Email: alice@example.com
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const Align = require("@tolbel/align").default;
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY,
+      environment: "sandbox",
+    });
+
+    const customer = await align.customers.create({
+      email: "alice@example.com",
+      type: "individual",
+      first_name: "Alice",
+      last_name: "Smith",
+    });
+
+    console.log("Customer ID:", customer.customer_id);
+    console.log("Email:", customer.email);
+    ```
+
+  </Tab>
+</Tabs>
+
+### Corporate Customer
+
+Create a customer account for a business:
+
+```typescript
+const company = await align.customers.create({
+  email: "contact@acme.com",
+  type: "corporate",
+  company_name: "Acme Corporation",
+});
+
+console.log(`Company: ${company.company_name}`);
+// Company: Acme Corporation
+```
+
+### Full Response Example
+
+```json
+{
+  "customer_id": "123e4567-e89b-12d3-a456-426614174000",
+  "email": "alice@example.com",
+  "type": "individual",
+  "first_name": "Alice",
+  "last_name": "Smith",
+  "kycs": null
+}
+```
+
+## Error Handling
+
+```typescript
+import { AlignError, AlignValidationError } from "@tolbel/align";
+
+try {
+  const customer = await align.customers.create({
+    email: "alice@example.com",
+    type: "individual",
+    first_name: "Alice",
+    last_name: "Smith",
+  });
+} catch (error) {
+  if (error instanceof AlignValidationError) {
+    // Request validation failed
+    console.error("Validation errors:", error.errors);
+    // [{ path: ["email"], message: "Invalid email format" }]
+  } else if (error instanceof AlignError) {
+    if (error.statusCode === 409) {
+      console.error("Email already exists");
+    } else {
+      console.error(`API Error: ${error.message}`);
+    }
+  }
+}
+```
+
+### Common Errors
+
+| Status Code | Reason               | Solution                                     |
+| ----------- | -------------------- | -------------------------------------------- |
+| 400         | Invalid request data | Check required fields and data types         |
+| 409         | Email already exists | Use a unique email or find existing customer |
+| 401         | Invalid API key      | Verify your API key is correct               |
+
+## Usage Notes
+
+<Warning>
+  Email addresses must be **unique** across all customers. Attempting to create
+  a customer with an existing email will result in a 409 Conflict error.
+</Warning>
+
+<Tip>
+  After creating a customer, initiate KYC verification using
+  [`createKycSession`](/docs/api/customers/create-kyc-session) to enable
+  transactions.
+</Tip>
+
+## Complete Workflow
+
+Here's a typical customer onboarding flow:
+
+```typescript
+// 1. Create the customer
+const customer = await align.customers.create({
+  email: "alice@example.com",
+  type: "individual",
+  first_name: "Alice",
+  last_name: "Smith",
+});
+
+// 2. Initiate KYC verification
+const kycSession = await align.customers.createKycSession(customer.customer_id);
+console.log(`KYC Link: ${kycSession.kycs.kyc_flow_link}`);
+
+// 3. (In sandbox) Simulate KYC approval
+await align.customers.simulateCustomer({
+  customer_id: customer.customer_id,
+  action: "kyc.status.approve",
+});
+
+// 4. Customer is now ready for transactions!
+```
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card title="Get Customer" icon="user" href="/docs/api/customers/get">
+    Retrieve customer details
+  </Card>
+  <Card
+    title="Create KYC Session"
+    icon="id-card"
+    href="/docs/api/customers/create-kyc-session"
+  >
+    Start identity verification
+  </Card>
+  <Card title="List Customers" icon="users" href="/docs/api/customers/list">
+    List all customers
+  </Card>
+  <Card title="Update Customer" icon="pen" href="/docs/api/customers/update">
+    Update customer documents
+  </Card>
+</CardGroup>

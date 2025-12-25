@@ -1,0 +1,64 @@
+---
+title: "Update Developer Fees"
+description: "Configure your developer fee percentage"
+icon: "pen"
+---
+
+# Update Developer Fees
+
+Update your developer fee configuration. Developer fees are added on top of platform fees and collected in your account.
+
+## Method Signature
+
+```typescript
+align.developers.updateFees(
+  data: UpdateDeveloperFeesRequest
+): Promise<DeveloperFeesResponse>
+```
+
+## Parameters
+
+<ParamField
+  body="service_type"
+  type="'onramp' | 'offramp' | 'cross_chain'"
+  required
+>
+  Service type to configure
+</ParamField>
+
+<ParamField body="fee_percent" type="string" required>
+  Fee percentage (e.g., "0.5" for 0.5%)
+</ParamField>
+
+<ParamField
+  body="accrual_basis"
+  type="'source_amount' | 'destination_amount'"
+  required
+>
+  Calculate fee based on source or destination amount
+</ParamField>
+
+## Example
+
+```typescript
+const fees = await align.developers.updateFees({
+  service_type: "offramp",
+  fee_percent: "0.5",
+  accrual_basis: "source_amount",
+});
+
+console.log("Fees updated!");
+```
+
+<Info>
+  Developer fees are automatically included in quotes and collected when
+  transfers complete.
+</Info>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card title="Get Fees" icon="percent" href="/docs/api/developers/get-fees">
+    View current fees
+  </Card>
+</CardGroup>

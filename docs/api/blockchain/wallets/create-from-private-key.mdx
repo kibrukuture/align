@@ -1,0 +1,120 @@
+---
+title: "Create Wallet from Private Key"
+description: "Import a wallet using an existing private key"
+icon: "key"
+---
+
+# Create Wallet from Private Key
+
+Import an existing wallet using its private key. Useful for integrating with external wallet systems or migrating wallets.
+
+## Method Signature
+
+```typescript
+align.blockchain.wallets.createFromPrivateKey(
+  privateKey: string
+): Promise<Wallet>
+```
+
+## Parameters
+
+<ParamField body="privateKey" type="string" required>
+  The private key string (with or without `0x` prefix)
+</ParamField>
+
+## Returns
+
+<ResponseField name="address" type="string">
+  The wallet's public address
+</ResponseField>
+
+<ResponseField name="privateKey" type="string">
+  The wallet's private key
+</ResponseField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const privateKey = "0x4c0883a69102937d6231471b5dbb628..." // Full 66-char key
+
+    const wallet = await align.blockchain.wallets.createFromPrivateKey(privateKey);
+
+    console.log(`Address: ${wallet.address}`);
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const wallet = await align.blockchain.wallets.createFromPrivateKey(
+      process.env.PRIVATE_KEY
+    );
+    console.log("Address:", wallet.address);
+    ```
+  </Tab>
+</Tabs>
+
+### From Environment Variable
+
+```typescript
+// Recommended: load from secure environment
+const wallet = await align.blockchain.wallets.createFromPrivateKey(
+  process.env.WALLET_PRIVATE_KEY!
+);
+
+// Send a transaction
+const tx = await align.blockchain.transactions.sendNativeToken(
+  wallet,
+  "0xRecipient...",
+  "0.1",
+  "polygon"
+);
+```
+
+## Error Handling
+
+```typescript
+import { AlignValidationError } from "@tolbel/align";
+
+try {
+  const wallet = await align.blockchain.wallets.createFromPrivateKey(
+    "invalid-key"
+  );
+} catch (error) {
+  if (error instanceof AlignValidationError) {
+    console.error("Invalid private key format");
+  }
+}
+```
+
+<Warning>
+  **Never expose private keys in client-side code!** Always use server-side
+  operations or secure key management services.
+</Warning>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Create Wallet"
+    icon="wallet"
+    href="/docs/api/blockchain/wallets/create"
+  >
+    Create new random wallet
+  </Card>
+  <Card
+    title="From Mnemonic"
+    icon="key"
+    href="/docs/api/blockchain/wallets/create-from-mnemonic"
+  >
+    Import from seed phrase
+  </Card>
+</CardGroup>

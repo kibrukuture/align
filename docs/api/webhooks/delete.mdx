@@ -1,0 +1,100 @@
+---
+title: "Delete Webhook"
+description: "Remove a registered webhook endpoint"
+icon: "trash"
+---
+
+# Delete Webhook
+
+Remove a webhook endpoint that you no longer need. Once deleted, the endpoint will stop receiving event notifications.
+
+## Method Signature
+
+```typescript
+align.webhooks.delete(id: string): Promise<void>
+```
+
+## Parameters
+
+<ParamField path="id" type="string" required>
+  The unique webhook identifier (e.g., `wh_abc123`)
+</ParamField>
+
+## Returns
+
+Returns `void` on success (no response body).
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    // Delete a webhook
+    await align.webhooks.delete("wh_123e4567-e89b-12d3-a456-426614174000");
+
+    console.log("Webhook deleted successfully");
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    await align.webhooks.delete("wh_123e4567-e89b-12d3-a456-426614174000");
+    console.log("Webhook deleted successfully");
+    ```
+  </Tab>
+</Tabs>
+
+### Delete All Webhooks
+
+```typescript
+// Get all webhooks and delete them
+const response = await align.webhooks.list();
+
+for (const webhook of response.items) {
+  await align.webhooks.delete(webhook.webhook_id);
+  console.log(`Deleted: ${webhook.url}`);
+}
+
+console.log("All webhooks deleted");
+```
+
+## Error Handling
+
+```typescript
+import { AlignError } from "@tolbel/align";
+
+try {
+  await align.webhooks.delete("wh_nonexistent");
+} catch (error) {
+  if (error instanceof AlignError) {
+    if (error.statusCode === 404) {
+      console.error("Webhook not found");
+    } else {
+      console.error(`Failed to delete: ${error.message}`);
+    }
+  }
+}
+```
+
+<Warning>
+  Webhook deletion is **permanent** and cannot be undone. Make sure you want to
+  stop receiving events before deleting.
+</Warning>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card title="Create Webhook" icon="bell" href="/docs/api/webhooks/create">
+    Register a new webhook
+  </Card>
+  <Card title="List Webhooks" icon="list" href="/docs/api/webhooks/list">
+    View all webhooks
+  </Card>
+</CardGroup>

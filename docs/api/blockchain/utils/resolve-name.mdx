@@ -1,0 +1,120 @@
+---
+title: "Resolve ENS Name"
+description: "Resolve an ENS name to an Ethereum address"
+icon: "globe"
+---
+
+# Resolve ENS Name
+
+Resolve an ENS (Ethereum Name Service) name to its associated Ethereum address.
+
+## Method Signature
+
+```typescript
+align.blockchain.utils.resolveName(
+  name: string,
+  provider: JsonRpcProvider
+): Promise<string | null>
+```
+
+## Parameters
+
+<ParamField body="name" type="string" required>
+  ENS name (e.g., `vitalik.eth`)
+</ParamField>
+
+<ParamField body="provider" type="JsonRpcProvider" required>
+  Ethereum mainnet provider (ENS only works on mainnet)
+</ParamField>
+
+## Returns
+
+Returns the address as a string, or `null` if not found.
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const provider = align.blockchain.providers.getProvider("ethereum");
+
+    const address = await align.blockchain.utils.resolveName(
+      "vitalik.eth",
+      provider
+    );
+
+    if (address) {
+      console.log(`vitalik.eth → ${address}`);
+      // vitalik.eth → 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
+    } else {
+      console.log("ENS name not found");
+    }
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const address = await align.blockchain.utils.resolveName(
+      ensName,
+      provider
+    );
+    console.log("Address:", address);
+    ```
+  </Tab>
+</Tabs>
+
+### Accept ENS or Address
+
+```typescript
+async function resolveRecipient(input: string): Promise<string> {
+  // If it's already a valid address, return it
+  if (align.blockchain.utils.isValidAddress(input)) {
+    return input;
+  }
+
+  // Try to resolve as ENS
+  if (input.endsWith(".eth")) {
+    const provider = align.blockchain.providers.getProvider("ethereum");
+    const resolved = await align.blockchain.utils.resolveName(input, provider);
+
+    if (resolved) {
+      return resolved;
+    }
+
+    throw new Error(`Could not resolve ENS: ${input}`);
+  }
+
+  throw new Error("Invalid address or ENS name");
+}
+```
+
+<Info>
+  ENS resolution only works on Ethereum mainnet. The SDK uses the mainnet
+  provider regardless of which network you're transacting on.
+</Info>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Lookup Address"
+    icon="magnifying-glass"
+    href="/docs/api/blockchain/utils/lookup-address"
+  >
+    Reverse ENS lookup
+  </Card>
+  <Card
+    title="Validate Address"
+    icon="check"
+    href="/docs/api/blockchain/utils/is-valid-address"
+  >
+    Check address format
+  </Card>
+</CardGroup>

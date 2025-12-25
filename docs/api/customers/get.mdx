@@ -1,0 +1,188 @@
+---
+title: "Get Customer"
+description: "Retrieve a customer's details by their unique identifier"
+icon: "user"
+---
+
+# Get Customer
+
+Retrieve detailed information about a specific customer, including their KYC status and verification details.
+
+## Method Signature
+
+```typescript
+align.customers.get(customerId: string): Promise<Customer>
+```
+
+## Parameters
+
+<ParamField path="customerId" type="string" required>
+  The unique customer identifier (UUID format)
+</ParamField>
+
+## Returns
+
+<ResponseField name="customer_id" type="string">
+  Unique identifier for the customer
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  Customer's email address
+</ResponseField>
+
+<ResponseField name="type" type="'individual' | 'corporate'">
+  Customer type
+</ResponseField>
+
+<ResponseField name="first_name" type="string">
+  Customer's first name (for individuals)
+</ResponseField>
+
+<ResponseField name="last_name" type="string">
+  Customer's last name (for individuals)
+</ResponseField>
+
+<ResponseField name="kycs" type="object">
+  KYC verification status and details
+  <Expandable title="KYC Object Properties">
+    <ResponseField name="kycs.status" type="string">
+      Overall KYC status: `pending`, `approved`, `rejected`
+    </ResponseField>
+    <ResponseField name="kycs.sub_status" type="string">
+      Detailed status: `kyc_form_submission_pending`,
+      `kyc_form_submission_accepted`, etc.
+    </ResponseField>
+    <ResponseField name="kycs.kyc_flow_link" type="string">
+      URL for the customer to complete KYC verification
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const customer = await align.customers.get(
+      "123e4567-e89b-12d3-a456-426614174000"
+    );
+
+    console.log(`Email: ${customer.email}`);
+    // Email: alice@example.com
+
+    console.log(`Name: ${customer.first_name} ${customer.last_name}`);
+    // Name: Alice Smith
+
+    // Check KYC status
+    if (customer.kycs) {
+      console.log(`KYC Status: ${customer.kycs.sub_status}`);
+      // KYC Status: kyc_form_submission_accepted
+    }
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const customer = await align.customers.get(
+      "123e4567-e89b-12d3-a456-426614174000"
+    );
+
+    console.log("Email:", customer.email);
+    console.log("Name:", customer.first_name, customer.last_name);
+
+    if (customer.kycs) {
+      console.log("KYC Status:", customer.kycs.sub_status);
+    }
+    ```
+
+  </Tab>
+</Tabs>
+
+### Full Response Example
+
+```json
+{
+  "customer_id": "123e4567-e89b-12d3-a456-426614174000",
+  "email": "alice@example.com",
+  "type": "individual",
+  "first_name": "Alice",
+  "last_name": "Smith",
+  "kycs": {
+    "status": "approved",
+    "sub_status": "kyc_form_submission_accepted",
+    "kyc_flow_link": "https://kyc.alignlabs.dev/flow/..."
+  }
+}
+```
+
+## Error Handling
+
+```typescript
+import { AlignError } from "@tolbel/align";
+
+try {
+  const customer = await align.customers.get("invalid-id");
+} catch (error) {
+  if (error instanceof AlignError && error.statusCode === 404) {
+    console.error("Customer not found");
+  }
+}
+```
+
+## Check KYC Status
+
+Use this method to poll for KYC approval status:
+
+```typescript
+async function waitForKycApproval(
+  customerId: string,
+  maxAttempts = 20
+): Promise<boolean> {
+  for (let i = 0; i < maxAttempts; i++) {
+    const customer = await align.customers.get(customerId);
+
+    if (customer.kycs?.sub_status === "kyc_form_submission_accepted") {
+      console.log("✅ KYC approved!");
+      return true;
+    }
+
+    if (customer.kycs?.sub_status === "kyc_form_submission_rejected") {
+      console.log("❌ KYC rejected");
+      return false;
+    }
+
+    // Wait 5 seconds before next check
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+  }
+
+  console.log("⏱️ Timeout waiting for KYC");
+  return false;
+}
+```
+
+<Tip>
+  Instead of polling, use [webhooks](/docs/api/webhooks/create) to receive
+  real-time KYC status updates.
+</Tip>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Create Customer"
+    icon="user-plus"
+    href="/docs/api/customers/create"
+  >
+    Create a new customer
+  </Card>
+  <Card title="List Customers" icon="users" href="/docs/api/customers/list">
+    Search and list customers
+  </Card>
+</CardGroup>

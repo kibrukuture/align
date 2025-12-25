@@ -1,0 +1,132 @@
+---
+title: "Create Cross-Chain Transfer"
+description: "Transfer assets between different blockchain networks"
+icon: "link"
+---
+
+# Create Cross-Chain Transfer
+
+Move cryptocurrency assets seamlessly between different blockchain networks. Supports USDC, USDT, and EURC across multiple chains.
+
+## Method Signature
+
+```typescript
+align.crossChain.createTransfer(
+  customerId: string,
+  data: CreateCrossChainTransferRequest
+): Promise<CrossChainTransfer>
+```
+
+## Parameters
+
+<ParamField path="customerId" type="string" required>
+  The unique customer identifier (UUID format)
+</ParamField>
+
+<ParamField body="source_network" type="string" required>
+  Source blockchain: `ethereum`, `polygon`, `base`, `arbitrum`, `solana`, `tron`
+</ParamField>
+
+<ParamField body="source_token" type="'usdc' | 'usdt' | 'eurc'" required>
+  Token to transfer
+</ParamField>
+
+<ParamField body="destination_network" type="string" required>
+  Destination blockchain
+</ParamField>
+
+<ParamField body="destination_token" type="'usdc' | 'usdt' | 'eurc'" required>
+  Token to receive (usually same as source)
+</ParamField>
+
+<ParamField body="amount" type="string" required>
+  Amount to transfer
+</ParamField>
+
+<ParamField body="source_wallet_address" type="string" required>
+  Wallet address on source chain
+</ParamField>
+
+<ParamField body="destination_wallet_address" type="string" required>
+  Wallet address on destination chain
+</ParamField>
+
+## Example
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    // Transfer USDC from Ethereum to Polygon
+    const transfer = await align.crossChain.createTransfer(customerId, {
+      source_network: "ethereum",
+      source_token: "usdc",
+      destination_network: "polygon",
+      destination_token: "usdc",
+      amount: "100.00",
+      source_wallet_address: "0x...",
+      destination_wallet_address: "0x...",
+    });
+
+    console.log(`Transfer ID: ${transfer.transfer_id}`);
+    console.log(`Status: ${transfer.status}`);
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const transfer = await align.crossChain.createTransfer(customerId, {
+      source_network: "ethereum",
+      source_token: "usdc",
+      destination_network: "polygon",
+      destination_token: "usdc",
+      amount: "100.00",
+      source_wallet_address: "0x...",
+      destination_wallet_address: "0x...",
+    });
+
+    console.log("Transfer ID:", transfer.transfer_id);
+    ```
+
+  </Tab>
+</Tabs>
+
+## Supported Routes
+
+| Source   | Destination                 | Tokens           |
+| -------- | --------------------------- | ---------------- |
+| Ethereum | Polygon, Base, Arbitrum     | USDC, USDT       |
+| Polygon  | Ethereum, Base, Arbitrum    | USDC, USDT, EURC |
+| Base     | Ethereum, Polygon, Arbitrum | USDC             |
+| Arbitrum | Ethereum, Polygon, Base     | USDC             |
+| Solana   | Ethereum, Polygon           | USDC             |
+
+<Info>
+  Cross-chain transfers typically complete within 10-30 minutes depending on
+  network congestion.
+</Info>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Get Transfer"
+    icon="eye"
+    href="/docs/api/cross-chain/get-transfer"
+  >
+    Track transfer status
+  </Card>
+  <Card
+    title="Complete Transfer"
+    icon="check"
+    href="/docs/api/cross-chain/complete-transfer"
+  >
+    Submit transaction hash
+  </Card>
+</CardGroup>

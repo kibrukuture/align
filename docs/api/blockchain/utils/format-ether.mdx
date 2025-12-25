@@ -1,0 +1,85 @@
+---
+title: "Format Ether"
+description: "Convert wei to ether (human-readable)"
+icon: "arrows-to-dot"
+---
+
+# Format Ether
+
+Convert a value in wei (smallest unit) to ether (human-readable).
+
+## Method Signature
+
+```typescript
+align.blockchain.utils.formatEther(wei: string): string
+```
+
+## Parameters
+
+<ParamField body="wei" type="string" required>
+  Amount in wei
+</ParamField>
+
+## Returns
+
+Returns the amount in ether as a string.
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    // 1 ETH = 1,000,000,000,000,000,000 wei
+    const eth = align.blockchain.utils.formatEther("1000000000000000000");
+    console.log(eth); // "1.0"
+
+    // 0.5 ETH
+    const halfEth = align.blockchain.utils.formatEther("500000000000000000");
+    console.log(halfEth); // "0.5"
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const balance = await provider.getBalance(address);
+    const formatted = align.blockchain.utils.formatEther(balance.toString());
+    console.log(`${formatted} ETH`);
+    ```
+  </Tab>
+</Tabs>
+
+### Display Wallet Balance
+
+```typescript
+const provider = align.blockchain.providers.getProvider("ethereum");
+const balanceWei = await provider.getBalance(walletAddress);
+
+const balanceEth = align.blockchain.utils.formatEther(balanceWei.toString());
+console.log(`Balance: ${balanceEth} ETH`);
+```
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Parse Ether"
+    icon="keyboard"
+    href="/docs/api/blockchain/utils/parse-ether"
+  >
+    Convert ether to wei
+  </Card>
+  <Card
+    title="Format Amount"
+    icon="coins"
+    href="/docs/api/blockchain/tokens/format-amount"
+  >
+    Format token amounts
+  </Card>
+</CardGroup>

@@ -1,0 +1,144 @@
+---
+title: "Send Token"
+description: "Send ERC-20 tokens to an address"
+icon: "paper-plane"
+---
+
+# Send Token
+
+Transfer ERC-20 tokens (USDC, USDT, etc.) from a wallet to a recipient address.
+
+## Method Signature
+
+```typescript
+align.blockchain.wallets.sendToken(
+  wallet: Wallet,
+  token: string,
+  to: string,
+  amount: string,
+  network: Network
+): Promise<Transaction>
+```
+
+## Parameters
+
+<ParamField body="wallet" type="Wallet" required>
+  The sender's wallet object (with private key)
+</ParamField>
+
+<ParamField body="token" type="string" required>
+  Token contract address or identifier (`usdc`, `usdt`)
+</ParamField>
+
+<ParamField body="to" type="string" required>
+  Recipient wallet address
+</ParamField>
+
+<ParamField body="amount" type="string" required>
+  Amount to send (e.g., `"100.00"` for 100 USDC)
+</ParamField>
+
+<ParamField body="network" type="string" required>
+  Network: `ethereum`, `polygon`, `base`, `arbitrum`
+</ParamField>
+
+## Returns
+
+<ResponseField name="hash" type="string">
+  Transaction hash
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Transaction status
+</ResponseField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const wallet = await align.blockchain.wallets.createFromPrivateKey(
+      process.env.PRIVATE_KEY!
+    );
+
+    // Send 50 USDC on Polygon
+    const tx = await align.blockchain.wallets.sendToken(
+      wallet,
+      "usdc",
+      "0xRecipientAddress...",
+      "50.00",
+      "polygon"
+    );
+
+    console.log(`TX Hash: ${tx.hash}`);
+
+    // Wait for confirmation
+    const receipt = await align.blockchain.transactions.waitForConfirmation(
+      tx.hash,
+      "polygon"
+    );
+    console.log(`Sent 50 USDC in block ${receipt.blockNumber}`);
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const tx = await align.blockchain.wallets.sendToken(
+      wallet,
+      "usdc",
+      "0xRecipient...",
+      "50.00",
+      "polygon"
+    );
+
+    console.log("TX Hash:", tx.hash);
+    ```
+
+  </Tab>
+</Tabs>
+
+### Using Contract Address
+
+```typescript
+// Custom token by contract address
+const DAI_POLYGON = "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063";
+
+const tx = await align.blockchain.wallets.sendToken(
+  wallet,
+  DAI_POLYGON,
+  recipient,
+  "100.00",
+  "polygon"
+);
+```
+
+<Info>
+  Token transfers require native tokens for gas fees. Ensure the wallet has both
+  the tokens to send AND native tokens for gas.
+</Info>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Send Native Token"
+    icon="paper-plane"
+    href="/docs/api/blockchain/wallets/send-native-token"
+  >
+    Send ETH/MATIC
+  </Card>
+  <Card
+    title="Get Token Balance"
+    icon="coins"
+    href="/docs/api/blockchain/wallets/get-token-balance"
+  >
+    Check token balance
+  </Card>
+</CardGroup>

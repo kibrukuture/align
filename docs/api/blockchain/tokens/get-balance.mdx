@@ -1,0 +1,56 @@
+---
+title: "Get Token Balance"
+description: "Retrieve token balance for a wallet"
+icon: "coins"
+---
+
+# Get Token Balance
+
+Retrieve the balance of a specific ERC-20 token for a wallet address.
+
+## Method Signature
+
+```typescript
+align.blockchain.tokens.getBalance(
+  tokenAddress: string,
+  walletAddress: string
+): Promise<TokenBalance>
+```
+
+## Example
+
+```typescript
+// Get USDC balance on Polygon
+const USDC_POLYGON = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
+
+const balance = await align.blockchain.tokens.getBalance(
+  USDC_POLYGON,
+  "0x742d35Cc6634C0532925a3b844Bc9e7595f0aB42"
+);
+
+console.log(`Balance: ${balance.formatted} USDC`);
+console.log(`Raw: ${balance.value}`);
+```
+
+## Response
+
+```json
+{
+  "value": "100000000",
+  "decimals": 6,
+  "formatted": "100.00",
+  "symbol": "USDC"
+}
+```
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Get Wallet"
+    icon="wallet"
+    href="/docs/api/blockchain/wallets/get"
+  >
+    Get native balance
+  </Card>
+</CardGroup>

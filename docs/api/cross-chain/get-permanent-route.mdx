@@ -1,0 +1,43 @@
+---
+title: "Get Permanent Route"
+description: "Retrieve permanent route details"
+icon: "eye"
+---
+
+# Get Permanent Route
+
+Retrieve details of a permanent cross-chain route.
+
+## Method Signature
+
+```typescript
+align.crossChain.getPermanentRoute(routeId: string): Promise<PermanentRouteAddress>
+```
+
+## Example
+
+```typescript
+const route = await align.crossChain.getPermanentRoute("route_123...");
+
+console.log(`Deposit Address: ${route.deposit_address}`);
+console.log(`Route: ${route.source_network} → ${route.destination_network}`);
+```
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Create Route"
+    icon="route"
+    href="/docs/api/cross-chain/create-permanent-route"
+  >
+    Create a new route
+  </Card>
+  <Card
+    title="List Routes"
+    icon="list"
+    href="/docs/api/cross-chain/list-permanent-routes"
+  >
+    List all routes
+  </Card>
+</CardGroup>

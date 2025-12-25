@@ -1,0 +1,115 @@
+---
+title: "Get Network Info"
+description: "Get configuration details for a blockchain network"
+icon: "circle-info"
+---
+
+# Get Network Info
+
+Retrieve configuration details for a supported blockchain network, including chain ID, currency, and block explorer.
+
+## Method Signature
+
+```typescript
+align.blockchain.providers.getNetworkInfo(
+  network: Network
+): NetworkConfig
+```
+
+## Parameters
+
+<ParamField body="network" type="string" required>
+  Network identifier
+</ParamField>
+
+## Returns
+
+<ResponseField name="chainId" type="number">
+  Network chain ID
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Network name
+</ResponseField>
+
+<ResponseField name="rpcUrl" type="string">
+  Default RPC URL
+</ResponseField>
+
+<ResponseField name="nativeCurrency" type="object">
+  Currency info (name, symbol, decimals)
+</ResponseField>
+
+<ResponseField name="blockExplorer" type="string">
+  Block explorer URL
+</ResponseField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const config = align.blockchain.providers.getNetworkInfo("polygon");
+
+    console.log(`Chain ID: ${config.chainId}`);        // 137
+    console.log(`Name: ${config.name}`);               // Polygon
+    console.log(`Currency: ${config.nativeCurrency.symbol}`); // MATIC
+    console.log(`Explorer: ${config.blockExplorer}`);  // https://polygonscan.com
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const config = align.blockchain.providers.getNetworkInfo("base");
+    console.log(config.chainId); // 8453
+    ```
+  </Tab>
+</Tabs>
+
+### Generate Block Explorer Link
+
+```typescript
+function getExplorerLink(txHash: string, network: string) {
+  const config = align.blockchain.providers.getNetworkInfo(network);
+  return `${config.blockExplorer}/tx/${txHash}`;
+}
+
+const link = getExplorerLink("0x123...", "polygon");
+// https://polygonscan.com/tx/0x123...
+```
+
+### Supported Networks
+
+| Network  | Chain ID | Currency |
+| -------- | -------- | -------- |
+| ethereum | 1        | ETH      |
+| polygon  | 137      | MATIC    |
+| base     | 8453     | ETH      |
+| arbitrum | 42161    | ETH      |
+| optimism | 10       | ETH      |
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Get Provider"
+    icon="server"
+    href="/docs/api/blockchain/providers/get-provider"
+  >
+    Get RPC provider
+  </Card>
+  <Card
+    title="Set Custom RPC"
+    icon="gear"
+    href="/docs/api/blockchain/providers/set-custom-rpc"
+  >
+    Configure RPC URL
+  </Card>
+</CardGroup>

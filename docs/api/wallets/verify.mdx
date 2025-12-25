@@ -1,0 +1,105 @@
+---
+title: "Verify Wallet"
+description: "Verify wallet ownership for compliance"
+icon: "wallet"
+---
+
+# Verify Wallet
+
+Verify that a customer owns a specific wallet address. Required for compliance before certain transactions.
+
+## Method Signature
+
+```typescript
+align.wallets.verify(
+  customerId: string,
+  data: VerifyWalletRequest
+): Promise<WalletVerification>
+```
+
+## Parameters
+
+<ParamField path="customerId" type="string" required>
+  Customer identifier
+</ParamField>
+
+<ParamField body="wallet_address" type="string" required>
+  Blockchain wallet address to verify
+</ParamField>
+
+<ParamField body="network" type="string" required>
+  Blockchain network: `ethereum`, `polygon`, `solana`, etc.
+</ParamField>
+
+<ParamField body="signature" type="string" required>
+  Signed message proving wallet ownership
+</ParamField>
+
+<ParamField body="message" type="string" required>
+  Message that was signed
+</ParamField>
+
+## Example
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+    import { ethers } from "ethers";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    // Step 1: Create message to sign
+    const message = `Verify wallet ownership for Align\nTimestamp: ${Date.now()}`;
+
+    // Step 2: Sign with user's wallet (frontend)
+    const signer = await provider.getSigner();
+    const signature = await signer.signMessage(message);
+    const address = await signer.getAddress();
+
+    // Step 3: Verify with Align
+    const verification = await align.wallets.verify(customerId, {
+      wallet_address: address,
+      network: "ethereum",
+      signature,
+      message,
+    });
+
+    console.log(`Verified: ${verification.verified}`);
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const verification = await align.wallets.verify(customerId, {
+      wallet_address: "0x...",
+      network: "ethereum",
+      signature: "0x...",
+      message: "Verify wallet ownership...",
+    });
+
+    console.log("Verified:", verification.verified);
+    ```
+
+  </Tab>
+</Tabs>
+
+<Info>
+  Wallet verification is typically a one-time process per wallet address. Once
+  verified, the wallet can be used for transfers.
+</Info>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Create Transfer"
+    icon="paper-plane"
+    href="/docs/api/transfers/create-transfer"
+  >
+    Use verified wallet in transfers
+  </Card>
+</CardGroup>

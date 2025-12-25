@@ -1,0 +1,145 @@
+---
+title: "Get Virtual Account"
+description: "Retrieve a virtual account's details and status"
+icon: "eye"
+---
+
+# Get Virtual Account
+
+Retrieve detailed information about a specific virtual account, including its status and deposit instructions.
+
+## Method Signature
+
+```typescript
+align.virtualAccounts.get(accountId: string): Promise<VirtualAccount>
+```
+
+## Parameters
+
+<ParamField path="accountId" type="string" required>
+  The unique virtual account identifier
+</ParamField>
+
+## Returns
+
+<ResponseField name="id" type="string">
+  Unique identifier for the virtual account
+</ResponseField>
+
+<ResponseField name="customer_id" type="string">
+  Associated customer identifier
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Account status: `active`, `pending`, `inactive`
+</ResponseField>
+
+<ResponseField name="source_currency" type="string">
+  Fiat currency for deposits
+</ResponseField>
+
+<ResponseField name="source_rails" type="string">
+  Payment rails type
+</ResponseField>
+
+<ResponseField name="destination_token" type="string">
+  Cryptocurrency token
+</ResponseField>
+
+<ResponseField name="destination_network" type="string">
+  Blockchain network
+</ResponseField>
+
+<ResponseField name="deposit_instructions" type="object">
+  Bank account details for deposits
+</ResponseField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const virtualAccount = await align.virtualAccounts.get(
+      "va_123e4567-e89b-12d3-a456-426614174000"
+    );
+
+    console.log(`Status: ${virtualAccount.status}`);
+    console.log(`Currency: ${virtualAccount.source_currency}`);
+    console.log(`Deposit to: ${virtualAccount.deposit_instructions.account_number}`);
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const virtualAccount = await align.virtualAccounts.get(
+      "va_123e4567-e89b-12d3-a456-426614174000"
+    );
+
+    console.log("Status:", virtualAccount.status);
+    console.log("Account Number:", virtualAccount.deposit_instructions.account_number);
+    ```
+
+  </Tab>
+</Tabs>
+
+### Full Response Example
+
+```json
+{
+  "id": "va_123e4567-e89b-12d3-a456-426614174000",
+  "customer_id": "123e4567-e89b-12d3-a456-426614174000",
+  "status": "active",
+  "source_currency": "usd",
+  "source_rails": "ach",
+  "destination_token": "usdc",
+  "destination_network": "polygon",
+  "destination_wallet_address": "0x742d35Cc6634C0532925a3b844Bc9e7595f0aB42",
+  "deposit_instructions": {
+    "account_number": "123456789",
+    "routing_number": "021000021",
+    "account_type": "checking",
+    "bank_name": "Example Bank",
+    "beneficiary_name": "Align Labs Inc."
+  }
+}
+```
+
+## Error Handling
+
+```typescript
+import { AlignError } from "@tolbel/align";
+
+try {
+  const account = await align.virtualAccounts.get("invalid-id");
+} catch (error) {
+  if (error instanceof AlignError && error.statusCode === 404) {
+    console.error("Virtual account not found");
+  }
+}
+```
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Create Virtual Account"
+    icon="plus"
+    href="/docs/api/virtual-accounts/create"
+  >
+    Create a new virtual account
+  </Card>
+  <Card
+    title="List Virtual Accounts"
+    icon="list"
+    href="/docs/api/virtual-accounts/list"
+  >
+    List all accounts
+  </Card>
+</CardGroup>

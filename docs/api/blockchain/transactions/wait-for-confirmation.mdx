@@ -1,0 +1,164 @@
+---
+title: "Wait for Confirmation"
+description: "Wait for a transaction to be confirmed on the blockchain"
+icon: "hourglass"
+---
+
+# Wait for Confirmation
+
+Block execution until a transaction reaches the specified number of confirmations. Essential for ensuring transaction finality before proceeding with dependent operations.
+
+## Method Signature
+
+```typescript
+align.blockchain.transactions.waitForConfirmation(
+  txHash: string,
+  network: Network,
+  confirmations?: number
+): Promise<TransactionReceiptData>
+```
+
+## Parameters
+
+<ParamField body="txHash" type="string" required>
+  Transaction hash to wait for
+</ParamField>
+
+<ParamField body="network" type="string" required>
+  Network where the transaction was sent
+</ParamField>
+
+<ParamField body="confirmations" type="number" default="1">
+  Number of confirmations to wait for (default: 1)
+</ParamField>
+
+## Returns
+
+<ResponseField name="blockNumber" type="number">
+  Block number where transaction was included
+</ResponseField>
+
+<ResponseField name="gasUsed" type="string">
+  Actual gas used
+</ResponseField>
+
+<ResponseField name="status" type="number">
+  1 for success, 0 for failure
+</ResponseField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    // Send transaction
+    const tx = await align.blockchain.wallets.sendNativeToken(
+      wallet,
+      recipient,
+      "0.1",
+      "polygon"
+    );
+
+    console.log(`TX sent: ${tx.hash}`);
+
+    // Wait for 1 confirmation
+    const receipt = await align.blockchain.transactions.waitForConfirmation(
+      tx.hash,
+      "polygon"
+    );
+
+    console.log(`✅ Confirmed in block ${receipt.blockNumber}`);
+    console.log(`Gas used: ${receipt.gasUsed}`);
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const tx = await align.blockchain.wallets.sendNativeToken(
+      wallet, recipient, "0.1", "polygon"
+    );
+
+    const receipt = await align.blockchain.transactions.waitForConfirmation(
+      tx.hash, "polygon"
+    );
+
+    console.log("Confirmed in block:", receipt.blockNumber);
+    ```
+
+  </Tab>
+</Tabs>
+
+### Wait for Multiple Confirmations
+
+For high-value transactions, wait for more confirmations:
+
+```typescript
+// Wait for 12 confirmations (recommended for Ethereum)
+const receipt = await align.blockchain.transactions.waitForConfirmation(
+  tx.hash,
+  "ethereum",
+  12
+);
+
+console.log(
+  `Transaction finalized with ${receipt.confirmations} confirmations`
+);
+```
+
+### With Timeout Handling
+
+```typescript
+const timeoutMs = 60000; // 60 seconds
+
+try {
+  const receipt = (await Promise.race([
+    align.blockchain.transactions.waitForConfirmation(tx.hash, "polygon"),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Timeout")), timeoutMs)
+    ),
+  ])) as TransactionReceiptData;
+
+  console.log("Confirmed:", receipt.blockNumber);
+} catch (error) {
+  if (error.message === "Timeout") {
+    console.log("Transaction taking longer than expected");
+    // Check status manually
+    const status = await align.blockchain.transactions.getStatus(
+      tx.hash,
+      "polygon"
+    );
+  }
+}
+```
+
+<Info>
+  Confirmation times vary by network: - **Polygon**: ~2 seconds per block -
+  **Ethereum**: ~12 seconds per block - **Arbitrum/Optimism**: ~0.3 seconds per
+  block
+</Info>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Get Status"
+    icon="clock"
+    href="/docs/api/blockchain/transactions/get-status"
+  >
+    Check status without waiting
+  </Card>
+  <Card
+    title="Estimate Gas"
+    icon="calculator"
+    href="/docs/api/blockchain/transactions/estimate-gas"
+  >
+    Estimate transaction cost
+  </Card>
+</CardGroup>

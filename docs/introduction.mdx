@@ -1,0 +1,170 @@
+---
+title: "Introduction"
+description: "Build powerful payment infrastructure with fiat-to-crypto, crypto-to-fiat, and cross-chain transfers"
+icon: "rocket"
+---
+
+# Align SDK
+
+The **unofficial** TypeScript/JavaScript SDK for the [AlignLab](https://docs.alignlabs.dev) API. Build production-ready payment infrastructure with comprehensive type safety, validation, and error handling.
+
+<Warning>
+  This is an **unofficial** SDK. For the official API documentation, visit
+  [docs.alignlabs.dev](https://docs.alignlabs.dev).
+</Warning>
+
+## Why Align SDK?
+
+<CardGroup cols={2}>
+  <Card title="Type-Safe" icon="shield-check">
+    Full TypeScript support with comprehensive type definitions. Catch errors at
+    compile time, not runtime.
+  </Card>
+  <Card title="Validated Requests" icon="check-circle">
+    Built-in request validation with Zod schemas. Invalid data is caught before
+    hitting the API.
+  </Card>
+  <Card title="Secure Webhooks" icon="lock">
+    HMAC-SHA256 webhook signature verification out of the box. Prevent replay
+    attacks and tampering.
+  </Card>
+  <Card title="Automatic Retry" icon="arrows-rotate">
+    Built-in retry mechanism with exponential backoff for transient network
+    errors.
+  </Card>
+</CardGroup>
+
+## What Can You Build?
+
+<AccordionGroup>
+  <Accordion title="Fiat-to-Crypto Onramps" icon="arrow-up">
+    Allow users to purchase cryptocurrency with fiat currency. Support for ACH, wire transfers, SEPA, and more.
+    
+    ```typescript
+    // Create a quote for buying USDC with USD
+    const quote = await align.transfers.createOnrampQuote(customerId, {
+      source_amount: "100.00",
+      source_currency: "usd",
+      source_payment_rails: "ach",
+      destination_token: "usdc",
+      destination_network: "polygon",
+    });
+    ```
+  </Accordion>
+  
+  <Accordion title="Crypto-to-Fiat Offramps" icon="arrow-down">
+    Enable users to convert cryptocurrency back to fiat currency and withdraw to their bank accounts.
+    
+    ```typescript
+    // Create a quote for selling USDC to USD
+    const quote = await align.transfers.createOfframpQuote(customerId, {
+      source_amount: "100.00",
+      source_token: "usdc",
+      source_network: "polygon",
+      destination_currency: "usd",
+      destination_payment_rails: "ach",
+    });
+    ```
+  </Accordion>
+  
+  <Accordion title="Cross-Chain Transfers" icon="link">
+    Move assets seamlessly between different blockchain networks.
+    
+    ```typescript
+    // Transfer USDC from Ethereum to Polygon
+    const transfer = await align.crossChain.createTransfer(customerId, {
+      source_network: "ethereum",
+      source_token: "usdc",
+      destination_network: "polygon",
+      destination_token: "usdc",
+      amount: "100.00",
+    });
+    ```
+  </Accordion>
+  
+  <Accordion title="Virtual Bank Accounts" icon="building-columns">
+    Create dedicated virtual bank accounts for seamless fiat deposits.
+    
+    ```typescript
+    // Create a USD virtual account
+    const account = await align.virtualAccounts.create(customerId, {
+      source_currency: "usd",
+      source_rails: "ach",
+      destination_token: "usdc",
+      destination_network: "polygon",
+    });
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Supported Networks & Tokens
+
+<Tabs>
+  <Tab title="Blockchain Networks">
+    | Network | Chain ID | Status | |---------|----------|--------| | Ethereum |
+    1 | ✅ Mainnet | | Polygon | 137 | ✅ Mainnet | | Base | 8453 | ✅ Mainnet |
+    | Arbitrum | 42161 | ✅ Mainnet | | Solana | - | ✅ Mainnet | | Tron | - |
+    ✅ Mainnet |
+  </Tab>
+  <Tab title="Stablecoins">
+    | Token | Networks | |-------|----------| | USDC | Ethereum, Polygon, Base,
+    Arbitrum, Solana | | USDT | Ethereum, Polygon, Tron | | EURC | Ethereum,
+    Polygon |
+  </Tab>
+  <Tab title="Fiat Currencies">
+    | Currency | Payment Rails | |----------|---------------| | USD | ACH, Wire
+    | | EUR | SEPA, SWIFT | | AED | UAEFTS |
+  </Tab>
+</Tabs>
+
+## Quick Example
+
+Here's a complete example of onboarding a user and processing their first deposit:
+
+```typescript
+import Align from "@tolbel/align";
+
+const align = new Align({
+  apiKey: process.env.ALIGN_API_KEY!,
+  environment: "sandbox",
+});
+
+// 1. Create a customer
+const customer = await align.customers.create({
+  email: "user@example.com",
+  type: "individual",
+  first_name: "Alice",
+  last_name: "Smith",
+});
+
+// 2. Start KYC verification
+const kyc = await align.customers.createKycSession(customer.customer_id);
+console.log(`KYC Link: ${kyc.kycs.kyc_flow_link}`);
+
+// 3. Create virtual account for deposits (after KYC approved)
+const virtualAccount = await align.virtualAccounts.create(
+  customer.customer_id,
+  {
+    source_currency: "usd",
+    source_rails: "ach",
+    destination_token: "usdc",
+    destination_network: "polygon",
+  }
+);
+
+console.log("Deposit Instructions:", virtualAccount.deposit_instructions);
+```
+
+## Next Steps
+
+<CardGroup cols={3}>
+  <Card title="Installation" icon="download" href="/docs/installation">
+    Install the SDK with your preferred package manager
+  </Card>
+  <Card title="Quick Start" icon="play" href="/docs/quickstart">
+    Get up and running in 5 minutes
+  </Card>
+  <Card title="API Reference" icon="book" href="/docs/api/customers/create">
+    Explore the complete API documentation
+  </Card>
+</CardGroup>

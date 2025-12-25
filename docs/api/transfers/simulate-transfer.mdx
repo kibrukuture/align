@@ -1,0 +1,156 @@
+---
+title: "Simulate Transfer"
+description: "Simulate transfer completion in sandbox environment"
+icon: "flask"
+---
+
+# Simulate Transfer
+
+Simulate transfer actions for testing purposes. This method is **only available in the sandbox environment**.
+
+<Warning>
+  This method is for **testing only** and will not work in production.
+</Warning>
+
+## Method Signatures
+
+### Simulate Offramp Transfer
+
+```typescript
+align.transfers.simulateOfframpTransfer(
+  data: SimulateOfframpTransferRequest
+): Promise<SimulateTransferResponse>
+```
+
+### Simulate Onramp Transfer
+
+```typescript
+align.transfers.simulateOnrampTransfer(
+  data: SimulateOnrampTransferRequest
+): Promise<SimulateTransferResponse>
+```
+
+## Parameters
+
+<ParamField body="transfer_id" type="string" required>
+  The transfer ID to simulate
+</ParamField>
+
+<ParamField body="action" type="string" required>
+  Simulation action: `complete`, `fail`
+</ParamField>
+
+## Examples
+
+### Simulate Offramp Completion
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    // Complete an offramp transfer
+    await align.transfers.simulateOfframpTransfer({
+      transfer_id: "tr_123e4567-e89b-12d3-a456-426614174000",
+      action: "complete",
+    });
+
+    // Verify completion
+    const transfer = await align.transfers.get("tr_123...");
+    console.log(`Status: ${transfer.status}`);
+    // Status: completed
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    await align.transfers.simulateOfframpTransfer({
+      transfer_id: "tr_123e4567-e89b-12d3-a456-426614174000",
+      action: "complete",
+    });
+
+    console.log("Transfer completed!");
+    ```
+
+  </Tab>
+</Tabs>
+
+### Simulate Onramp Completion
+
+```typescript
+await align.transfers.simulateOnrampTransfer({
+  transfer_id: "tr_456...",
+  action: "complete",
+});
+```
+
+### Simulate Failure
+
+Test error handling by simulating a failed transfer:
+
+```typescript
+await align.transfers.simulateOfframpTransfer({
+  transfer_id: "tr_123...",
+  action: "fail",
+});
+
+const transfer = await align.transfers.get("tr_123...");
+console.log(`Status: ${transfer.status}`);
+// Status: failed
+```
+
+## Complete Test Workflow
+
+```typescript
+async function testOfframpFlow(customerId: string) {
+  // 1. Create quote
+  const quote = await align.transfers.createOfframpQuote(customerId, {
+    source_amount: "100.00",
+    source_token: "usdc",
+    source_network: "polygon",
+    destination_currency: "usd",
+    destination_payment_rails: "ach",
+  });
+
+  // 2. Create transfer
+  const transfer = await align.transfers.createOfframpTransfer(customerId, {
+    quote_id: quote.quote_id,
+    external_account_id: "ext_123",
+    source_wallet_address: "0x...",
+  });
+
+  // 3. Simulate completion
+  await align.transfers.simulateOfframpTransfer({
+    transfer_id: transfer.transfer_id,
+    action: "complete",
+  });
+
+  // 4. Verify
+  const completed = await align.transfers.get(transfer.transfer_id);
+  console.log(`✅ Transfer ${completed.status}`);
+}
+```
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Simulate Virtual Account"
+    icon="building-columns"
+    href="/docs/api/virtual-accounts/simulate"
+  >
+    Simulate deposits
+  </Card>
+  <Card
+    title="Simulate Customer"
+    icon="user"
+    href="/docs/api/customers/simulate-customer"
+  >
+    Simulate KYC approval
+  </Card>
+</CardGroup>

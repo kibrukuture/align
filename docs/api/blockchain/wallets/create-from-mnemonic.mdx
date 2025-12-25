@@ -1,0 +1,122 @@
+---
+title: "Create Wallet from Mnemonic"
+description: "Restore a wallet from a 12 or 24-word recovery phrase"
+icon: "key"
+---
+
+# Create Wallet from Mnemonic
+
+Restore a cryptocurrency wallet from an existing mnemonic (seed phrase). This is useful for recovering wallets or generating deterministic wallet hierarchies.
+
+## Method Signature
+
+```typescript
+align.blockchain.wallets.createFromMnemonic(
+  mnemonic: string
+): Promise<Wallet>
+```
+
+## Parameters
+
+<ParamField body="mnemonic" type="string" required>
+  12 or 24-word BIP-39 recovery phrase, space-separated
+</ParamField>
+
+## Returns
+
+<ResponseField name="address" type="string">
+  The wallet's public address (e.g., `0x...`)
+</ResponseField>
+
+<ResponseField name="privateKey" type="string">
+  The wallet's private key
+</ResponseField>
+
+<ResponseField name="mnemonic" type="string">
+  The mnemonic phrase used
+</ResponseField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const mnemonic = "witch collapse practice feed shame open despair creek road again ice least";
+
+    const wallet = await align.blockchain.wallets.createFromMnemonic(mnemonic);
+
+    console.log(`Address: ${wallet.address}`);
+    // Address: 0x742d35Cc6634C0532925a3b844Bc9e7595f0aB42
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const mnemonic = "witch collapse practice feed shame open despair creek road again ice least";
+
+    const wallet = await align.blockchain.wallets.createFromMnemonic(mnemonic);
+    console.log("Address:", wallet.address);
+    ```
+
+  </Tab>
+</Tabs>
+
+### HD Wallet Recovery
+
+Mnemonics generate deterministic wallets - the same mnemonic always produces the same wallet:
+
+```typescript
+// These will produce identical wallets
+const wallet1 = await align.blockchain.wallets.createFromMnemonic(mnemonic);
+const wallet2 = await align.blockchain.wallets.createFromMnemonic(mnemonic);
+
+console.log(wallet1.address === wallet2.address); // true
+```
+
+## Error Handling
+
+```typescript
+import { AlignValidationError } from "@tolbel/align";
+
+try {
+  const wallet = await align.blockchain.wallets.createFromMnemonic(
+    "invalid mnemonic phrase"
+  );
+} catch (error) {
+  if (error instanceof AlignValidationError) {
+    console.error("Invalid mnemonic:", error.errors);
+    // [{ message: "Invalid mnemonic phrase" }]
+  }
+}
+```
+
+<Warning>
+  **Security:** Never share your mnemonic phrase. Anyone with access to it has
+  full control of your wallet and funds.
+</Warning>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Create Wallet"
+    icon="wallet"
+    href="/docs/api/blockchain/wallets/create"
+  >
+    Create new random wallet
+  </Card>
+  <Card
+    title="From Private Key"
+    icon="key"
+    href="/docs/api/blockchain/wallets/create-from-private-key"
+  >
+    Import from private key
+  </Card>
+</CardGroup>

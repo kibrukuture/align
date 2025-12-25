@@ -1,0 +1,148 @@
+---
+title: "Simulate Virtual Account"
+description: "Simulate deposits to a virtual account in sandbox"
+icon: "flask"
+---
+
+# Simulate Virtual Account
+
+Simulate a deposit to a virtual account for testing purposes. This method is **only available in the sandbox environment**.
+
+<Warning>
+  This method is for **testing only** and will not work in production.
+</Warning>
+
+## Method Signature
+
+```typescript
+align.virtualAccounts.simulate(
+  accountId: string,
+  data: SimulateVirtualAccountRequest
+): Promise<SimulateVirtualAccountResponse>
+```
+
+## Parameters
+
+<ParamField path="accountId" type="string" required>
+  The unique virtual account identifier
+</ParamField>
+
+<ParamField body="amount" type="string" required>
+  Amount to deposit in the source currency (e.g., "100.00" for $100)
+</ParamField>
+
+## Returns
+
+Returns simulation result with deposit and conversion details.
+
+## Examples
+
+### Simulate a $100 Deposit
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    // Simulate depositing $100
+    const result = await align.virtualAccounts.simulate(
+      "va_123e4567-e89b-12d3-a456-426614174000",
+      {
+        amount: "100.00",
+      }
+    );
+
+    console.log("Deposit simulated successfully!");
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const result = await align.virtualAccounts.simulate(
+      "va_123e4567-e89b-12d3-a456-426614174000",
+      { amount: "100.00" }
+    );
+
+    console.log("Deposit simulated!");
+    ```
+
+  </Tab>
+</Tabs>
+
+### Complete Test Flow
+
+```typescript
+async function testVirtualAccountDeposit() {
+  // 1. Create customer and complete KYC (see previous examples)
+
+  // 2. Create virtual account
+  const account = await align.virtualAccounts.create(customerId, {
+    source_currency: "usd",
+    source_rails: "ach",
+    destination_token: "usdc",
+    destination_network: "polygon",
+  });
+  console.log("✅ Virtual account created");
+
+  // 3. Simulate deposit
+  await align.virtualAccounts.simulate(account.id, {
+    amount: "250.00",
+  });
+  console.log("✅ $250 deposit simulated");
+
+  // 4. Check updated account
+  const updated = await align.virtualAccounts.get(account.id);
+  console.log(`Account status: ${updated.status}`);
+}
+```
+
+<Info>
+  In sandbox, simulated deposits trigger the full conversion flow. Use webhooks
+  to track the transfer completion.
+</Info>
+
+## Error Handling
+
+```typescript
+import { AlignError, AlignValidationError } from "@tolbel/align";
+
+try {
+  await align.virtualAccounts.simulate(accountId, {
+    amount: "100.00",
+  });
+} catch (error) {
+  if (error instanceof AlignValidationError) {
+    console.error("Invalid amount:", error.errors);
+  } else if (error instanceof AlignError) {
+    if (error.statusCode === 404) {
+      console.error("Virtual account not found");
+    } else if (error.statusCode === 400) {
+      console.error("Cannot simulate in production environment");
+    }
+  }
+}
+```
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Create Virtual Account"
+    icon="plus"
+    href="/docs/api/virtual-accounts/create"
+  >
+    Create account first
+  </Card>
+  <Card
+    title="Simulate Transfer"
+    icon="flask"
+    href="/docs/api/transfers/simulate-transfer"
+  >
+    Simulate direct transfers
+  </Card>
+</CardGroup>

@@ -1,0 +1,133 @@
+---
+title: "Create Webhook"
+description: "Register a webhook endpoint for real-time event notifications"
+icon: "bell"
+---
+
+# Create Webhook
+
+Register a webhook endpoint to receive real-time notifications about transfers, deposits, and other events.
+
+## Method Signature
+
+```typescript
+align.webhooks.create(data: CreateWebhookRequest): Promise<Webhook>
+```
+
+## Parameters
+
+<ParamField body="url" type="string" required>
+  HTTPS endpoint URL to receive webhook events
+</ParamField>
+
+<ParamField body="events" type="string[]" required>
+  Array of event types to subscribe to
+</ParamField>
+
+## Supported Events
+
+| Event                     | Description                     |
+| ------------------------- | ------------------------------- |
+| `transfer.created`        | Transfer initiated              |
+| `transfer.processing`     | Transfer in progress            |
+| `transfer.completed`      | Transfer completed successfully |
+| `transfer.failed`         | Transfer failed                 |
+| `virtual_account.created` | Virtual account created         |
+| `virtual_account.credit`  | Deposit received                |
+| `customer.kyc.approved`   | KYC verification passed         |
+| `customer.kyc.rejected`   | KYC verification failed         |
+
+## Example
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const webhook = await align.webhooks.create({
+      url: "https://your-app.com/webhooks/align",
+      events: [
+        "transfer.completed",
+        "transfer.failed",
+        "virtual_account.credit",
+        "customer.kyc.approved",
+      ],
+    });
+
+    console.log(`Webhook ID: ${webhook.webhook_id}`);
+    console.log(`Secret: ${webhook.secret}`);
+    // Store this secret securely for signature verification!
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const webhook = await align.webhooks.create({
+      url: "https://your-app.com/webhooks/align",
+      events: ["transfer.completed", "transfer.failed"],
+    });
+
+    console.log("Webhook Secret:", webhook.secret);
+    ```
+
+  </Tab>
+</Tabs>
+
+<Warning>
+  **Store the webhook secret securely!** You'll need it to verify incoming
+  webhook signatures.
+</Warning>
+
+## Webhook Handler Example
+
+```typescript
+import express from "express";
+import crypto from "crypto";
+
+const app = express();
+app.use(express.json());
+
+const WEBHOOK_SECRET = process.env.ALIGN_WEBHOOK_SECRET!;
+
+app.post("/webhooks/align", (req, res) => {
+  // Verify signature
+  const signature = req.headers["x-align-signature"] as string;
+  const payload = JSON.stringify(req.body);
+
+  const expectedSignature = crypto
+    .createHmac("sha256", WEBHOOK_SECRET)
+    .update(payload)
+    .digest("hex");
+
+  if (signature !== expectedSignature) {
+    return res.status(401).send("Invalid signature");
+  }
+
+  // Process event
+  const { event, data } = req.body;
+
+  switch (event) {
+    case "transfer.completed":
+      console.log("Transfer completed:", data.transfer_id);
+      break;
+    case "virtual_account.credit":
+      console.log("Deposit received:", data.amount);
+      break;
+  }
+
+  res.status(200).send("OK");
+});
+```
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card title="List Webhooks" icon="list" href="/docs/api/webhooks/list">
+    View registered webhooks
+  </Card>
+</CardGroup>

@@ -1,0 +1,98 @@
+---
+title: "Upload File"
+description: "Upload files for KYC documents"
+icon: "upload"
+---
+
+# Upload File
+
+Upload files such as identity documents and proof of address for KYC verification.
+
+## Method Signature
+
+```typescript
+align.files.upload(data: UploadFileRequest): Promise<UploadFileResponse>
+```
+
+## Parameters
+
+<ParamField body="file" type="Buffer | Blob" required>
+  File content to upload
+</ParamField>
+
+<ParamField body="filename" type="string" required>
+  Original filename with extension
+</ParamField>
+
+<ParamField body="contentType" type="string" required>
+  MIME type: `image/jpeg`, `image/png`, `application/pdf`
+</ParamField>
+
+## Example
+
+<Tabs>
+  <Tab title="TypeScript (Node.js)">
+    ```typescript
+    import Align from "@tolbel/align";
+    import { readFileSync } from "fs";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    // Read file from disk
+    const fileBuffer = readFileSync("./drivers-license.jpg");
+
+    // Upload to Align
+    const result = await align.files.upload({
+      file: fileBuffer,
+      filename: "drivers-license.jpg",
+      contentType: "image/jpeg",
+    });
+
+    console.log(`File ID: ${result.file_id}`);
+    // Use this file_id in customer.update()
+    ```
+
+  </Tab>
+  <Tab title="JavaScript (Browser)">
+    ```javascript
+    // With file input element
+    const fileInput = document.getElementById("file-upload");
+    const file = fileInput.files[0];
+
+    // Read as ArrayBuffer
+    const buffer = await file.arrayBuffer();
+
+    const result = await align.files.upload({
+      file: Buffer.from(buffer),
+      filename: file.name,
+      contentType: file.type,
+    });
+
+    console.log("File ID:", result.file_id);
+    ```
+
+  </Tab>
+</Tabs>
+
+## Supported Formats
+
+| Format | MIME Type         | Max Size |
+| ------ | ----------------- | -------- |
+| JPEG   | `image/jpeg`      | 10 MB    |
+| PNG    | `image/png`       | 10 MB    |
+| PDF    | `application/pdf` | 10 MB    |
+
+<Warning>
+  Files are encrypted at rest and only accessible for KYC verification purposes.
+</Warning>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card title="Update Customer" icon="pen" href="/docs/api/customers/update">
+    Attach files to customer
+  </Card>
+</CardGroup>

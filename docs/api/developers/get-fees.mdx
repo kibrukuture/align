@@ -1,0 +1,54 @@
+---
+title: "Get Developer Fees"
+description: "Retrieve your configured developer fees"
+icon: "percent"
+---
+
+# Get Developer Fees
+
+Retrieve the developer fee configuration for your account.
+
+## Method Signature
+
+```typescript
+align.developers.getFees(): Promise<DeveloperFeesResponse>
+```
+
+## Example
+
+```typescript
+const fees = await align.developers.getFees();
+
+for (const fee of fees.items) {
+  console.log(`Service: ${fee.service_type}`);
+  console.log(`Fee: ${fee.fee_percent}%`);
+  console.log(`Basis: ${fee.accrual_basis}`);
+}
+```
+
+## Response
+
+```json
+{
+  "items": [
+    {
+      "service_type": "offramp",
+      "fee_percent": "0.5",
+      "accrual_basis": "source_amount"
+    },
+    {
+      "service_type": "onramp",
+      "fee_percent": "0.5",
+      "accrual_basis": "source_amount"
+    }
+  ]
+}
+```
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card title="Update Fees" icon="pen" href="/docs/api/developers/update-fees">
+    Configure your fees
+  </Card>
+</CardGroup>

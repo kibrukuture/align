@@ -1,0 +1,49 @@
+---
+title: "List Permanent Routes"
+description: "List all permanent cross-chain routes for a customer"
+icon: "list"
+---
+
+# List Permanent Routes
+
+Retrieve all permanent cross-chain routes configured for a customer.
+
+## Method Signature
+
+```typescript
+align.crossChain.listPermanentRoutes(
+  customerId: string
+): Promise<PermanentRouteListResponse>
+```
+
+## Example
+
+```typescript
+const response = await align.crossChain.listPermanentRoutes(customerId);
+
+console.log(`Total routes: ${response.items.length}`);
+
+for (const route of response.items) {
+  console.log(`${route.source_network} → ${route.destination_network}`);
+  console.log(`  Deposit: ${route.deposit_address}`);
+}
+```
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Create Route"
+    icon="route"
+    href="/docs/api/cross-chain/create-permanent-route"
+  >
+    Create a new route
+  </Card>
+  <Card
+    title="Get Route"
+    icon="eye"
+    href="/docs/api/cross-chain/get-permanent-route"
+  >
+    Get specific route
+  </Card>
+</CardGroup>

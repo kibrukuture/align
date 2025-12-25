@@ -1,0 +1,73 @@
+---
+title: "Deploy Contract"
+description: "Deploy a smart contract to the blockchain"
+icon: "code"
+---
+
+# Deploy Contract
+
+Deploy a smart contract to an EVM-compatible blockchain.
+
+## Method Signature
+
+```typescript
+align.blockchain.contracts.deploy(
+  abi: any[],
+  bytecode: string,
+  args: any[],
+  privateKey: string
+): Promise<DeployedContract>
+```
+
+## Parameters
+
+<ParamField body="abi" type="array" required>
+  Contract ABI (Application Binary Interface)
+</ParamField>
+
+<ParamField body="bytecode" type="string" required>
+  Compiled contract bytecode
+</ParamField>
+
+<ParamField body="args" type="array">
+  Constructor arguments
+</ParamField>
+
+<ParamField body="privateKey" type="string" required>
+  Private key for signing deployment
+</ParamField>
+
+## Example
+
+```typescript
+import contractArtifact from "./MyContract.json";
+
+const contract = await align.blockchain.contracts.deploy(
+  contractArtifact.abi,
+  contractArtifact.bytecode,
+  ["Constructor Arg 1", 100],
+  process.env.PRIVATE_KEY!
+);
+
+console.log(`Contract Address: ${contract.address}`);
+console.log(`TX Hash: ${contract.deploymentTransaction.hash}`);
+```
+
+<Warning>
+  Ensure you have sufficient native tokens for gas fees before deploying.
+</Warning>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Send Transaction"
+    icon="paper-plane"
+    href="/docs/api/blockchain/transactions/send"
+  >
+    Interact with contracts
+  </Card>
+  <Card title="Mint NFT" icon="image" href="/docs/api/blockchain/nfts/mint">
+    Mint NFTs
+  </Card>
+</CardGroup>

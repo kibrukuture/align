@@ -1,0 +1,369 @@
+---
+title: "Error Handling"
+description: "Handle errors gracefully with the Align SDK's typed error classes"
+icon: "triangle-exclamation"
+---
+
+# Error Handling
+
+The Align SDK provides a robust error handling system with typed errors that help you identify and handle issues effectively.
+
+## Error Types
+
+The SDK exports two main error classes:
+
+```typescript
+import { AlignError, AlignValidationError } from "@tolbel/align";
+```
+
+### AlignError
+
+Thrown when the API returns an error response (4xx or 5xx status codes).
+
+```typescript
+class AlignError extends Error {
+  readonly statusCode?: number; // HTTP status code
+  readonly code?: string; // Error code from API
+  readonly details?: unknown; // Additional error details
+}
+```
+
+### AlignValidationError
+
+Thrown when request data fails local validation before being sent to the API.
+
+```typescript
+class AlignValidationError extends Error {
+  readonly errors: ValidationError[]; // Array of validation issues
+}
+
+interface ValidationError {
+  path: string[]; // Path to the invalid field
+  message: string; // Human-readable error message
+}
+```
+
+## Basic Error Handling
+
+Always wrap API calls in try-catch blocks:
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align, { AlignError, AlignValidationError } from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    async function createCustomer() {
+      try {
+        const customer = await align.customers.create({
+          email: "alice@example.com",
+          type: "individual",
+          first_name: "Alice",
+          last_name: "Smith",
+        });
+        return customer;
+      } catch (error) {
+        if (error instanceof AlignValidationError) {
+          // Local validation failed
+          console.error("Validation failed:");
+          error.errors.forEach((e) => {
+            console.error(`  ${e.path.join(".")}: ${e.message}`);
+          });
+        } else if (error instanceof AlignError) {
+          // API returned an error
+          console.error(`API Error [${error.statusCode}]: ${error.message}`);
+        } else {
+          // Network or unexpected error
+          throw error;
+        }
+      }
+    }
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const { default: Align, AlignError, AlignValidationError } = require("@tolbel/align");
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY,
+      environment: "sandbox",
+    });
+
+    async function createCustomer() {
+      try {
+        const customer = await align.customers.create({
+          email: "alice@example.com",
+          type: "individual",
+          first_name: "Alice",
+          last_name: "Smith",
+        });
+        return customer;
+      } catch (error) {
+        if (error instanceof AlignValidationError) {
+          console.error("Validation failed:", error.errors);
+        } else if (error instanceof AlignError) {
+          console.error(`API Error [${error.statusCode}]: ${error.message}`);
+        } else {
+          throw error;
+        }
+      }
+    }
+    ```
+
+  </Tab>
+</Tabs>
+
+## Common Error Scenarios
+
+<AccordionGroup>
+  <Accordion title="Duplicate Email (409 Conflict)" icon="clone">
+    Thrown when trying to create a customer with an email that already exists.
+    
+    ```typescript
+    try {
+      await align.customers.create({
+        email: "existing@example.com",
+        type: "individual",
+        first_name: "Alice",
+        last_name: "Smith",
+      });
+    } catch (error) {
+      if (error instanceof AlignError && error.statusCode === 409) {
+        // Email already exists - find the existing customer
+        const existing = await align.customers.list("existing@example.com");
+        console.log("Found existing customer:", existing.items[0].customer_id);
+      }
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Invalid API Key (401 Unauthorized)" icon="key">
+    Thrown when the API key is invalid or missing.
+    
+    ```typescript
+    try {
+      await align.customers.list();
+    } catch (error) {
+      if (error instanceof AlignError && error.statusCode === 401) {
+        console.error("Invalid API key. Check your ALIGN_API_KEY environment variable.");
+      }
+    }
+    ```
+    
+    <Warning>
+    Never log or expose your API key in error messages!
+    </Warning>
+  </Accordion>
+  
+  <Accordion title="Resource Not Found (404)" icon="magnifying-glass">
+    Thrown when the requested resource doesn't exist.
+    
+    ```typescript
+    try {
+      const customer = await align.customers.get("non-existent-id");
+    } catch (error) {
+      if (error instanceof AlignError && error.statusCode === 404) {
+        console.error("Customer not found");
+      }
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Validation Errors" icon="check">
+    Caught before the API call when request data is invalid.
+    
+    ```typescript
+    try {
+      await align.customers.create({
+        email: "not-an-email",  // Invalid email format
+        type: "individual",
+        // Missing first_name and last_name
+      });
+    } catch (error) {
+      if (error instanceof AlignValidationError) {
+        // error.errors = [
+        //   { path: ["email"], message: "Invalid email format" },
+        //   { path: ["first_name"], message: "Required" },
+        //   { path: ["last_name"], message: "Required" }
+        // ]
+      }
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Rate Limiting (429 Too Many Requests)" icon="gauge-high">
+    Thrown when you've exceeded the API rate limit.
+    
+    ```typescript
+    try {
+      await align.customers.list();
+    } catch (error) {
+      if (error instanceof AlignError && error.statusCode === 429) {
+        // Wait and retry
+        const retryAfter = parseInt(error.details?.retryAfter || "60");
+        console.log(`Rate limited. Retry after ${retryAfter} seconds`);
+        
+        await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000));
+        // Retry the request
+      }
+    }
+    ```
+    
+    <Tip>
+    The SDK has built-in retry logic with exponential backoff. Most transient errors are automatically retried.
+    </Tip>
+  </Accordion>
+</AccordionGroup>
+
+## Error Handling Patterns
+
+### Centralized Error Handler
+
+Create a reusable error handler for consistent error management:
+
+```typescript
+import { AlignError, AlignValidationError } from "@tolbel/align";
+
+type ErrorResult =
+  | { type: "validation"; errors: Array<{ path: string[]; message: string }> }
+  | { type: "api"; statusCode: number; message: string }
+  | { type: "network"; message: string }
+  | { type: "unknown"; error: unknown };
+
+function handleAlignError(error: unknown): ErrorResult {
+  if (error instanceof AlignValidationError) {
+    return {
+      type: "validation",
+      errors: error.errors,
+    };
+  }
+
+  if (error instanceof AlignError) {
+    return {
+      type: "api",
+      statusCode: error.statusCode ?? 500,
+      message: error.message,
+    };
+  }
+
+  if (error instanceof Error && error.message.includes("fetch")) {
+    return {
+      type: "network",
+      message: "Network error. Check your internet connection.",
+    };
+  }
+
+  return {
+    type: "unknown",
+    error,
+  };
+}
+
+// Usage
+try {
+  await align.customers.create(data);
+} catch (error) {
+  const result = handleAlignError(error);
+
+  switch (result.type) {
+    case "validation":
+      return { success: false, errors: result.errors };
+    case "api":
+      return { success: false, message: result.message };
+    case "network":
+      return { success: false, message: "Please try again later" };
+    default:
+      throw error;
+  }
+}
+```
+
+### Retry with Backoff
+
+For critical operations, implement custom retry logic:
+
+```typescript
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries = 3,
+  baseDelay = 1000
+): Promise<T> {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+
+      if (error instanceof AlignError) {
+        // Don't retry client errors (4xx) except rate limiting
+        if (
+          error.statusCode &&
+          error.statusCode < 500 &&
+          error.statusCode !== 429
+        ) {
+          throw error;
+        }
+      }
+
+      // Exponential backoff
+      const delay = baseDelay * Math.pow(2, attempt);
+      console.log(`Attempt ${attempt + 1} failed. Retrying in ${delay}ms...`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+
+  throw lastError;
+}
+
+// Usage
+const customer = await withRetry(() =>
+  align.customers.create({
+    email: "alice@example.com",
+    type: "individual",
+    first_name: "Alice",
+    last_name: "Smith",
+  })
+);
+```
+
+## Logging Errors
+
+Enable SDK logging for debugging:
+
+```typescript
+const align = new Align({
+  apiKey: process.env.ALIGN_API_KEY!,
+  environment: "sandbox",
+  enableLogging: true, // Enable pino logging
+});
+```
+
+<Info>
+  The SDK uses [pino](https://github.com/pinojs/pino) for logging. Set
+  `LOG_LEVEL` environment variable to control log verbosity.
+</Info>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Always Use Try-Catch" icon="shield">
+    Wrap all API calls in try-catch blocks to prevent unhandled promise
+    rejections.
+  </Card>
+  <Card title="Check Error Types" icon="list-check">
+    Use `instanceof` to distinguish between validation errors and API errors.
+  </Card>
+  <Card title="Log Appropriately" icon="file-lines">
+    Log errors for debugging but never log sensitive data like API keys.
+  </Card>
+  <Card title="User-Friendly Messages" icon="message">
+    Transform technical errors into user-friendly messages for your UI.
+  </Card>
+</CardGroup>

@@ -1,0 +1,47 @@
+---
+title: "Get Cross-Chain Transfer"
+description: "Retrieve cross-chain transfer details and status"
+icon: "eye"
+---
+
+# Get Cross-Chain Transfer
+
+Retrieve the current status and details of a cross-chain transfer.
+
+## Method Signature
+
+```typescript
+align.crossChain.getTransfer(transferId: string): Promise<CrossChainTransfer>
+```
+
+## Example
+
+```typescript
+const transfer = await align.crossChain.getTransfer(
+  "xc_123e4567-e89b-12d3-a456-426614174000"
+);
+
+console.log(`Status: ${transfer.status}`);
+console.log(
+  `Source: ${transfer.source_network} → ${transfer.destination_network}`
+);
+```
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Create Transfer"
+    icon="link"
+    href="/docs/api/cross-chain/create-transfer"
+  >
+    Create a cross-chain transfer
+  </Card>
+  <Card
+    title="Complete Transfer"
+    icon="check"
+    href="/docs/api/cross-chain/complete-transfer"
+  >
+    Submit tx hash
+  </Card>
+</CardGroup>

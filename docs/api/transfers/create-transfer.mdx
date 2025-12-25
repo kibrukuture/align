@@ -1,0 +1,251 @@
+---
+title: "Create Transfer"
+description: "Execute an onramp or offramp transfer using a quote"
+icon: "paper-plane"
+---
+
+# Create Transfer
+
+Execute a transfer using a previously obtained quote. Supports both onramp (fiat→crypto) and offramp (crypto→fiat) transfers.
+
+## Offramp Transfer (Crypto → Fiat)
+
+Convert cryptocurrency to fiat and send to a bank account.
+
+### Method Signature
+
+```typescript
+align.transfers.createOfframpTransfer(
+  customerId: string,
+  data: CreateOfframpTransferRequest
+): Promise<Transfer>
+```
+
+### Parameters
+
+<ParamField path="customerId" type="string" required>
+  The unique customer identifier (UUID format)
+</ParamField>
+
+<ParamField body="quote_id" type="string" required>
+  Quote ID from a previous `createOfframpQuote` call
+</ParamField>
+
+<ParamField body="external_account_id" type="string" required>
+  Bank account ID to receive the fiat funds
+</ParamField>
+
+<ParamField body="source_wallet_address" type="string" required>
+  Wallet address sending the cryptocurrency
+</ParamField>
+
+<ParamField body="purpose" type="string">
+  Transfer purpose code for compliance (see supported values below)
+</ParamField>
+
+### Example
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    // Step 1: Get a quote
+    const quote = await align.transfers.createOfframpQuote(customerId, {
+      source_amount: "100.00",
+      source_token: "usdc",
+      source_network: "polygon",
+      destination_currency: "usd",
+      destination_payment_rails: "ach",
+    });
+
+    // Step 2: Execute the transfer
+    const transfer = await align.transfers.createOfframpTransfer(customerId, {
+      quote_id: quote.quote_id,
+      external_account_id: "ext_123",
+      source_wallet_address: "0x742d35Cc6634C0532925a3b844Bc9e7595f0aB42",
+      purpose: "personal_expenses",
+    });
+
+    console.log(`Transfer ID: ${transfer.transfer_id}`);
+    console.log(`Status: ${transfer.status}`);
+    // Status: pending
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const quote = await align.transfers.createOfframpQuote(customerId, {
+      source_amount: "100.00",
+      source_token: "usdc",
+      source_network: "polygon",
+      destination_currency: "usd",
+      destination_payment_rails: "ach",
+    });
+
+    const transfer = await align.transfers.createOfframpTransfer(customerId, {
+      quote_id: quote.quote_id,
+      external_account_id: "ext_123",
+      source_wallet_address: "0x...",
+    });
+
+    console.log("Transfer ID:", transfer.transfer_id);
+    ```
+
+  </Tab>
+</Tabs>
+
+---
+
+## Onramp Transfer (Fiat → Crypto)
+
+Convert fiat to cryptocurrency and send to a wallet.
+
+### Method Signature
+
+```typescript
+align.transfers.createOnrampTransfer(
+  customerId: string,
+  data: CreateOnrampTransferRequest
+): Promise<Transfer>
+```
+
+### Parameters
+
+<ParamField path="customerId" type="string" required>
+  The unique customer identifier (UUID format)
+</ParamField>
+
+<ParamField body="quote_id" type="string" required>
+  Quote ID from a previous `createOnrampQuote` call
+</ParamField>
+
+<ParamField body="destination_wallet_address" type="string" required>
+  Wallet address to receive the cryptocurrency
+</ParamField>
+
+<ParamField body="purpose" type="string">
+  Transfer purpose code for compliance
+</ParamField>
+
+### Example
+
+```typescript
+// Step 1: Get a quote
+const quote = await align.transfers.createOnrampQuote(customerId, {
+  source_amount: "100.00",
+  source_currency: "usd",
+  source_payment_rails: "ach",
+  destination_token: "usdc",
+  destination_network: "polygon",
+});
+
+// Step 2: Execute the transfer
+const transfer = await align.transfers.createOnrampTransfer(customerId, {
+  quote_id: quote.quote_id,
+  destination_wallet_address: "0x742d35Cc6634C0532925a3b844Bc9e7595f0aB42",
+  purpose: "crypto_purchase",
+});
+
+console.log(`Transfer ID: ${transfer.transfer_id}`);
+// Funds will be sent to the wallet once fiat is deposited
+```
+
+---
+
+## Transfer Response
+
+```json
+{
+  "transfer_id": "tr_123e4567-e89b-12d3-a456-426614174000",
+  "status": "pending",
+  "type": "offramp",
+  "source_amount": "100.00",
+  "source_token": "usdc",
+  "source_network": "polygon",
+  "destination_amount": "98.50",
+  "destination_currency": "usd",
+  "fee_amount": "1.50",
+  "created_at": "2024-01-15T10:30:00Z"
+}
+```
+
+## Transfer Statuses
+
+| Status       | Description                           |
+| ------------ | ------------------------------------- |
+| `pending`    | Transfer initiated, waiting for funds |
+| `processing` | Transfer is being processed           |
+| `completed`  | Transfer completed successfully       |
+| `failed`     | Transfer failed                       |
+| `cancelled`  | Transfer was cancelled                |
+
+## Transfer Purpose Codes
+
+<Info>
+  Purpose codes are required for regulatory compliance in certain jurisdictions.
+</Info>
+
+| Code                | Description            |
+| ------------------- | ---------------------- |
+| `personal_expenses` | Personal spending      |
+| `crypto_purchase`   | Buying cryptocurrency  |
+| `crypto_sale`       | Selling cryptocurrency |
+| `investment`        | Investment purposes    |
+| `business_payment`  | Business transaction   |
+| `salary`            | Salary payment         |
+| `gift`              | Gift transfer          |
+
+## Error Handling
+
+```typescript
+import { AlignError, AlignValidationError } from "@tolbel/align";
+
+try {
+  const transfer = await align.transfers.createOfframpTransfer(customerId, {
+    quote_id: quote.quote_id,
+    external_account_id: "ext_123",
+    source_wallet_address: "0x...",
+  });
+} catch (error) {
+  if (error instanceof AlignError) {
+    if (error.statusCode === 400) {
+      console.error("Quote expired or invalid");
+    } else if (error.statusCode === 403) {
+      console.error("KYC verification required");
+    }
+  }
+}
+```
+
+<Warning>
+  Quotes expire after a short time. If you receive a "quote expired" error,
+  request a new quote before creating the transfer.
+</Warning>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Create Quote"
+    icon="calculator"
+    href="/docs/api/transfers/create-quote"
+  >
+    Get a quote first
+  </Card>
+  <Card title="Get Transfer" icon="eye" href="/docs/api/transfers/get-transfer">
+    Track transfer status
+  </Card>
+  <Card
+    title="Complete Transfer"
+    icon="check"
+    href="/docs/api/transfers/complete-transfer"
+  >
+    Complete offramp transfers
+  </Card>
+</CardGroup>

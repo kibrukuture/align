@@ -1,0 +1,136 @@
+---
+title: "Create External Account"
+description: "Link a bank account for receiving fiat withdrawals"
+icon: "building"
+---
+
+# Create External Account
+
+Link an external bank account to a customer's profile for receiving fiat withdrawals from offramp transfers.
+
+## Method Signature
+
+```typescript
+align.externalAccounts.create(
+  customerId: string,
+  data: CreateExternalAccountRequest
+): Promise<ExternalAccount>
+```
+
+## Parameters
+
+<ParamField path="customerId" type="string" required>
+  Customer identifier
+</ParamField>
+
+<ParamField body="type" type="'us' | 'iban'" required>
+  Account type: US domestic or international IBAN
+</ParamField>
+
+### US Account Fields
+
+<ParamField body="account_holder_name" type="string" required>
+  Name on the bank account
+</ParamField>
+
+<ParamField body="routing_number" type="string" required>
+  9-digit ABA routing number
+</ParamField>
+
+<ParamField body="account_number" type="string" required>
+  Bank account number
+</ParamField>
+
+<ParamField body="account_type" type="'checking' | 'savings'" required>
+  Type of bank account
+</ParamField>
+
+### IBAN Account Fields
+
+<ParamField body="account_holder_name" type="string" required>
+  Name on the bank account
+</ParamField>
+
+<ParamField body="iban" type="string" required>
+  International Bank Account Number
+</ParamField>
+
+<ParamField body="bic" type="string" required>
+  Bank Identifier Code (SWIFT code)
+</ParamField>
+
+## Examples
+
+### US Bank Account
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const account = await align.externalAccounts.create(customerId, {
+      type: "us",
+      account_holder_name: "Alice Smith",
+      routing_number: "021000021",
+      account_number: "123456789",
+      account_type: "checking",
+    });
+
+    console.log(`Account ID: ${account.external_account_id}`);
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const account = await align.externalAccounts.create(customerId, {
+      type: "us",
+      account_holder_name: "Alice Smith",
+      routing_number: "021000021",
+      account_number: "123456789",
+      account_type: "checking",
+    });
+    ```
+  </Tab>
+</Tabs>
+
+### IBAN Bank Account
+
+```typescript
+const account = await align.externalAccounts.create(customerId, {
+  type: "iban",
+  account_holder_name: "Alice Schmidt",
+  iban: "DE89370400440532013000",
+  bic: "COBADEFFXXX",
+});
+
+console.log(`Account ID: ${account.external_account_id}`);
+```
+
+<Info>
+  Linked bank accounts are verified automatically. Use the account ID in offramp
+  transfers once verified.
+</Info>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="List Accounts"
+    icon="list"
+    href="/docs/api/external-accounts/list"
+  >
+    List linked accounts
+  </Card>
+  <Card
+    title="Create Transfer"
+    icon="paper-plane"
+    href="/docs/api/transfers/create-transfer"
+  >
+    Use in offramp transfers
+  </Card>
+</CardGroup>

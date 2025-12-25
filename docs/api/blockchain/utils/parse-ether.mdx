@@ -1,0 +1,86 @@
+---
+title: "Parse Ether"
+description: "Convert ether to wei (raw units)"
+icon: "keyboard"
+---
+
+# Parse Ether
+
+Convert a human-readable ether amount to wei (smallest unit).
+
+## Method Signature
+
+```typescript
+align.blockchain.utils.parseEther(ether: string): bigint
+```
+
+## Parameters
+
+<ParamField body="ether" type="string" required>
+  Amount in ether
+</ParamField>
+
+## Returns
+
+Returns the amount in wei as a bigint.
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    // Convert 1 ETH to wei
+    const wei = align.blockchain.utils.parseEther("1.0");
+    console.log(wei.toString()); // "1000000000000000000"
+
+    // Convert 0.5 ETH to wei
+    const halfWei = align.blockchain.utils.parseEther("0.5");
+    console.log(halfWei.toString()); // "500000000000000000"
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const weiAmount = align.blockchain.utils.parseEther("0.1");
+    console.log(weiAmount.toString());
+    ```
+  </Tab>
+</Tabs>
+
+### Use in Transaction
+
+```typescript
+const amountInEther = "0.1";
+const amountInWei = align.blockchain.utils.parseEther(amountInEther);
+
+// Use for contract call
+const tx = await contract.deposit({
+  value: amountInWei,
+});
+```
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Format Ether"
+    icon="arrows-to-dot"
+    href="/docs/api/blockchain/utils/format-ether"
+  >
+    Convert wei to ether
+  </Card>
+  <Card
+    title="Parse Amount"
+    icon="coins"
+    href="/docs/api/blockchain/tokens/parse-amount"
+  >
+    Parse token amounts
+  </Card>
+</CardGroup>

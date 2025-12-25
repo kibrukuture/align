@@ -1,0 +1,69 @@
+---
+title: "Mint NFT"
+description: "Mint an NFT on an ERC-721 contract"
+icon: "image"
+---
+
+# Mint NFT
+
+Mint a new NFT on an ERC-721 compatible contract.
+
+## Method Signature
+
+```typescript
+align.blockchain.nfts.mint(
+  contractAddress: string,
+  to: string,
+  tokenUri: string,
+  privateKey: string
+): Promise<MintResult>
+```
+
+## Parameters
+
+<ParamField body="contractAddress" type="string" required>
+  Address of the NFT contract
+</ParamField>
+
+<ParamField body="to" type="string" required>
+  Recipient address for the NFT
+</ParamField>
+
+<ParamField body="tokenUri" type="string" required>
+  Metadata URI (IPFS or HTTP)
+</ParamField>
+
+<ParamField body="privateKey" type="string" required>
+  Private key for signing
+</ParamField>
+
+## Example
+
+```typescript
+const result = await align.blockchain.nfts.mint(
+  "0x...nftContract",
+  "0x...recipient",
+  "ipfs://QmXxx.../metadata.json",
+  process.env.PRIVATE_KEY!
+);
+
+console.log(`Token ID: ${result.tokenId}`);
+console.log(`TX Hash: ${result.transactionHash}`);
+```
+
+<Info>
+  The contract must implement the standard ERC-721 `mint` or `safeMint`
+  function.
+</Info>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Deploy Contract"
+    icon="code"
+    href="/docs/api/blockchain/contracts/deploy"
+  >
+    Deploy NFT contract
+  </Card>
+</CardGroup>

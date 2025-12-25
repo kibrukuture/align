@@ -1,0 +1,104 @@
+---
+title: "List Offramp Transfers"
+description: "Retrieve all offramp (crypto-to-fiat) transfers for a customer"
+icon: "list"
+---
+
+# List Offramp Transfers
+
+Retrieve all offramp transfers (crypto → fiat) for a specific customer.
+
+## Method Signature
+
+```typescript
+align.transfers.listOfframpTransfers(
+  customerId: string
+): Promise<TransferListResponse>
+```
+
+## Parameters
+
+<ParamField path="customerId" type="string" required>
+  The unique customer identifier (UUID format)
+</ParamField>
+
+## Returns
+
+<ResponseField name="items" type="Transfer[]">
+  Array of offramp transfer objects
+</ResponseField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const response = await align.transfers.listOfframpTransfers(
+      "123e4567-e89b-12d3-a456-426614174000"
+    );
+
+    console.log(`Total offramp transfers: ${response.items.length}`);
+
+    for (const transfer of response.items) {
+      console.log(`${transfer.transfer_id}: ${transfer.status}`);
+      console.log(`  ${transfer.source_amount} USDC → $${transfer.destination_amount} USD`);
+    }
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const response = await align.transfers.listOfframpTransfers(
+      "123e4567-e89b-12d3-a456-426614174000"
+    );
+
+    response.items.forEach((transfer) => {
+      console.log(`${transfer.transfer_id}: ${transfer.status}`);
+    });
+    ```
+
+  </Tab>
+</Tabs>
+
+### Filter by Status
+
+```typescript
+const response = await align.transfers.listOfframpTransfers(customerId);
+
+// Get only completed offramps
+const completed = response.items.filter((t) => t.status === "completed");
+
+// Calculate total volume sold
+const totalSold = completed.reduce(
+  (sum, t) => sum + parseFloat(t.source_amount),
+  0
+);
+
+console.log(`Total crypto sold: ${totalSold} USDC`);
+```
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="List Onramp Transfers"
+    icon="list"
+    href="/docs/api/transfers/list-onramp-transfers"
+  >
+    List fiat-to-crypto transfers
+  </Card>
+  <Card
+    title="Get Offramp Transfer"
+    icon="arrow-down"
+    href="/docs/api/transfers/get-offramp-transfer"
+  >
+    Get specific offramp
+  </Card>
+</CardGroup>

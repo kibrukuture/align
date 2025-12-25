@@ -1,0 +1,123 @@
+---
+title: "List Virtual Accounts"
+description: "Retrieve all virtual accounts for a customer"
+icon: "list"
+---
+
+# List Virtual Accounts
+
+Retrieve all virtual accounts associated with a specific customer.
+
+## Method Signature
+
+```typescript
+align.virtualAccounts.list(customerId: string): Promise<VirtualAccountListResponse>
+```
+
+## Parameters
+
+<ParamField path="customerId" type="string" required>
+  The unique customer identifier (UUID format)
+</ParamField>
+
+## Returns
+
+<ResponseField name="items" type="VirtualAccount[]">
+  Array of virtual account objects
+</ResponseField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const response = await align.virtualAccounts.list(
+      "123e4567-e89b-12d3-a456-426614174000"
+    );
+
+    console.log(`Total accounts: ${response.items.length}`);
+
+    for (const account of response.items) {
+      console.log(`${account.id}: ${account.source_currency} → ${account.destination_token}`);
+    }
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const response = await align.virtualAccounts.list(
+      "123e4567-e89b-12d3-a456-426614174000"
+    );
+
+    response.items.forEach((account) => {
+      console.log(`${account.id}: ${account.source_currency} → ${account.destination_token}`);
+    });
+    ```
+
+  </Tab>
+</Tabs>
+
+### Find Active Accounts
+
+```typescript
+const response = await align.virtualAccounts.list(customerId);
+
+const activeAccounts = response.items.filter(
+  (account) => account.status === "active"
+);
+
+console.log(`Active accounts: ${activeAccounts.length}`);
+```
+
+### Response Example
+
+```json
+{
+  "items": [
+    {
+      "id": "va_123",
+      "status": "active",
+      "source_currency": "usd",
+      "source_rails": "ach",
+      "destination_token": "usdc",
+      "destination_network": "polygon",
+      "deposit_instructions": { ... }
+    },
+    {
+      "id": "va_456",
+      "status": "active",
+      "source_currency": "eur",
+      "source_rails": "sepa",
+      "destination_token": "eurc",
+      "destination_network": "polygon",
+      "deposit_instructions": { ... }
+    }
+  ]
+}
+```
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Create Virtual Account"
+    icon="plus"
+    href="/docs/api/virtual-accounts/create"
+  >
+    Create a new account
+  </Card>
+  <Card
+    title="Get Virtual Account"
+    icon="eye"
+    href="/docs/api/virtual-accounts/get"
+  >
+    Get specific account details
+  </Card>
+</CardGroup>

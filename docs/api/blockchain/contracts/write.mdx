@@ -1,0 +1,143 @@
+---
+title: "Write Contract"
+description: "Call state-changing functions on smart contracts"
+icon: "pen"
+---
+
+# Write Contract
+
+Execute state-changing (non-view) functions on smart contracts. Requires gas and wallet signing.
+
+## Method Signature
+
+```typescript
+align.blockchain.contracts.write(
+  params: ContractTransaction
+): Promise<TransactionResponse>
+```
+
+## Parameters
+
+<ParamField body="contractAddress" type="string" required>
+  Contract address
+</ParamField>
+
+<ParamField body="abi" type="array" required>
+  Contract ABI
+</ParamField>
+
+<ParamField body="method" type="string" required>
+  Function name to call
+</ParamField>
+
+<ParamField body="args" type="array">
+  Function arguments
+</ParamField>
+
+<ParamField body="wallet" type="Wallet" required>
+  Wallet for signing
+</ParamField>
+
+<ParamField body="network" type="string" required>
+  Target network
+</ParamField>
+
+## Returns
+
+Returns an ethers.js `TransactionResponse` that can be awaited for confirmation.
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const wallet = await align.blockchain.wallets.createFromPrivateKey(
+      process.env.PRIVATE_KEY!
+    );
+
+    // Approve USDC spending
+    const ERC20_ABI = [
+      "function approve(address spender, uint256 amount) returns (bool)",
+    ];
+
+    const tx = await align.blockchain.contracts.write({
+      contractAddress: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+      abi: ERC20_ABI,
+      method: "approve",
+      args: ["0xSpenderAddress...", "1000000000"], // 1000 USDC
+      wallet,
+      network: "polygon",
+    });
+
+    console.log(`TX Hash: ${tx.hash}`);
+
+    // Wait for confirmation
+    const receipt = await tx.wait();
+    console.log(`Confirmed in block ${receipt?.blockNumber}`);
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const tx = await align.blockchain.contracts.write({
+      contractAddress: tokenAddress,
+      abi: ERC20_ABI,
+      method: "approve",
+      args: [spender, amount],
+      wallet,
+      network: "polygon",
+    });
+
+    await tx.wait();
+    console.log("Approved!");
+    ```
+
+  </Tab>
+</Tabs>
+
+### ERC-20 Transfer
+
+```typescript
+const tx = await align.blockchain.contracts.write({
+  contractAddress: USDC_ADDRESS,
+  abi: ["function transfer(address to, uint256 amount) returns (bool)"],
+  method: "transfer",
+  args: [recipientAddress, "50000000"], // 50 USDC
+  wallet,
+  network: "polygon",
+});
+
+const receipt = await tx.wait();
+console.log(`Transferred in block ${receipt?.blockNumber}`);
+```
+
+<Warning>
+  Write operations require native tokens for gas. Ensure the wallet has
+  sufficient balance.
+</Warning>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Read Contract"
+    icon="file-lines"
+    href="/docs/api/blockchain/contracts/read"
+  >
+    Call view functions
+  </Card>
+  <Card
+    title="Get Events"
+    icon="list"
+    href="/docs/api/blockchain/contracts/get-events"
+  >
+    Query contract events
+  </Card>
+</CardGroup>

@@ -1,0 +1,112 @@
+---
+title: "Lookup Address"
+description: "Get the ENS name for an Ethereum address"
+icon: "magnifying-glass"
+---
+
+# Lookup Address
+
+Perform a reverse ENS lookup to get the primary ENS name associated with an address.
+
+## Method Signature
+
+```typescript
+align.blockchain.utils.lookupAddress(
+  address: string,
+  provider: JsonRpcProvider
+): Promise<string | null>
+```
+
+## Parameters
+
+<ParamField body="address" type="string" required>
+  Ethereum address to look up
+</ParamField>
+
+<ParamField body="provider" type="JsonRpcProvider" required>
+  Ethereum mainnet provider
+</ParamField>
+
+## Returns
+
+Returns the primary ENS name as a string, or `null` if not set.
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const provider = align.blockchain.providers.getProvider("ethereum");
+
+    const ensName = await align.blockchain.utils.lookupAddress(
+      "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+      provider
+    );
+
+    if (ensName) {
+      console.log(`Address has ENS: ${ensName}`);
+      // Address has ENS: vitalik.eth
+    } else {
+      console.log("No ENS name set");
+    }
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const name = await align.blockchain.utils.lookupAddress(
+      address,
+      provider
+    );
+    console.log("ENS:", name);
+    ```
+  </Tab>
+</Tabs>
+
+### Display Friendly Names
+
+```typescript
+async function formatAddress(address: string): Promise<string> {
+  const provider = align.blockchain.providers.getProvider("ethereum");
+
+  const ensName = await align.blockchain.utils.lookupAddress(address, provider);
+
+  if (ensName) {
+    return ensName; // vitalik.eth
+  }
+
+  // Truncate address for display
+  return `${address.slice(0, 6)}...${address.slice(-4)}`; // 0xd8dA...6045
+}
+```
+
+<Info>
+  Not all addresses have ENS names. Only addresses with a primary ENS name set
+  will return a value.
+</Info>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Resolve Name"
+    icon="globe"
+    href="/docs/api/blockchain/utils/resolve-name"
+  >
+    ENS to address
+  </Card>
+  <Card
+    title="Validate Address"
+    icon="check"
+    href="/docs/api/blockchain/utils/is-valid-address"
+  >
+    Check address format
+  </Card>
+</CardGroup>

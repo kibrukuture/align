@@ -1,0 +1,113 @@
+---
+title: "Transfer ERC-721 NFT"
+description: "Transfer an ERC-721 NFT to another address"
+icon: "image"
+---
+
+# Transfer ERC-721 NFT
+
+Safely transfer an ERC-721 NFT from your wallet to another address.
+
+## Method Signature
+
+```typescript
+align.blockchain.nfts.transferERC721(
+  wallet: Wallet,
+  contractAddress: string,
+  to: string,
+  tokenId: string,
+  network: Network
+): Promise<TransactionResponse>
+```
+
+## Parameters
+
+<ParamField body="wallet" type="Wallet" required>
+  Owner wallet (must own the NFT)
+</ParamField>
+
+<ParamField body="contractAddress" type="string" required>
+  NFT contract address
+</ParamField>
+
+<ParamField body="to" type="string" required>
+  Recipient address
+</ParamField>
+
+<ParamField body="tokenId" type="string" required>
+  Token ID to transfer
+</ParamField>
+
+<ParamField body="network" type="string" required>
+  Network where the NFT exists
+</ParamField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const wallet = await align.blockchain.wallets.createFromPrivateKey(
+      process.env.PRIVATE_KEY!
+    );
+
+    const tx = await align.blockchain.nfts.transferERC721(
+      wallet,
+      "0xNFTContractAddress...",
+      "0xRecipientAddress...",
+      "123", // Token ID
+      "polygon"
+    );
+
+    console.log(`TX Hash: ${tx.hash}`);
+
+    const receipt = await tx.wait();
+    console.log(`NFT transferred in block ${receipt?.blockNumber}`);
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const tx = await align.blockchain.nfts.transferERC721(
+      wallet,
+      nftContract,
+      recipient,
+      "123",
+      "polygon"
+    );
+    await tx.wait();
+    console.log("NFT transferred!");
+    ```
+  </Tab>
+</Tabs>
+
+<Warning>
+  You must own the NFT to transfer it. The transaction will fail if you don't
+  own the specified token ID.
+</Warning>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Transfer ERC-1155"
+    icon="layer-group"
+    href="/docs/api/blockchain/nfts/transfer-erc1155"
+  >
+    Transfer multi-tokens
+  </Card>
+  <Card
+    title="Get Owner"
+    icon="user"
+    href="/docs/api/blockchain/nfts/get-owner"
+  >
+    Check NFT owner
+  </Card>
+</CardGroup>

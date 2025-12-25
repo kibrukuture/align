@@ -1,0 +1,196 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "name": "Align SDK",
+  "description": "Build powerful payment infrastructure with fiat-to-crypto, crypto-to-fiat, and cross-chain transfers",
+  "theme": "mint",
+  "colors": {
+    "primary": "#007acc",
+    "light": "#00a3ff",
+    "dark": "#005a9e"
+  },
+
+  "topbarLinks": [
+    {
+      "name": "GitHub",
+      "url": "https://github.com/kibrukuture/align"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Get API Key",
+    "url": "https://docs.alignlabs.dev"
+  },
+  "navigation": {
+    "groups": [
+      {
+        "group": "Getting Started",
+        "pages": [
+          "docs/introduction",
+          "docs/installation",
+          "docs/quickstart",
+          "docs/error-handling"
+        ]
+      },
+      {
+        "group": "API Reference",
+        "pages": [
+          {
+            "group": "Customers",
+            "pages": [
+              "docs/api/customers/create",
+              "docs/api/customers/get",
+              "docs/api/customers/update",
+              "docs/api/customers/list",
+              "docs/api/customers/create-kyc-session",
+              "docs/api/customers/simulate-customer"
+            ]
+          },
+          {
+            "group": "Virtual Accounts",
+            "pages": [
+              "docs/api/virtual-accounts/create",
+              "docs/api/virtual-accounts/get",
+              "docs/api/virtual-accounts/list",
+              "docs/api/virtual-accounts/simulate"
+            ]
+          },
+          {
+            "group": "Transfers",
+            "pages": [
+              "docs/api/transfers/create-quote",
+              "docs/api/transfers/create-transfer",
+              "docs/api/transfers/get-transfer",
+              "docs/api/transfers/get-offramp-transfer",
+              "docs/api/transfers/get-onramp-transfer",
+              "docs/api/transfers/list-transfers",
+              "docs/api/transfers/list-offramp-transfers",
+              "docs/api/transfers/list-onramp-transfers",
+              "docs/api/transfers/complete-transfer",
+              "docs/api/transfers/simulate-transfer"
+            ]
+          },
+          {
+            "group": "Cross-Chain",
+            "pages": [
+              "docs/api/cross-chain/create-transfer",
+              "docs/api/cross-chain/get-transfer",
+              "docs/api/cross-chain/complete-transfer",
+              "docs/api/cross-chain/create-permanent-route",
+              "docs/api/cross-chain/get-permanent-route",
+              "docs/api/cross-chain/list-permanent-routes"
+            ]
+          },
+          {
+            "group": "External Accounts",
+            "pages": [
+              "docs/api/external-accounts/create",
+              "docs/api/external-accounts/list"
+            ]
+          },
+          {
+            "group": "Wallets",
+            "pages": ["docs/api/wallets/verify"]
+          },
+          {
+            "group": "Webhooks",
+            "pages": [
+              "docs/api/webhooks/create",
+              "docs/api/webhooks/list",
+              "docs/api/webhooks/delete",
+              "docs/api/webhooks/verify-signature"
+            ]
+          },
+          {
+            "group": "Developers",
+            "pages": [
+              "docs/api/developers/get-fees",
+              "docs/api/developers/update-fees"
+            ]
+          },
+          {
+            "group": "Files",
+            "pages": ["docs/api/files/upload"]
+          },
+          {
+            "group": "Blockchain",
+            "pages": [
+              {
+                "group": "Wallets",
+                "pages": [
+                  "docs/api/blockchain/wallets/create",
+                  "docs/api/blockchain/wallets/get",
+                  "docs/api/blockchain/wallets/create-from-mnemonic",
+                  "docs/api/blockchain/wallets/create-from-private-key",
+                  "docs/api/blockchain/wallets/create-from-encrypted",
+                  "docs/api/blockchain/wallets/get-balance",
+                  "docs/api/blockchain/wallets/get-token-balance",
+                  "docs/api/blockchain/wallets/send-native-token",
+                  "docs/api/blockchain/wallets/send-token",
+                  "docs/api/blockchain/wallets/encrypt-private-key"
+                ]
+              },
+              {
+                "group": "Transactions",
+                "pages": [
+                  "docs/api/blockchain/transactions/send",
+                  "docs/api/blockchain/transactions/estimate-gas",
+                  "docs/api/blockchain/transactions/get-status",
+                  "docs/api/blockchain/transactions/wait-for-confirmation"
+                ]
+              },
+              {
+                "group": "Tokens",
+                "pages": [
+                  "docs/api/blockchain/tokens/get-balance",
+                  "docs/api/blockchain/tokens/get-address",
+                  "docs/api/blockchain/tokens/format-amount",
+                  "docs/api/blockchain/tokens/parse-amount",
+                  "docs/api/blockchain/tokens/get-token-info"
+                ]
+              },
+              {
+                "group": "Contracts",
+                "pages": [
+                  "docs/api/blockchain/contracts/deploy",
+                  "docs/api/blockchain/contracts/read",
+                  "docs/api/blockchain/contracts/write",
+                  "docs/api/blockchain/contracts/get-events"
+                ]
+              },
+              {
+                "group": "NFTs",
+                "pages": [
+                  "docs/api/blockchain/nfts/mint",
+                  "docs/api/blockchain/nfts/transfer-erc721",
+                  "docs/api/blockchain/nfts/transfer-erc1155",
+                  "docs/api/blockchain/nfts/get-owner",
+                  "docs/api/blockchain/nfts/is-owner"
+                ]
+              },
+              {
+                "group": "Providers",
+                "pages": [
+                  "docs/api/blockchain/providers/get-provider",
+                  "docs/api/blockchain/providers/set-custom-rpc",
+                  "docs/api/blockchain/providers/get-network-info"
+                ]
+              },
+              {
+                "group": "Utils",
+                "pages": [
+                  "docs/api/blockchain/utils/is-valid-address",
+                  "docs/api/blockchain/utils/format-ether",
+                  "docs/api/blockchain/utils/parse-ether",
+                  "docs/api/blockchain/utils/resolve-name",
+                  "docs/api/blockchain/utils/lookup-address"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "footerSocials": {
+    "github": "https://github.com/kibrukuture/align"
+  }
+}

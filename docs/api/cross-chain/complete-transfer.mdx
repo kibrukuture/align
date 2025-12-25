@@ -1,0 +1,66 @@
+---
+title: "Complete Cross-Chain Transfer"
+description: "Complete a cross-chain transfer by providing the transaction hash"
+icon: "check"
+---
+
+# Complete Cross-Chain Transfer
+
+Complete a cross-chain transfer by providing the blockchain transaction hash after sending funds.
+
+## Method Signature
+
+```typescript
+align.crossChain.completeTransfer(
+  transferId: string,
+  data: CompleteCrossChainTransferRequest
+): Promise<CrossChainTransfer>
+```
+
+## Parameters
+
+<ParamField path="transferId" type="string" required>
+  The cross-chain transfer ID
+</ParamField>
+
+<ParamField body="source_tx_hash" type="string" required>
+  Transaction hash from the source blockchain
+</ParamField>
+
+## Example
+
+```typescript
+const completed = await align.crossChain.completeTransfer(
+  "xc_123e4567-e89b-12d3-a456-426614174000",
+  {
+    source_tx_hash: "0xabcdef1234567890...",
+  }
+);
+
+console.log(`Status: ${completed.status}`);
+// Status: processing
+```
+
+<Warning>
+  Wait for the transaction to be confirmed on the source blockchain before
+  calling this method.
+</Warning>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Get Transfer"
+    icon="eye"
+    href="/docs/api/cross-chain/get-transfer"
+  >
+    Track completion
+  </Card>
+  <Card
+    title="Create Transfer"
+    icon="link"
+    href="/docs/api/cross-chain/create-transfer"
+  >
+    Start a transfer
+  </Card>
+</CardGroup>

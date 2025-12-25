@@ -1,0 +1,156 @@
+---
+title: "Estimate Gas"
+description: "Calculate the gas cost for a transaction before sending"
+icon: "calculator"
+---
+
+# Estimate Gas
+
+Calculate the gas cost for a transaction before sending it. This helps users understand the fee they'll pay and prevents failed transactions due to insufficient gas.
+
+## Method Signature
+
+```typescript
+align.blockchain.transactions.estimateGas(
+  from: string,
+  to: string,
+  amount: string,
+  network: Network,
+  data?: string
+): Promise<GasEstimate>
+```
+
+## Parameters
+
+<ParamField body="from" type="string" required>
+  Sender wallet address
+</ParamField>
+
+<ParamField body="to" type="string" required>
+  Recipient address
+</ParamField>
+
+<ParamField body="amount" type="string" required>
+  Amount in native token (e.g., `"0.1"`)
+</ParamField>
+
+<ParamField body="network" type="string" required>
+  Network: `ethereum`, `polygon`, `base`, `arbitrum`
+</ParamField>
+
+<ParamField body="data" type="string">
+  Optional encoded contract call data (for contract interactions)
+</ParamField>
+
+## Returns
+
+<ResponseField name="gasLimit" type="string">
+  Estimated gas units required
+</ResponseField>
+
+<ResponseField name="gasPrice" type="string">
+  Current gas price in wei
+</ResponseField>
+
+<ResponseField name="maxFeePerGas" type="string">
+  EIP-1559 max fee per gas
+</ResponseField>
+
+<ResponseField name="maxPriorityFeePerGas" type="string">
+  EIP-1559 priority fee
+</ResponseField>
+
+<ResponseField name="estimatedCost" type="string">
+  Total estimated cost in native token
+</ResponseField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const estimate = await align.blockchain.transactions.estimateGas(
+      "0xSenderAddress...",
+      "0xRecipientAddress...",
+      "0.1",
+      "polygon"
+    );
+
+    console.log(`Gas Limit: ${estimate.gasLimit}`);
+    console.log(`Estimated Cost: ${estimate.estimatedCost} MATIC`);
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const estimate = await align.blockchain.transactions.estimateGas(
+      from,
+      to,
+      "0.1",
+      "polygon"
+    );
+    console.log("Cost:", estimate.estimatedCost, "MATIC");
+    ```
+  </Tab>
+</Tabs>
+
+### Show Fee to User Before Send
+
+```typescript
+const estimate = await align.blockchain.transactions.estimateGas(
+  wallet.address,
+  recipient,
+  sendAmount,
+  "polygon"
+);
+
+// Display to user
+console.log(`
+  Transaction Summary:
+  - Sending: ${sendAmount} MATIC
+  - Network Fee: ${estimate.estimatedCost} MATIC
+  - Total: ${parseFloat(sendAmount) + parseFloat(estimate.estimatedCost)} MATIC
+`);
+
+// Check if user has enough
+const balance = await align.blockchain.wallets.getBalance(
+  wallet.address,
+  "polygon"
+);
+const totalNeeded = parseFloat(sendAmount) + parseFloat(estimate.estimatedCost);
+
+if (parseFloat(balance) < totalNeeded) {
+  throw new Error(`Insufficient balance. Need ${totalNeeded}, have ${balance}`);
+}
+```
+
+<Tip>
+  Gas estimates include a buffer for safety. Unused gas is returned to the
+  sender.
+</Tip>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Send Native Token"
+    icon="paper-plane"
+    href="/docs/api/blockchain/wallets/send-native-token"
+  >
+    Send transaction
+  </Card>
+  <Card
+    title="Get Status"
+    icon="clock"
+    href="/docs/api/blockchain/transactions/get-status"
+  >
+    Check transaction status
+  </Card>
+</CardGroup>

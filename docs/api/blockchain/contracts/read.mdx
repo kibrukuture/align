@@ -1,0 +1,134 @@
+---
+title: "Read Contract"
+description: "Call read-only (view) functions on smart contracts"
+icon: "file-lines"
+---
+
+# Read Contract
+
+Call read-only (view/pure) functions on any smart contract without spending gas.
+
+## Method Signature
+
+```typescript
+align.blockchain.contracts.read(
+  params: ContractCall
+): Promise<unknown>
+```
+
+## Parameters
+
+<ParamField body="contractAddress" type="string" required>
+  Contract address to call
+</ParamField>
+
+<ParamField body="abi" type="array" required>
+  Contract ABI (only needs the function you're calling)
+</ParamField>
+
+<ParamField body="method" type="string" required>
+  Function name to call
+</ParamField>
+
+<ParamField body="args" type="array">
+  Function arguments (if any)
+</ParamField>
+
+<ParamField body="network" type="string" required>
+  Network: `ethereum`, `polygon`, `base`, `arbitrum`
+</ParamField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    // ERC-20 balanceOf example
+    const ERC20_ABI = [
+      "function balanceOf(address) view returns (uint256)",
+      "function decimals() view returns (uint8)",
+      "function symbol() view returns (string)",
+    ];
+
+    const balance = await align.blockchain.contracts.read({
+      contractAddress: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174", // USDC
+      abi: ERC20_ABI,
+      method: "balanceOf",
+      args: ["0xWalletAddress..."],
+      network: "polygon",
+    });
+
+    console.log(`Balance: ${balance.toString()}`);
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const balance = await align.blockchain.contracts.read({
+      contractAddress: USDC_ADDRESS,
+      abi: ERC20_ABI,
+      method: "balanceOf",
+      args: [walletAddress],
+      network: "polygon",
+    });
+    ```
+  </Tab>
+</Tabs>
+
+### Read Multiple Values
+
+```typescript
+const [symbol, decimals, balance] = await Promise.all([
+  align.blockchain.contracts.read({
+    contractAddress: tokenAddress,
+    abi: ERC20_ABI,
+    method: "symbol",
+    args: [],
+    network: "polygon",
+  }),
+  align.blockchain.contracts.read({
+    contractAddress: tokenAddress,
+    abi: ERC20_ABI,
+    method: "decimals",
+    args: [],
+    network: "polygon",
+  }),
+  align.blockchain.contracts.read({
+    contractAddress: tokenAddress,
+    abi: ERC20_ABI,
+    method: "balanceOf",
+    args: [walletAddress],
+    network: "polygon",
+  }),
+]);
+
+console.log(`${symbol}: ${formatUnits(balance, decimals)}`);
+```
+
+<Info>Read operations are free - they don't require gas or signing.</Info>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Write Contract"
+    icon="pen"
+    href="/docs/api/blockchain/contracts/write"
+  >
+    Call state-changing methods
+  </Card>
+  <Card
+    title="Get Events"
+    icon="list"
+    href="/docs/api/blockchain/contracts/get-events"
+  >
+    Query contract events
+  </Card>
+</CardGroup>

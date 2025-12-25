@@ -1,0 +1,143 @@
+---
+title: "Get Contract Events"
+description: "Query historical events emitted by smart contracts"
+icon: "list"
+---
+
+# Get Contract Events
+
+Query past events emitted by smart contracts within a specified block range.
+
+## Method Signature
+
+```typescript
+align.blockchain.contracts.getEvents(
+  params: ContractEventQuery
+): Promise<ContractEvent[]>
+```
+
+## Parameters
+
+<ParamField body="contractAddress" type="string" required>
+  Contract address to query
+</ParamField>
+
+<ParamField body="abi" type="array" required>
+  Contract ABI (needs event definitions)
+</ParamField>
+
+<ParamField body="eventName" type="string" required>
+  Event name to filter
+</ParamField>
+
+<ParamField body="fromBlock" type="number">
+  Starting block (default: 0)
+</ParamField>
+
+<ParamField body="toBlock" type="number | string">
+  Ending block (default: `"latest"`)
+</ParamField>
+
+<ParamField body="network" type="string" required>
+  Network to query
+</ParamField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    // Get USDC Transfer events
+    const ERC20_ABI = [
+      "event Transfer(address indexed from, address indexed to, uint256 value)",
+    ];
+
+    const events = await align.blockchain.contracts.getEvents({
+      contractAddress: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+      abi: ERC20_ABI,
+      eventName: "Transfer",
+      fromBlock: 50000000,
+      toBlock: "latest",
+      network: "polygon",
+    });
+
+    console.log(`Found ${events.length} Transfer events`);
+
+    events.forEach((event) => {
+      console.log(`${event.args[0]} → ${event.args[1]}: ${event.args[2]}`);
+    });
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const events = await align.blockchain.contracts.getEvents({
+      contractAddress: tokenAddress,
+      abi: ERC20_ABI,
+      eventName: "Transfer",
+      fromBlock: 0,
+      toBlock: "latest",
+      network: "polygon",
+    });
+    ```
+  </Tab>
+</Tabs>
+
+### Track Wallet Activity
+
+```typescript
+// Get all transfers to/from a specific wallet
+const walletAddress = "0x...";
+
+const events = await align.blockchain.contracts.getEvents({
+  contractAddress: USDC_ADDRESS,
+  abi: [
+    "event Transfer(address indexed from, address indexed to, uint256 value)",
+  ],
+  eventName: "Transfer",
+  fromBlock: 50000000,
+  toBlock: "latest",
+  network: "polygon",
+});
+
+// Filter for our wallet
+const incoming = events.filter(
+  (e) => e.args[1].toLowerCase() === walletAddress.toLowerCase()
+);
+const outgoing = events.filter(
+  (e) => e.args[0].toLowerCase() === walletAddress.toLowerCase()
+);
+
+console.log(`Incoming: ${incoming.length}, Outgoing: ${outgoing.length}`);
+```
+
+<Info>
+  Querying large block ranges may be slow or rate-limited. Use smaller ranges
+  for better performance.
+</Info>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Read Contract"
+    icon="file-lines"
+    href="/docs/api/blockchain/contracts/read"
+  >
+    Read current state
+  </Card>
+  <Card
+    title="Write Contract"
+    icon="pen"
+    href="/docs/api/blockchain/contracts/write"
+  >
+    Execute transactions
+  </Card>
+</CardGroup>

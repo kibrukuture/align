@@ -1,0 +1,93 @@
+---
+title: "Get Token Address"
+description: "Get the contract address for a supported token on a network"
+icon: "map-pin"
+---
+
+# Get Token Address
+
+Retrieve the contract address for a supported token (USDC, USDT, etc.) on a specific network.
+
+## Method Signature
+
+```typescript
+align.blockchain.tokens.getAddress(
+  token: Token,
+  network: Network
+): string
+```
+
+## Parameters
+
+<ParamField body="token" type="string" required>
+  Token identifier: `usdc`, `usdt`
+</ParamField>
+
+<ParamField body="network" type="string" required>
+  Network: `ethereum`, `polygon`, `base`, `arbitrum`
+</ParamField>
+
+## Returns
+
+Returns the token's contract address as a string.
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const usdcPolygon = align.blockchain.tokens.getAddress("usdc", "polygon");
+    console.log(`USDC on Polygon: ${usdcPolygon}`);
+    // 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174
+
+    const usdcEthereum = align.blockchain.tokens.getAddress("usdc", "ethereum");
+    console.log(`USDC on Ethereum: ${usdcEthereum}`);
+    // 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const address = align.blockchain.tokens.getAddress("usdc", "polygon");
+    console.log("USDC:", address);
+    ```
+  </Tab>
+</Tabs>
+
+### Supported Tokens
+
+| Token | Ethereum | Polygon | Base | Arbitrum |
+| ----- | -------- | ------- | ---- | -------- |
+| USDC  | ✅       | ✅      | ✅   | ✅       |
+| USDT  | ✅       | ✅      | ❌   | ✅       |
+
+<Info>
+  This is a synchronous method - it doesn't make network calls. Token addresses
+  are stored locally in the SDK.
+</Info>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Get Token Balance"
+    icon="coins"
+    href="/docs/api/blockchain/tokens/get-balance"
+  >
+    Check token balance
+  </Card>
+  <Card
+    title="Get Token Info"
+    icon="circle-info"
+    href="/docs/api/blockchain/tokens/get-token-info"
+  >
+    Get token metadata
+  </Card>
+</CardGroup>

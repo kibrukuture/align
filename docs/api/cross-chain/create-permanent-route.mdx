@@ -1,0 +1,85 @@
+---
+title: "Create Permanent Route"
+description: "Set up automatic cross-chain routing for recurring transfers"
+icon: "route"
+---
+
+# Create Permanent Route
+
+Create a permanent cross-chain route for automatic asset bridging. When funds arrive on the source chain, they're automatically transferred to the destination.
+
+## Method Signature
+
+```typescript
+align.crossChain.createPermanentRoute(
+  customerId: string,
+  data: CreatePermanentRouteRequest
+): Promise<PermanentRouteAddress>
+```
+
+## Parameters
+
+<ParamField path="customerId" type="string" required>
+  Customer identifier
+</ParamField>
+
+<ParamField body="source_network" type="string" required>
+  Source blockchain network
+</ParamField>
+
+<ParamField body="source_token" type="string" required>
+  Token to receive on source chain
+</ParamField>
+
+<ParamField body="destination_network" type="string" required>
+  Destination blockchain network
+</ParamField>
+
+<ParamField body="destination_token" type="string" required>
+  Token to send on destination chain
+</ParamField>
+
+<ParamField body="destination_wallet_address" type="string" required>
+  Wallet address to receive funds on destination chain
+</ParamField>
+
+## Example
+
+```typescript
+// Create a route: anything sent to this address on Ethereum
+// will be bridged to Polygon automatically
+const route = await align.crossChain.createPermanentRoute(customerId, {
+  source_network: "ethereum",
+  source_token: "usdc",
+  destination_network: "polygon",
+  destination_token: "usdc",
+  destination_wallet_address: "0x...",
+});
+
+console.log(`Deposit Address: ${route.deposit_address}`);
+// Send funds to this address to trigger automatic bridging
+```
+
+<Tip>
+  Use permanent routes for recurring bridge operations like salary payments or
+  automated treasury management.
+</Tip>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Get Route"
+    icon="eye"
+    href="/docs/api/cross-chain/get-permanent-route"
+  >
+    Get route details
+  </Card>
+  <Card
+    title="List Routes"
+    icon="list"
+    href="/docs/api/cross-chain/list-permanent-routes"
+  >
+    List all routes
+  </Card>
+</CardGroup>

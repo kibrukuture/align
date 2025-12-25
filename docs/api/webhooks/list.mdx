@@ -1,0 +1,35 @@
+---
+title: "List Webhooks"
+description: "Retrieve all registered webhook endpoints"
+icon: "list"
+---
+
+# List Webhooks
+
+Retrieve all webhook endpoints registered for your account.
+
+## Method Signature
+
+```typescript
+align.webhooks.list(): Promise<WebhookListResponse>
+```
+
+## Example
+
+```typescript
+const response = await align.webhooks.list();
+
+for (const webhook of response.items) {
+  console.log(`ID: ${webhook.webhook_id}`);
+  console.log(`URL: ${webhook.url}`);
+  console.log(`Events: ${webhook.events.join(", ")}`);
+}
+```
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card title="Create Webhook" icon="bell" href="/docs/api/webhooks/create">
+    Register a new webhook
+  </Card>
+</CardGroup>

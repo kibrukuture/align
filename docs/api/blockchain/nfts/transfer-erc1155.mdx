@@ -1,0 +1,119 @@
+---
+title: "Transfer ERC-1155"
+description: "Transfer ERC-1155 multi-tokens to another address"
+icon: "layer-group"
+---
+
+# Transfer ERC-1155
+
+Transfer ERC-1155 tokens (semi-fungible or multi-tokens) to another address. ERC-1155 supports both fungible and non-fungible tokens in a single contract.
+
+## Method Signature
+
+```typescript
+align.blockchain.nfts.transferERC1155(
+  wallet: Wallet,
+  contractAddress: string,
+  to: string,
+  tokenId: string,
+  amount: string,
+  network: Network
+): Promise<TransactionResponse>
+```
+
+## Parameters
+
+<ParamField body="wallet" type="Wallet" required>
+  Owner wallet
+</ParamField>
+
+<ParamField body="contractAddress" type="string" required>
+  ERC-1155 contract address
+</ParamField>
+
+<ParamField body="to" type="string" required>
+  Recipient address
+</ParamField>
+
+<ParamField body="tokenId" type="string" required>
+  Token ID to transfer
+</ParamField>
+
+<ParamField body="amount" type="string" required>
+  Amount to transfer
+</ParamField>
+
+<ParamField body="network" type="string" required>
+  Network
+</ParamField>
+
+## Examples
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    import Align from "@tolbel/align";
+
+    const align = new Align({
+      apiKey: process.env.ALIGN_API_KEY!,
+      environment: "sandbox",
+    });
+
+    const wallet = await align.blockchain.wallets.createFromPrivateKey(
+      process.env.PRIVATE_KEY!
+    );
+
+    // Transfer 5 of token ID 42
+    const tx = await align.blockchain.nfts.transferERC1155(
+      wallet,
+      "0xERC1155ContractAddress...",
+      "0xRecipientAddress...",
+      "42",     // Token ID
+      "5",      // Amount to transfer
+      "polygon"
+    );
+
+    console.log(`TX Hash: ${tx.hash}`);
+    await tx.wait();
+    console.log("Tokens transferred!");
+    ```
+
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const tx = await align.blockchain.nfts.transferERC1155(
+      wallet,
+      contract,
+      recipient,
+      tokenId,
+      "10",
+      "polygon"
+    );
+    await tx.wait();
+    ```
+  </Tab>
+</Tabs>
+
+<Info>
+  ERC-1155 is commonly used for gaming items, where you might have 100 copies of
+  a "sword" token.
+</Info>
+
+## Related Methods
+
+<CardGroup cols={2}>
+  <Card
+    title="Transfer ERC-721"
+    icon="image"
+    href="/docs/api/blockchain/nfts/transfer-erc721"
+  >
+    Transfer unique NFTs
+  </Card>
+  <Card
+    title="Check Ownership"
+    icon="user"
+    href="/docs/api/blockchain/nfts/is-owner"
+  >
+    Verify token ownership
+  </Card>
+</CardGroup>
