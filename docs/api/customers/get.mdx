@@ -136,33 +136,91 @@ try {
 }
 ```
 
-## Check KYC Status
+## Monitoring KYC Status
 
-Use this method to poll for KYC approval status:
+<Warning>
+  **Demo Only Notice**: Simple `while` loops or `setInterval` polling are not
+  suitable for production applications. They consume unnecessary resources and
+  are unreliable if your server restarts.
+</Warning>
+
+### Primary Method: Webhooks (Recommended)
+
+The most efficient way to track KYC updates is to listen for the `customer.kycs.updated` webhook event. This allows your application to react in real-time.
 
 ```typescript
-async function waitForKycApproval(
-  customerId: string,
-  maxAttempts = 20
-): Promise<boolean> {
-  for (let i = 0; i < maxAttempts; i++) {
+// Webhook Handler (e.g., Express route)
+app.post(
+  "/webhooks/align",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    // ... Verification logic (see Webhooks documentation) ...
+
+    const event = JSON.parse(req.body.toString());
+
+    if (event.event_type === "customer.kycs.updated") {
+      // 1. Get the customer ID from the event
+      const customerId = event.entity_id;
+
+      // 2. Fetch the latest customer data to check the new status
+      const customer = await align.customers.get(customerId);
+
+      // 3. Handle the status change
+      if (customer.kycs?.status === "status_accepted") {
+        console.log(`✅ KYC Approved for customer ${customerId}`);
+        // TODO: Enable feature access for user
+      } else if (customer.kycs?.status === "status_rejected") {
+        console.log(`❌ KYC Rejected for customer ${customerId}`);
+        // TODO: Notify user to retry
+      }
+    }
+
+    res.status(200).send("OK");
+  }
+);
+```
+
+### Secondary Method: Robust Polling (Fallback)
+
+For added reliability, implementing a robust polling mechanism (e.g., a scheduled Cron job or a queue-based worker like BullMQ/Redis) is recommended to double-check statuses in case a webhook event is missed.
+
+**Do not** use simple while-loops in your main request thread. Instead, schedule a background job:
+
+```typescript
+// Example: Cron job running every 5 minutes
+cron.schedule("*/5 * * * *", async () => {
+  console.log("Running KYC status sync...");
+
+  // Fetch pending verifications from YOUR database
+  const pendingUsers = await db.users.find({ kycStatus: "pending" });
+
+  for (const user of pendingUsers) {
+    const customer = await align.customers.get(user.alignCustomerId);
+
+    // Update local database if status has changed
+    if (customer.kycs?.status !== user.kycStatus) {
+      await db.users.update(user.id, { kycStatus: customer.kycs?.status });
+    }
+  }
+});
+```
+
+### Demo/Testing Polling
+
+For scripts or quick local testing **only**, you can use a simple loop:
+
+```typescript
+async function waitForKycApproval(customerId: string) {
+  let attempts = 0;
+  while (attempts < 20) {
     const customer = await align.customers.get(customerId);
 
-    if (customer.kycs?.sub_status === "kyc_form_submission_accepted") {
-      console.log("KYC approved!");
-      return true;
-    }
+    if (customer.kycs?.status === "status_accepted") return true;
+    if (customer.kycs?.status === "status_rejected") return false;
 
-    if (customer.kycs?.sub_status === "kyc_form_submission_rejected") {
-      console.log("KYC rejected");
-      return false;
-    }
-
-    // Wait 5 seconds before next check
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await new Promise((r) => setTimeout(r, 5000)); // Wait 5s
+    attempts++;
   }
-
-  console.log("Timeout waiting for KYC");
   return false;
 }
 ```
