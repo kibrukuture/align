@@ -1,110 +1,86 @@
 ---
 title: "Create Blockchain Wallet"
-description: "Create a new managed blockchain wallet"
+description: "Generate a new random cryptocurrency wallet"
 icon: "wallet"
 ---
 
 # Create Blockchain Wallet
 
-Create a new managed blockchain wallet with optional encryption. Supports HD wallet generation from mnemonic phrases.
+Generate a brand new cryptocurrency wallet with a cryptographically secure random private key. This wallet can be used across all supported EVM-compatible networks (Ethereum, Polygon, Base, Arbitrum).
 
 ## Method Signature
 
 ```typescript
-align.blockchain.wallets.create(
-  options: WalletCreationOptions
-): Promise<Wallet | EncryptedWallet>
+align.blockchain.wallets.create(): Promise<Wallet>
 ```
 
 ## Parameters
 
-<ParamField body="network" type="string" required>
-  Blockchain network for the wallet
-</ParamField>
+This method takes no parameters. It always generates a fresh, random wallet.
 
-<ParamField body="password" type="string">
-  Optional password for wallet encryption
-</ParamField>
+## Returns
 
-<ParamField body="mnemonic" type="string">
-  Optional 12/24-word mnemonic for deterministic generation
-</ParamField>
+Returns a `Wallet` object containing:
 
-## Examples
+<ResponseField name="address" type="string">
+  The public wallet address (e.g., `0x742d...`)
+</ResponseField>
 
-### Create New Wallet
+<ResponseField name="privateKey" type="string">
+  The private key used for signing transactions. **Keep this secret!**
+</ResponseField>
 
-<Tabs>
-  <Tab title="TypeScript">
-    ```typescript
-    import Align from "@tolbel/align";
+<ResponseField name="mnemonic" type="string">
+  The 12-word recovery phrase. **Store this securely - it cannot be recovered if
+  lost!**
+</ResponseField>
 
-    const align = new Align({
-      apiKey: process.env.ALIGN_API_KEY!,
-      environment: "sandbox",
-    });
-
-    // Create a new Polygon wallet
-    const wallet = await align.blockchain.wallets.create({
-      network: "polygon",
-    });
-
-    console.log(`Address: ${wallet.address}`);
-    console.log(`Mnemonic: ${wallet.mnemonic}`);
-    // Store mnemonic securely - cannot be recovered!
-    ```
-
-  </Tab>
-  <Tab title="JavaScript">
-    ```javascript
-    const wallet = await align.blockchain.wallets.create({
-      network: "polygon",
-    });
-
-    console.log("Address:", wallet.address);
-    ```
-
-  </Tab>
-</Tabs>
-
-### Create Encrypted Wallet
+## Example
 
 ```typescript
-const encryptedWallet = await align.blockchain.wallets.create({
-  network: "ethereum",
-  password: "secure-password",
+import Align from "@tolbel/align";
+
+const align = new Align({
+  apiKey: process.env.ALIGN_API_KEY!,
+  environment: "sandbox",
 });
 
-console.log(`Address: ${encryptedWallet.address}`);
-console.log(`Encrypted JSON: ${encryptedWallet.encryptedJson}`);
-// Store encryptedJson securely
-```
+// Create a new random wallet
+const wallet = await align.blockchain.wallets.create();
 
-### Import from Mnemonic
-
-```typescript
-const wallet = await align.blockchain.wallets.create({
-  network: "polygon",
-  mnemonic: "word1 word2 word3 ... word12",
-});
+console.log(`Address: ${wallet.address}`);
+console.log(`Private Key: ${wallet.privateKey}`);
+console.log(`Mnemonic: ${wallet.mnemonic}`);
 ```
 
 <Warning>
-  **Store mnemonics and private keys securely!** They cannot be recovered if
-  lost.
+  **Security Warning**: The `privateKey` and `mnemonic` give full access to the
+  wallet's funds. Never expose them in client-side code or logs. Store them
+  securely (e.g., encrypted database, environment variables).
 </Warning>
 
 ## Related Methods
 
 <CardGroup cols={2}>
-  <Card title="Get Wallet" icon="eye" href="/docs/api/blockchain/wallets/get">
-    Retrieve wallet details
+  <Card
+    title="Import from Mnemonic"
+    icon="key"
+    href="/docs/api/blockchain/wallets/create-from-mnemonic"
+  >
+    Restore from seed phrase
   </Card>
   <Card
-    title="Send Transaction"
-    icon="paper-plane"
-    href="/docs/api/blockchain/transactions/send"
+    title="Import from Private Key"
+    icon="key"
+    href="/docs/api/blockchain/wallets/create-from-private-key"
   >
-    Send transactions
+    Import existing key
+  </Card>
+  <Card
+    title="Encrypt Wallet"
+    icon="lock"
+    href="/docs/api/blockchain/wallets/encrypt-wallet"
+  >
+    Secure storage
   </Card>
 </CardGroup>
