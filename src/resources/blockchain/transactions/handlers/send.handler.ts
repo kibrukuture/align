@@ -25,7 +25,7 @@ import {
 } from "@/resources/blockchain/wallets/handlers/send.handler";
 
 /**
- * Sends a native token transaction (ETH, MATIC, etc.)
+ * Sends a native token transaction (ETH, POL, etc.)
  *
  * This is a convenience wrapper around the wallet's `sendNativeToken` function.
  * It handles the entire flow of creating, signing, and broadcasting a transaction
@@ -69,7 +69,7 @@ import {
  *   "0.1",
  *   provider
  * );
- * 
+ *
  * console.log(`Transaction sent! Hash: ${tx.hash}`);
  * ```
  *
@@ -125,7 +125,7 @@ export async function sendNativeToken(
  * Sending 50 USDC
  * ```typescript
  * const usdcAddress = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
- * 
+ *
  * const tx = await sendToken(
  *   myWallet,
  *   usdcAddress,
@@ -133,7 +133,7 @@ export async function sendNativeToken(
  *   "50.0",
  *   provider
  * );
- * 
+ *
  * console.log(`Transfer successful! Hash: ${tx.hash}`);
  * ```
  *

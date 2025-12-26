@@ -218,7 +218,7 @@ export interface GasEstimate {
   totalCost: string;
 
   /**
-   * Total estimated cost formatted in native token (e.g., ETH, MATIC)
+   * Total estimated cost formatted in native token (e.g., ETH, POL)
    */
   totalCostFormatted: string;
 }

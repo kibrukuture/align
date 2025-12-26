@@ -42,7 +42,7 @@ import type { Wallet as SDKWallet } from "@/resources/blockchain/wallets/wallets
  * ```typescript
  * const wallet = await createFromEncrypted(encrypted, password);
  * const address = getAddressFromWallet(wallet);
- * 
+ *
  * return {
  *   message: "Wallet unlocked successfully",
  *   address,
@@ -57,9 +57,9 @@ export function getAddressFromWallet(wallet: SDKWallet): string {
  * Retrieves the native token balance for a wallet address
  *
  * Queries the blockchain via RPC provider to get the native cryptocurrency balance
- * (ETH on Ethereum, MATIC on Polygon, etc.) for a given address.
+ * (ETH on Ethereum, POL on Polygon, etc.) for a given address.
  *
- * The balance is returned in human-readable format (e.g., "1.5" MATIC) rather than
+ * The balance is returned in human-readable format (e.g., "1.5" POL) rather than
  * the smallest unit (wei). This makes it easy to display to users.
  *
  * **Important Notes:**
@@ -75,7 +75,7 @@ export function getAddressFromWallet(wallet: SDKWallet): string {
  *
  * @returns {Promise<string>} A promise that resolves to the balance as a string
  *   Formatted with 18 decimals (standard for native tokens)
- *   Example: "1.5" for 1.5 MATIC or "0.025" for 0.025 ETH
+ *   Example: "1.5" for 1.5 POL or "0.025" for 0.025 ETH
  *
  * @throws {Error} If:
  *   - Provider is not connected to the network
@@ -90,9 +90,9 @@ export function getAddressFromWallet(wallet: SDKWallet): string {
  *   "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
  *   provider
  * );
- * 
- * console.log(`Balance: ${balance} MATIC`);
- * // Output: Balance: 1.5 MATIC
+ *
+ * console.log(`Balance: ${balance} POL`);
+ * // Output: Balance: 1.5 POL
  * ```
  *
  * @example
@@ -100,14 +100,14 @@ export function getAddressFromWallet(wallet: SDKWallet): string {
  * ```typescript
  * async function canSend(wallet: SDKWallet, amount: string, provider: JsonRpcProvider) {
  *   const balance = await getBalance(wallet.address, provider);
- *   
+ *
  *   if (parseFloat(balance) < parseFloat(amount)) {
  *     return {
  *       canSend: false,
  *       message: `Insufficient balance. Have: ${balance}, Need: ${amount}`,
  *     };
  *   }
- *   
+ *
  *   return { canSend: true };
  * }
  * ```
@@ -117,9 +117,9 @@ export function getAddressFromWallet(wallet: SDKWallet): string {
  * ```typescript
  * const balance = await getBalance(userAddress, provider);
  * const formattedBalance = parseFloat(balance).toFixed(4);
- * 
- * console.log(`Your balance: ${formattedBalance} MATIC`);
- * // Output: Your balance: 1.5000 MATIC
+ *
+ * console.log(`Your balance: ${formattedBalance} POL`);
+ * // Output: Your balance: 1.5000 POL
  * ```
  *
  * @see {@link getTokenBalance} To get ERC-20 token balance instead
@@ -146,7 +146,7 @@ export async function getBalance(
  * formats the balance in human-readable format.
  *
  * **Important Notes:**
- * - This is for ERC-20 TOKENS only, not native tokens (ETH, MATIC)
+ * - This is for ERC-20 TOKENS only, not native tokens (ETH, POL)
  * - For native tokens, use getBalance instead
  * - Token contract addresses differ across networks (USDC on Polygon ≠ USDC on Ethereum)
  * - The provider must be connected to the network where the token contract exists
@@ -177,13 +177,13 @@ export async function getBalance(
  * ```typescript
  * const provider = new JsonRpcProvider("https://polygon-rpc.com");
  * const usdcAddress = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
- * 
+ *
  * const balance = await getTokenBalance(
  *   "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
  *   usdcAddress,
  *   provider
  * );
- * 
+ *
  * console.log(`USDC Balance: ${balance}`);
  * // Output: USDC Balance: 100.0
  * ```
@@ -197,14 +197,14 @@ export async function getBalance(
  *     USDT: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
  *     DAI: "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",
  *   };
- *   
+ *
  *   const balances = await Promise.all(
  *     Object.entries(tokens).map(async ([symbol, tokenAddress]) => {
  *       const balance = await getTokenBalance(address, tokenAddress, provider);
  *       return { symbol, balance };
  *     })
  *   );
- *   
+ *
  *   return balances;
  *   // Output: [{symbol: "USDC", balance: "100.0"}, ...]
  * }
@@ -224,7 +224,7 @@ export async function getBalance(
  *     tokenAddress,
  *     provider
  *   );
- *   
+ *
  *   return parseFloat(balance) >= parseFloat(requiredAmount);
  * }
  * ```
@@ -311,7 +311,7 @@ export async function getTokenBalance(
  *   provider,
  *   20 // Get last 20 transactions
  * );
- * 
+ *
  * console.log(`Found ${txHashes.length} recent transactions`);
  * txHashes.forEach(hash => console.log(hash));
  * ```
@@ -320,12 +320,12 @@ export async function getTokenBalance(
  * Fetching full transaction details
  * ```typescript
  * const txHashes = await getTransactionHistory(address, provider, 10);
- * 
+ *
  * // Fetch full details for each transaction
  * const transactions = await Promise.all(
  *   txHashes.map(hash => provider.getTransaction(hash))
  * );
- * 
+ *
  * transactions.forEach(tx => {
  *   console.log(`From: ${tx.from}, To: ${tx.to}, Value: ${tx.value}`);
  * });
@@ -338,10 +338,10 @@ export async function getTokenBalance(
  * async function getTransactionHistoryProduction(address: string) {
  *   const apiKey = "YOUR_POLYGONSCAN_API_KEY";
  *   const url = `https://api.polygonscan.com/api?module=account&action=txlist&address=${address}&apikey=${apiKey}`;
- *   
+ *
  *   const response = await fetch(url);
  *   const data = await response.json();
- *   
+ *
  *   return data.result; // Full transaction history with metadata
  * }
  * ```

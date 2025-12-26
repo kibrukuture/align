@@ -14,7 +14,7 @@ const DEFAULT_NETWORK_CONFIGS: Record<Network, NetworkConfig> = {
     chainId: 137,
     name: "Polygon",
     rpcUrl: "https://polygon-rpc.com",
-    nativeCurrency: { name: "MATIC", symbol: "MATIC", decimals: 18 },
+    nativeCurrency: { name: "POL", symbol: "POL", decimals: 18 },
     blockExplorer: "https://polygonscan.com",
   },
   base: {

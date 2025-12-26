@@ -7,7 +7,7 @@
  * **Categories:**
  * - **Creation:** Generate new wallets, import from mnemonic/private key.
  * - **Encryption:** Securely encrypt/decrypt private keys and wallets.
- * - **Sending:** Transfer native tokens (ETH, MATIC) and ERC-20 tokens.
+ * - **Sending:** Transfer native tokens (ETH, POL) and ERC-20 tokens.
  * - **Retrieval:** Get balances, addresses, and transaction history.
  *
  * @module WalletsHandlers

@@ -12,7 +12,6 @@
 
 import type { JsonRpcProvider } from "ethers";
 import type { Network } from "@/resources/blockchain/constants/networks";
- 
 
 /**
  * Network configuration
@@ -26,8 +25,8 @@ import type { Network } from "@/resources/blockchain/constants/networks";
  *   name: 'Polygon',
  *   rpcUrl: 'https://polygon-rpc.com',
  *   nativeCurrency: {
- *     name: 'MATIC',
- *     symbol: 'MATIC',
+ *     name: 'POL',
+ *     symbol: 'POL',
  *     decimals: 18
  *   },
  *   blockExplorer: 'https://polygonscan.com'
@@ -55,12 +54,12 @@ export interface NetworkConfig {
    */
   nativeCurrency: {
     /**
-     * Currency name (e.g., "Ether", "MATIC")
+     * Currency name (e.g., "Ether", "POL")
      */
     name: string;
 
     /**
-     * Currency symbol (e.g., "ETH", "MATIC")
+     * Currency symbol (e.g., "ETH", "POL")
      */
     symbol: string;
 
@@ -183,5 +182,3 @@ export interface ProviderWrapper {
    */
   customRpcUrl?: string;
 }
-
-

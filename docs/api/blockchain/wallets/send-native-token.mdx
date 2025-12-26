@@ -1,6 +1,6 @@
 ---
 title: "Send Native Token"
-description: "Send ETH, MATIC, or other native tokens to an address"
+description: "Send ETH, POL, or other native tokens to an address"
 icon: "paper-plane"
 ---
 
@@ -26,7 +26,7 @@ align.blockchain.wallets.sendNativeToken(
 </ParamField>
 
 <ParamField body="amount" type="string" required>
-  Amount to send (e.g., `"0.1"` for 0.1 ETH/MATIC)
+  Amount to send (e.g., `"0.1"` for 0.1 ETH/POL)
 </ParamField>
 
 <ParamField body="network" type="string" required>
@@ -60,7 +60,7 @@ align.blockchain.wallets.sendNativeToken(
       process.env.PRIVATE_KEY!
     );
 
-    // Send 0.1 MATIC
+    // Send 0.1 POL
     const tx = await align.blockchain.wallets.sendNativeToken(
       wallet,
       "0xRecipientAddress...",

@@ -32,7 +32,7 @@ import { getTokenAddress } from "@/resources/blockchain/tokens/handlers/info.han
  * 4. Standardizes error handling
  *
  * **Key Features:**
- * - Sending native transactions (ETH, MATIC)
+ * - Sending native transactions (ETH, POL)
  * - Sending ERC-20 token transactions (USDC, USDT)
  * - Gas estimation and cost calculation
  * - Transaction status monitoring
@@ -51,10 +51,10 @@ export class Transactions {
   constructor(private providers: Providers) {}
 
   /**
-   * Sends a native token transaction (ETH, MATIC, etc.).
+   * Sends a native token transaction (ETH, POL, etc.).
    *
    * This method sends the blockchain's native currency from one address to another.
-   * Native tokens are the base currency of each chain (ETH on Ethereum, MATIC on Polygon, etc.).
+   * Native tokens are the base currency of each chain (ETH on Ethereum, POL on Polygon, etc.).
    * This is the simplest type of transaction - just sending value from A to B.
    *
    * **What This Does:**
@@ -65,7 +65,7 @@ export class Transactions {
    *
    * **Native Tokens by Network:**
    * - Ethereum: ETH (18 decimals)
-   * - Polygon: MATIC (18 decimals)
+   * - Polygon: POL (18 decimals)
    * - Base: ETH (18 decimals)
    * - Arbitrum: ETH (18 decimals)
    * - Optimism: ETH (18 decimals)
@@ -122,12 +122,12 @@ export class Transactions {
    * ```
    *
    * @example
-   * Send MATIC on Polygon
+   * Send POL on Polygon
    * ```typescript
    * const tx = await align.blockchain.transactions.sendNativeToken(
    *   wallet,
    *   "0xRecipient...",
-   *   "10.0", // 10 MATIC
+   *   "10.0", // 10 POL
    *   "polygon"
    * );
    * ```
@@ -195,13 +195,13 @@ export class Transactions {
    *
    * **How It Works:**
    * - Calls the token contract's `transfer(address to, uint256 amount)` function
-   * - Gas fees are paid in the native token (ETH, MATIC, etc.)
+   * - Gas fees are paid in the native token (ETH, POL, etc.)
    * - The amount is automatically converted to the token's decimal format
    * - Wallet must have both: enough tokens AND enough native tokens for gas
    *
    * **Gas Considerations:**
    * - ERC-20 transfers cost more gas than native transfers (~50,000-65,000 gas)
-   * - Gas is paid in native tokens (ETH, MATIC), NOT in the token being sent
+   * - Gas is paid in native tokens (ETH, POL), NOT in the token being sent
    * - Different tokens may have different gas costs (some have transfer fees)
    * - Use `estimateGas()` to preview costs
    *
@@ -397,7 +397,7 @@ export class Transactions {
    * );
    *
    * const confirmed = confirm(
-   *   `Send 0.5 MATIC?\nNetwork Fee: ${estimate.totalCostFormatted}`
+   *   `Send 0.5 POL?\nNetwork Fee: ${estimate.totalCostFormatted}`
    * );
    *
    * if (confirmed) {

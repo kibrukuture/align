@@ -119,7 +119,7 @@ export interface WalletBalance {
   address: string;
 
   /**
-   * The native token balance (ETH, MATIC, etc.) as a string
+   * The native token balance (ETH, POL, etc.) as a string
    */
   native: string;
 

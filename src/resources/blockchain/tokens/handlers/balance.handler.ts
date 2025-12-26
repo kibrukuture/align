@@ -55,7 +55,7 @@ export async function getTokenBalance(
 /**
  * Get native token balance for an address
  *
- * Queries the blockchain for the native token balance (ETH, MATIC, etc.)
+ * Queries the blockchain for the native token balance (ETH, POL, etc.)
  * of a given address.
  *
  * @param address - The wallet address to query
@@ -70,7 +70,7 @@ export async function getTokenBalance(
  *   '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
  *   provider
  * );
- * console.log(balance); // "1.5" (in MATIC)
+ * console.log(balance); // "1.5" (in POL)
  * ```
  */
 export async function getNativeBalance(
@@ -138,14 +138,14 @@ export async function getNativeBalance(
  *   "0xc2132D05D31c914a87C6611C10748AEb04B58e8F", // USDT
  *   "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063", // DAI
  * ];
- * 
+ *
  * const balances = await getTokenBalances(
  *   "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
  *   stablecoins,
  *   provider,
  *   "polygon"
  * );
- * 
+ *
  * balances.forEach(b => {
  *   console.log(`${b.token}: ${b.balanceFormatted}`);
  * });
@@ -163,19 +163,19 @@ export async function getNativeBalance(
  *     "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174", // USDC
  *     "0xc2132D05D31c914a87C6611C10748AEb04B58e8F", // USDT
  *   ];
- *   
+ *
  *   const balances = await getTokenBalances(
  *     walletAddress,
  *     tokens,
  *     provider,
  *     "polygon"
  *   );
- *   
+ *
  *   // Filter out zero balances
- *   const nonZeroBalances = balances.filter(b => 
+ *   const nonZeroBalances = balances.filter(b =>
  *     parseFloat(b.balanceFormatted) > 0
  *   );
- *   
+ *
  *   return nonZeroBalances.map(b => ({
  *     symbol: b.token,
  *     balance: b.balanceFormatted,
@@ -188,15 +188,15 @@ export async function getNativeBalance(
  * Calculating total value in USD
  * ```typescript
  * const balances = await getTokenBalances(address, tokenAddresses, provider, "polygon");
- * 
+ *
  * // Assume you have price data
  * const prices = { USDC: 1.0, USDT: 1.0, DAI: 1.0 };
- * 
+ *
  * const totalValue = balances.reduce((sum, b) => {
  *   const value = parseFloat(b.balanceFormatted) * prices[b.token];
  *   return sum + value;
  * }, 0);
- * 
+ *
  * console.log(`Total portfolio value: $${totalValue.toFixed(2)}`);
  * ```
  *
@@ -218,11 +218,7 @@ export async function getTokenBalances(
     );
 
     // Get token info to include in result
-    const tokenInfo = await getTokenInfo(
-      tokenAddress,
-      provider,
-      network
-    );
+    const tokenInfo = await getTokenInfo(tokenAddress, provider, network);
 
     const rawBalance = parseUnits(
       balanceFormatted,
@@ -298,7 +294,7 @@ export async function getTokenBalances(
  *   { raw: "1000000000000000000", decimals: 18, symbol: "DAI" },
  *   { raw: "100000000", decimals: 8, symbol: "WBTC" },
  * ];
- * 
+ *
  * tokens.forEach(t => {
  *   const formatted = formatBalance(t.raw, t.decimals);
  *   console.log(`${t.symbol}: ${formatted}`);
@@ -309,9 +305,6 @@ export async function getTokenBalances(
  * // WBTC: 1.0
  * ```
  */
-export function formatBalance(
-  balance: string,
-  decimals: number
-): string {
+export function formatBalance(balance: string, decimals: number): string {
   return formatUnits(balance, decimals);
 }

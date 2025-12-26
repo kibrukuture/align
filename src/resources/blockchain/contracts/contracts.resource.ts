@@ -119,7 +119,7 @@ export class Contracts {
    * - Requires a wallet with a private key for signing
    * - Consumes gas (paid by the wallet)
    * - Returns a transaction response immediately (not waiting for confirmation)
-   * - Can send native tokens (ETH, MATIC, etc.) along with the call
+   * - Can send native tokens (ETH, POL, etc.) along with the call
    *
    * **Gas Considerations:**
    * - The wallet must have sufficient native tokens for gas

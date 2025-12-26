@@ -163,7 +163,7 @@ export class Wallets {
   }
 
   /**
-   * Gets the native token balance (ETH, MATIC, etc.) for an address
+   * Gets the native token balance (ETH, POL, etc.) for an address
    *
    * @param {string} address - The wallet address to check
    * @param {Network} network - The network to query
@@ -173,7 +173,7 @@ export class Wallets {
    * @example
    * ```typescript
    * const balance = await align.blockchain.wallets.getBalance(address, "polygon");
-   * console.log(`Balance: ${balance} MATIC`);
+   * console.log(`Balance: ${balance} POL`);
    * ```
    */
   public async getBalance(address: string, network: Network): Promise<string> {

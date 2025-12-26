@@ -80,7 +80,7 @@ align.blockchain.transactions.estimateGas(
     );
 
     console.log(`Gas Limit: ${estimate.gasLimit}`);
-    console.log(`Estimated Cost: ${estimate.estimatedCost} MATIC`);
+    console.log(`Estimated Cost: ${estimate.estimatedCost} POL`);
     ```
 
   </Tab>
@@ -92,7 +92,7 @@ align.blockchain.transactions.estimateGas(
       "0.1",
       "polygon"
     );
-    console.log("Cost:", estimate.estimatedCost, "MATIC");
+    console.log("Cost:", estimate.estimatedCost, "POL");
     ```
   </Tab>
 </Tabs>
@@ -110,9 +110,9 @@ const estimate = await align.blockchain.transactions.estimateGas(
 // Display to user
 console.log(`
   Transaction Summary:
-  - Sending: ${sendAmount} MATIC
-  - Network Fee: ${estimate.estimatedCost} MATIC
-  - Total: ${parseFloat(sendAmount) + parseFloat(estimate.estimatedCost)} MATIC
+  - Sending: ${sendAmount} POL
+  - Network Fee: ${estimate.estimatedCost} POL
+  - Total: ${parseFloat(sendAmount) + parseFloat(estimate.estimatedCost)} POL
 `);
 
 // Check if user has enough
