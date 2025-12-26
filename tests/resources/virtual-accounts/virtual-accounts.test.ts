@@ -52,7 +52,10 @@ describe("VirtualAccountsResource Validation", () => {
     };
 
     try {
-      await virtualAccounts.create("cust_123", invalidData);
+      await virtualAccounts.create(
+        "cust_123",
+        invalidData as CreateVirtualAccountRequest
+      );
       throw new Error("Should have thrown validation error");
     } catch (error) {
       expect(error).toBeInstanceOf(AlignValidationError);
@@ -68,7 +71,10 @@ describe("VirtualAccountsResource Validation", () => {
     };
 
     try {
-      await virtualAccounts.create("cust_123", invalidData);
+      await virtualAccounts.create(
+        "cust_123",
+        invalidData as CreateVirtualAccountRequest
+      );
       throw new Error("Should have thrown validation error");
     } catch (error) {
       expect(error).toBeInstanceOf(AlignValidationError);
@@ -83,7 +89,10 @@ describe("VirtualAccountsResource Validation", () => {
     };
 
     try {
-      await virtualAccounts.create("cust_123", invalidData);
+      await virtualAccounts.create(
+        "cust_123",
+        invalidData as CreateVirtualAccountRequest
+      );
       throw new Error("Should have thrown validation error");
     } catch (error) {
       expect(error).toBeInstanceOf(AlignValidationError);
