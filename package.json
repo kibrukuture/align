@@ -20,6 +20,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --minify --clean",
     "test": "bun test",
+    "test:coverage": "bun test --coverage",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "bun run typecheck && bun run build",
     "pub": "bun run typecheck && bun run build && npm publish"
