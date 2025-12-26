@@ -77,7 +77,7 @@ describe("ExternalAccountsResource Validation", () => {
     };
 
     try {
-      await externalAccounts.create(invalidData);
+      await externalAccounts.create("", invalidData as any);
       throw new Error("Should have thrown validation error");
     } catch (error) {
       expect(error).toBeInstanceOf(AlignValidationError);
@@ -105,7 +105,7 @@ describe("ExternalAccountsResource Validation", () => {
     };
 
     try {
-      await externalAccounts.create(invalidData);
+      await externalAccounts.create("", invalidData as any);
       throw new Error("Should have thrown validation error");
     } catch (error) {
       expect(error).toBeInstanceOf(AlignValidationError);

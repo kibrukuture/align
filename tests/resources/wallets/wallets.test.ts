@@ -2,7 +2,6 @@ import { describe, expect, test } from "bun:test";
 import { WalletsResource } from "@/resources/wallets/wallets.resource";
 import { HttpClient } from "@/core/http-client";
 import { AlignValidationError } from "@/core/errors";
-import type { VerifyWalletRequest } from "@/resources/wallets/wallets.types";
 
 describe("WalletsResource Validation", () => {
   const mockClient: HttpClient = {
